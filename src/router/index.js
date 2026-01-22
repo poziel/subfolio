@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
 import LoginView from '../views/LoginView.vue'
 import TrackerView from '../views/TrackerView.vue'
+import RecurrenceOverviewView from '../views/RecurrenceOverviewView.vue'
 import { useAuth } from '../composables/useAuth'
 
 const routes = [
@@ -19,6 +20,12 @@ const routes = [
     path: '/app',
     name: 'app',
     component: TrackerView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/app/recurrences',
+    name: 'recurrences',
+    component: RecurrenceOverviewView,
     meta: { requiresAuth: true }
   }
 ]

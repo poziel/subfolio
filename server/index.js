@@ -52,6 +52,31 @@ app.post('/expenses', (req, res) => {
   return res.status(201).json(created)
 })
 
+app.put('/expenses/:id', (req, res) => {
+  const { id } = req.params
+  const { name, category, amount, frequency, dueDate } = req.body
+
+  if (!name || !category || !amount || !frequency || !dueDate) {
+    return res.status(400).json({ error: 'Missing fields' })
+  }
+
+  const result = db
+    .prepare(
+      'UPDATE expenses SET name = ?, category = ?, amount = ?, frequency = ?, dueDate = ? WHERE id = ?'
+    )
+    .run(name, category, amount, frequency, dueDate, id)
+
+  if (result.changes === 0) {
+    return res.status(404).json({ error: 'Expense not found' })
+  }
+
+  const updated = db
+    .prepare('SELECT id, name, category, amount, frequency, dueDate, createdAt FROM expenses WHERE id = ?')
+    .get(id)
+
+  return res.json(updated)
+})
+
 app.delete('/expenses/:id', (req, res) => {
   const { id } = req.params
   db.prepare('DELETE FROM expenses WHERE id = ?').run(id)
