@@ -1,3 +1,5 @@
+cd client; npm run check; npm run lint; cd ../server; npm run check; npm run lint; cd ..;
+
 # subfolio
 
 This template should help get you started developing with Vue 3 in Vite.

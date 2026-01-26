@@ -46,6 +46,12 @@ Use all statuses deliberately and keep them accurate.
 5. When work is done: move to In Review.
 6. After user confirmation: move to Completed.
 
+## Verification rules
+- After every code change, run checks and lint:
+  - Client: `cd client && npm run check && npm run lint`
+  - Server: `cd server && npm run check && npm run lint`
+- Use the root shortcut scripts when available (see root `package.json`).
+
 ## Communication rules
 - Ask questions when decisions are needed to proceed.
 - Keep updates concise and actionable.

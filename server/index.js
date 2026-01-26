@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import Database from 'better-sqlite3'
 import path from 'path'
+import { fileURLToPath } from 'url'
 
 const app = express()
 const PORT = process.env.PORT || 3001
@@ -9,7 +10,8 @@ const PORT = process.env.PORT || 3001
 app.use(cors())
 app.use(express.json())
 
-const dbPath = path.join(process.cwd(), 'server', 'subfolio.db')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const dbPath = path.join(__dirname, 'subfolio.db')
 const db = new Database(dbPath)
 
 db.prepare(

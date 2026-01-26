@@ -1,27 +1,15 @@
 {
-  "name": "subfolio",
-  "version": "0.0.0",
+  "name": "subfolio-root",
   "private": true,
-  "type": "module",
-  "engines": {
-    "node": "^20.19.0 || >=22.12.0"
-  },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "api": "node server/index.js"
-  },
-  "dependencies": {
-    "better-sqlite3": "^11.6.0",
-    "cors": "^2.8.5",
-    "express": "^4.21.2",
-    "vue": "^3.5.26",
-    "vue-router": "^4.5.1"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.3",
-    "vite": "^7.3.0",
-    "vite-plugin-vue-devtools": "^8.0.5"
+    "check": "npm run check --prefix client && npm run check --prefix server",
+    "lint": "npm run lint --prefix client && npm run lint --prefix server",
+    "verify": "npm run check --prefix client && npm run lint --prefix client && npm run check --prefix server && npm run lint --prefix server",
+    "dev": "npm run dev --prefix client && npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "build": "npm run build --prefix client && npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build:server": "npm run build --prefix server"
   }
 }
