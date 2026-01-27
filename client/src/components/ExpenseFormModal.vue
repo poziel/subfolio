@@ -1,8 +1,7 @@
 <script setup>
 import { computed, watch } from 'vue'
+import { Select, AutocompleteSelect } from '@subfolio/vue-components'
 import AppModal from './AppModal.vue'
-import UiSelect from './UiSelect.vue'
-import UiAutocompleteSelect from './UiAutocompleteSelect.vue'
 import { useExpenses } from '../composables/useExpenses'
 
 const {
@@ -106,7 +105,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
         <label for="modal-expense-category" class="mb-1.5 block text-sm text-muted">
           Category
         </label>
-        <UiAutocompleteSelect
+        <AutocompleteSelect
           id="modal-expense-category"
           v-model="form.category"
           :options="categoryOptions"
@@ -133,7 +132,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
         </div>
         <div>
           <label for="modal-expense-currency" class="mb-1.5 block text-sm text-muted">Currency</label>
-          <UiSelect
+          <Select
             id="modal-expense-currency"
             v-model="form.currency"
             :options="currencyOptions"
@@ -173,7 +172,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
         <label for="modal-expense-frequency" class="mb-1.5 block text-sm text-muted">
           Frequency
         </label>
-        <UiSelect
+        <Select
           id="modal-expense-frequency"
           v-model="form.frequency"
           :options="frequencySelectOptions"
@@ -221,7 +220,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
           <label for="modal-pattern-type" class="mb-1.5 block text-xs text-muted">
             Pattern type
           </label>
-          <UiSelect
+          <Select
             id="modal-pattern-type"
             v-model="form.datePattern.type"
             :options="patternTypeOptions"
@@ -237,7 +236,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-day" class="mb-1.5 block text-xs text-muted">
               Day of month
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-day"
               v-model="form.datePattern.dayOfMonth"
               :options="dayOptions"
@@ -254,7 +253,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-weekday" class="mb-1.5 block text-xs text-muted">
               Day of week
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-weekday"
               v-model="form.datePattern.dayOfWeek"
               :options="weekdayOptions"
@@ -270,7 +269,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-nth" class="mb-1.5 block text-xs text-muted">
               Which week
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-nth"
               v-model="form.datePattern.nthWeek"
               :options="ordinalOptions"
@@ -282,7 +281,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-weekday2" class="mb-1.5 block text-xs text-muted">
               Day of week
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-weekday2"
               v-model="form.datePattern.dayOfWeek"
               :options="weekdayOptions"
@@ -298,7 +297,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-month" class="mb-1.5 block text-xs text-muted">
               Month
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-month"
               v-model="form.datePattern.month"
               :options="monthOptions"
@@ -310,7 +309,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-day-year" class="mb-1.5 block text-xs text-muted">
               Day
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-day-year"
               v-model="form.datePattern.dayOfMonth"
               :options="dayOptions"
@@ -327,7 +326,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
               <label for="modal-pattern-nth-year" class="mb-1.5 block text-xs text-muted">
                 Which week
               </label>
-              <UiSelect
+              <Select
                 id="modal-pattern-nth-year"
                 v-model="form.datePattern.nthWeek"
                 :options="ordinalOptions"
@@ -339,7 +338,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
               <label for="modal-pattern-weekday-year" class="mb-1.5 block text-xs text-muted">
                 Day of week
               </label>
-              <UiSelect
+              <Select
                 id="modal-pattern-weekday-year"
                 v-model="form.datePattern.dayOfWeek"
                 :options="weekdayOptions"
@@ -352,7 +351,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             <label for="modal-pattern-month-year" class="mb-1.5 block text-xs text-muted">
               Month
             </label>
-            <UiSelect
+            <Select
               id="modal-pattern-month-year"
               v-model="form.datePattern.month"
               :options="monthOptions"

@@ -1,0 +1,43 @@
+@use "../variables" as *;
+@use "../mixins" as *;
+
+.ui-textarea {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: $ui-padding;
+  color: $color-ink;
+  font-size: 0.9375rem;
+  font-family: $font-family-sans;
+  min-height: 6rem;
+  resize: vertical;
+  line-height: 1.5;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: rgba($color-muted, 0.8);
+  }
+
+  &:disabled {
+    @include disabled-state;
+  }
+
+  &:read-only {
+    background: rgba($color-muted, 0.05);
+    cursor: default;
+    resize: none;
+  }
+}
+
+.ui-textarea-counter {
+  font-size: 0.75rem;
+  color: $color-muted;
+  text-align: right;
+  
+  &.ui-textarea-counter--limit {
+    color: #ef4444;
+  }
+}

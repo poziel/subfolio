@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
 import LoginView from '../views/LoginView.vue'
+import HomeView from '../views/HomeView.vue'
 import TrackerView from '../views/TrackerView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import RecurrenceOverviewView from '../views/RecurrenceOverviewView.vue'
@@ -20,7 +21,13 @@ const routes = [
   },
   {
     path: '/app',
-    name: 'app',
+    name: 'home',
+    component: HomeView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/app/expenses',
+    name: 'expenses',
     component: TrackerView,
     meta: { requiresAuth: true }
   },

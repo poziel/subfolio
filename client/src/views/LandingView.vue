@@ -1,6 +1,6 @@
 <script setup>
 import { ref } from 'vue'
-import UiSelect from '../components/UiSelect.vue'
+import { Select } from '@subfolio/vue-components'
 
 const categoryOptions = [
   { value: 'Subscriptions', label: 'Subscriptions' },
@@ -258,7 +258,7 @@ const selectedFrequency = ref('Monthly')
             </div>
             <div>
               <label for="expense-category" class="mb-1.5 block text-sm text-muted">Category</label>
-              <UiSelect
+              <Select
                 id="expense-category"
                 v-model="selectedCategory"
                 :options="categoryOptions"
@@ -278,7 +278,7 @@ const selectedFrequency = ref('Monthly')
               <label for="expense-frequency" class="mb-1.5 block text-sm text-muted">
                 Frequency
               </label>
-              <UiSelect
+              <Select
                 id="expense-frequency"
                 v-model="selectedFrequency"
                 :options="frequencyOptions"

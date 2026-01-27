@@ -9,7 +9,8 @@ const { logout } = useAuth()
 const { openAddModal } = useExpenses()
 
 const navItems = [
-  { to: '/app', label: 'Tracker', icon: 'grid' },
+  { to: '/app', label: 'Home', icon: 'home' },
+  { to: '/app/expenses', label: 'Expenses', icon: 'grid' },
   { to: '/app/categories', label: 'Categories', icon: 'folder' },
   { to: '/app/recurrences', label: 'Recurrences', icon: 'repeat' },
   { to: '/app/forecast', label: 'Forecast', icon: 'trending-up' },
@@ -72,7 +73,10 @@ const isActive = (path) => route.path === path
           "
         >
           <span class="flex h-5 w-5 items-center justify-center text-xs">
-            <template v-if="item.icon === 'grid'">
+            <template v-if="item.icon === 'home'">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+            </template>
+            <template v-else-if="item.icon === 'grid'">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4"><rect width="7" height="7" x="3" y="3" rx="1" /><rect width="7" height="7" x="14" y="3" rx="1" /><rect width="7" height="7" x="14" y="14" rx="1" /><rect width="7" height="7" x="3" y="14" rx="1" /></svg>
             </template>
             <template v-else-if="item.icon === 'folder'">

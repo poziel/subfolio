@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useSettings } from '../composables/useSettings'
 
@@ -19,8 +19,17 @@ const props = defineProps({
   emptyMessage: {
     type: String,
     default: 'No expenses yet.'
+  },
+  showPagination: {
+    type: Boolean,
+    default: false
   }
 })
+
+// Pagination state
+const currentPage = ref(1)
+const itemsPerPage = ref(10)
+const itemsPerPageOptions = [5, 10, 20]
 
 const {
   openEditModal,
@@ -60,6 +69,46 @@ const nextOccurrence = (expense) => {
   const next = getNextOccurrence(expense)
   return next ? formatDate(next) : '-'
 }
+
+// Pagination computed properties
+const totalPages = computed(() => {
+  if (!props.showPagination) return 1
+  return Math.ceil(props.expenses.length / itemsPerPage.value)
+})
+
+const paginatedExpenses = computed(() => {
+  if (!props.showPagination) return props.expenses
+  
+  const start = (currentPage.value - 1) * itemsPerPage.value
+  const end = start + itemsPerPage.value
+  return props.expenses.slice(start, end)
+})
+
+const displayExpenses = computed(() => {
+  return props.showPagination ? paginatedExpenses.value : props.expenses
+})
+
+// Pagination functions
+const goToPage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+  }
+}
+
+const changeItemsPerPage = (value) => {
+  itemsPerPage.value = value
+  currentPage.value = 1 // Reset to first page
+}
+
+const startItem = computed(() => {
+  if (!props.expenses.length) return 0
+  return (currentPage.value - 1) * itemsPerPage.value + 1
+})
+
+const endItem = computed(() => {
+  const end = currentPage.value * itemsPerPage.value
+  return Math.min(end, props.expenses.length)
+})
 </script>
 
 <template>
@@ -76,7 +125,7 @@ const nextOccurrence = (expense) => {
       <span v-if="showActions" class="w-24 text-right">Actions</span>
     </div>
     <div
-      v-for="item in expenses"
+      v-for="item in displayExpenses"
       :key="item.id"
       class="grid grid-cols-1 items-center gap-3 rounded-2xl border px-4 py-3 text-sm transition sm:grid"
       :style="{ gridTemplateColumns: columns }"
@@ -123,8 +172,17 @@ const nextOccurrence = (expense) => {
         >
           {{ formatMoney(item.amount, item.currency) }}
         </span>
-        <span class="ml-1 text-xs text-muted">{{ item.currency }}</span>
-        <span v-if="!item.includesTax && item.taxRate" class="ml-1 text-xs text-muted">
+        <span 
+          class="ml-1 text-xs text-muted"
+          :title="getConversionTooltip(item.amount, item.currency)"
+        >
+          {{ item.currency }}
+        </span>
+        <span 
+          v-if="!item.includesTax && item.taxRate" 
+          class="ml-1 text-xs text-muted"
+          :title="getConversionTooltip(item.amount, item.currency)"
+        >
           +tax
         </span>
       </div>
@@ -216,6 +274,68 @@ const nextOccurrence = (expense) => {
     </div>
     <div v-if="!expenses.length" class="py-12 text-center text-muted">
       <p>{{ emptyMessage }}</p>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div v-if="showPagination && expenses.length > 0" class="mt-4 flex items-center justify-between border-t border-border pt-4">
+      <div class="flex items-center gap-3">
+        <span class="text-sm text-muted">Items per page:</span>
+        <select
+          v-model="itemsPerPage"
+          class="rounded-lg border border-border bg-white px-3 py-1.5 text-sm text-ink transition hover:border-accent focus:border-accent focus:outline-none"
+          @change="changeItemsPerPage(Number($event.target.value))"
+        >
+          <option v-for="option in itemsPerPageOptions" :key="option" :value="option">
+            {{ option }}
+          </option>
+        </select>
+        <span class="text-sm text-muted">
+          {{ startItem }} - {{ endItem }} of {{ expenses.length }}
+        </span>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          :disabled="currentPage === 1"
+          class="grid h-8 w-8 place-items-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-40"
+          :class="currentPage === 1 ? 'border-border bg-white/60 text-muted' : 'border-border bg-white text-ink hover:border-accent hover:text-accent'"
+          title="Previous page"
+          @click="goToPage(currentPage - 1)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="m15 18-6-6 6-6" />
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-1">
+          <template v-for="page in totalPages" :key="page">
+            <button
+              v-if="page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)"
+              type="button"
+              class="grid h-8 min-w-[2rem] place-items-center rounded-lg border px-2 text-sm transition"
+              :class="page === currentPage ? 'border-accent bg-accent/10 font-medium text-accent' : 'border-border bg-white text-ink hover:border-accent hover:text-accent'"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+            <span v-else-if="page === currentPage - 2 || page === currentPage + 2" class="px-1 text-muted">...</span>
+          </template>
+        </div>
+
+        <button
+          type="button"
+          :disabled="currentPage === totalPages"
+          class="grid h-8 w-8 place-items-center rounded-lg border transition disabled:cursor-not-allowed disabled:opacity-40"
+          :class="currentPage === totalPages ? 'border-border bg-white/60 text-muted' : 'border-border bg-white text-ink hover:border-accent hover:text-accent'"
+          title="Next page"
+          @click="goToPage(currentPage + 1)"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </button>
+      </div>
     </div>
   </div>
 </template>

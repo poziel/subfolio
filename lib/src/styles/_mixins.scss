@@ -1,0 +1,65 @@
+// Mixins for reusable styles
+@use "./variables" as *;
+
+@mixin focus-ring($color: $color-accent) {
+  outline: none;
+  border-color: $color;
+  box-shadow: 0 0 0 2px rgba($color, 0.12);
+}
+
+@mixin transition($properties...) {
+  $transitions: ();
+  @each $property in $properties {
+    $transitions: append($transitions, $property $ui-transition-duration $ui-transition-timing, comma);
+  }
+  transition: $transitions;
+}
+
+@mixin disabled-state {
+  opacity: 0.6;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+@mixin panel-shadow {
+  border: 1px solid $color-border;
+  background: $color-surface-card;
+  box-shadow: $shadow-card;
+}
+
+@mixin scrollbar($width: 8px, $thumb-color: rgba($color-ink, 0.2)) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba($color-ink, 0.3);
+  }
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

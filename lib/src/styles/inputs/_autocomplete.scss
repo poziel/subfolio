@@ -1,0 +1,42 @@
+@use "../variables" as *;
+@use "../mixins" as *;
+
+.ui-autocomplete-trigger {
+  padding: 0.2rem 0.6rem;
+  gap: 0.5rem;
+}
+
+.ui-autocomplete-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 0.5rem 0.6rem;
+  color: $color-ink;
+  min-width: 0;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::placeholder {
+    color: rgba($color-muted, 0.8);
+  }
+}
+
+.ui-autocomplete-caret {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  border-radius: $ui-border-radius-sm;
+  @include transition(background);
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba($color-accent, 0.1);
+  }
+
+  &:active {
+    background: rgba($color-accent, 0.15);
+  }
+}

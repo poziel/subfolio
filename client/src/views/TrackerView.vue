@@ -58,7 +58,7 @@ onMounted(fetchExpenses)
   <div class="grid gap-8 p-6 lg:p-8">
     <!-- Page Header -->
     <header>
-      <h1 class="font-serif text-2xl text-ink">Expense Tracker</h1>
+      <h1 class="font-serif text-2xl text-ink">Expenses</h1>
       <p class="text-muted">Track all your recurring payments at a glance.</p>
     </header>
 
@@ -144,7 +144,7 @@ onMounted(fetchExpenses)
           <p>No expenses match "{{ searchQuery }}"</p>
           <p class="text-sm">Try a different search term.</p>
         </div>
-        <ExpenseTable v-else :expenses="filteredExpenses" />
+        <ExpenseTable v-else :expenses="filteredExpenses" :show-pagination="true" />
       </div>
     </section>
   </div>

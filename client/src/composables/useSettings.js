@@ -4,7 +4,8 @@ const storageKey = 'subfolio-settings'
 
 const defaultSettings = {
   displayedCurrency: 'CAD',
-  availableCurrencies: ['CAD', 'USD', 'EUR', 'GBP', 'AUD']
+  availableCurrencies: ['CAD', 'USD', 'EUR', 'GBP', 'AUD'],
+  defaultOrdering: 'dateAdded'
 }
 
 const allCurrencies = ['CAD', 'USD', 'EUR', 'GBP', 'AUD', 'NZD', 'JPY', 'CHF', 'MXN', 'BRL', 'SGD']
@@ -45,7 +46,8 @@ function loadSettings() {
       displayedCurrency: parsed.displayedCurrency || defaultSettings.displayedCurrency,
       availableCurrencies: Array.isArray(parsed.availableCurrencies) && parsed.availableCurrencies.length
         ? parsed.availableCurrencies
-        : [...defaultSettings.availableCurrencies]
+        : [...defaultSettings.availableCurrencies],
+      defaultOrdering: parsed.defaultOrdering || defaultSettings.defaultOrdering
     }
   } catch {
     return { ...defaultSettings }
@@ -147,6 +149,18 @@ watch(settingsState, () => {
   persistSettings()
 }, { deep: true })
 
+const defaultOrdering = computed({
+  get: () => settingsState.value.defaultOrdering,
+  set: (value) => {
+    settingsState.value.defaultOrdering = value
+    persistSettings()
+  }
+})
+
+function setDefaultOrdering(value) {
+  defaultOrdering.value = value
+}
+
 export function useSettings() {
   ensureRates()
 
@@ -156,6 +170,7 @@ export function useSettings() {
     availableCurrencies,
     allCurrencies,
     conversionStatus,
+    defaultOrdering,
 
     // formatting
     formatMoney,
@@ -165,6 +180,7 @@ export function useSettings() {
 
     // actions
     setDisplayedCurrency,
-    setAvailableCurrencies
+    setAvailableCurrencies,
+    setDefaultOrdering
   }
 }
