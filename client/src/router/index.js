@@ -2,7 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
 import LoginView from '../views/LoginView.vue'
 import TrackerView from '../views/TrackerView.vue'
+import CategoriesView from '../views/CategoriesView.vue'
 import RecurrenceOverviewView from '../views/RecurrenceOverviewView.vue'
+import SettingsView from '../views/SettingsView.vue'
 import { useAuth } from '../composables/useAuth'
 
 const routes = [
@@ -23,9 +25,21 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/app/categories',
+    name: 'categories',
+    component: CategoriesView,
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/app/recurrences',
     name: 'recurrences',
     component: RecurrenceOverviewView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/app/settings',
+    name: 'settings',
+    component: SettingsView,
     meta: { requiresAuth: true }
   }
 ]

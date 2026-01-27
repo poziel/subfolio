@@ -1,63 +1,23 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { useAuth } from '../composables/useAuth'
+import { computed, onMounted } from 'vue'
+import { useExpenses } from '../composables/useExpenses'
+import { useSettings } from '../composables/useSettings'
 
-const { logout } = useAuth()
+const { expenses, fetchExpenses, getYearlyAmount, frequencyOptions } = useExpenses()
+const { formatMoney, getConversionTooltip, convertToDisplayed, displayedCurrency } = useSettings()
 
-const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001'
-const expenses = ref([])
-const status = ref('idle')
-
-const localFallback = [
-  {
-    id: 1,
-    name: 'Streamline Pro',
-    category: 'Subscriptions',
-    frequency: 'Monthly',
-    dueDate: '2026-03-18',
-    amount: 32
-  },
-  {
-    id: 2,
-    name: 'Metro Utilities',
-    category: 'Utilities',
-    frequency: 'Monthly',
-    dueDate: '2026-03-21',
-    amount: 118
-  },
-  {
-    id: 3,
-    name: 'Pulse Gym',
-    category: 'Wellness',
-    frequency: 'Monthly',
-    dueDate: '2026-03-26',
-    amount: 64
-  },
-  {
-    id: 4,
-    name: 'Home Insurance',
-    category: 'Housing',
-    frequency: 'Yearly',
-    dueDate: '2026-04-02',
-    amount: 420
-  }
-]
-
-const frequencyMultiplier = (frequency) => {
-  switch (frequency) {
-    case 'Weekly':
-      return 52
-    case 'Yearly':
-      return 1
-    default:
-      return 12
-  }
+// Get display label for frequency
+const getFrequencyLabel = (frequency) => {
+  const option = frequencyOptions.find((f) => f.value === frequency)
+  return option ? option.label : frequency
 }
 
-const yearlyAmount = (item) => Number(item.amount) * frequencyMultiplier(item.frequency)
-
 const summaryTotals = computed(() => {
-  const yearly = expenses.value.reduce((total, item) => total + yearlyAmount(item), 0)
+  const activeExpenses = expenses.value.filter((item) => item.active !== false)
+  const yearly = activeExpenses.reduce(
+    (total, item) => total + convertToDisplayed(getYearlyAmount(item), item.currency || displayedCurrency),
+    0
+  )
   const monthly = yearly / 12
   const perPay = yearly / 26
 
@@ -69,78 +29,33 @@ const summaryTotals = computed(() => {
 })
 
 const projectedRows = computed(() =>
-  expenses.value.map((item) => {
-    const yearly = yearlyAmount(item)
-    return {
-      ...item,
-      yearly,
-      monthly: yearly / 12,
-      perPay: yearly / 26
-    }
-  })
+  expenses.value
+    .filter((item) => item.active !== false)
+    .map((item) => {
+      const yearly = getYearlyAmount(item)
+      const yearlyDisplayed = convertToDisplayed(yearly, item.currency || displayedCurrency)
+      return {
+        ...item,
+        yearly,
+        monthly: yearly / 12,
+        perPay: yearly / 26,
+        yearlyDisplayed,
+        monthlyDisplayed: yearlyDisplayed / 12,
+        perPayDisplayed: yearlyDisplayed / 26
+      }
+    })
 )
 
-const fetchExpenses = async () => {
-  status.value = 'loading'
-  try {
-    const response = await fetch(`${apiBase}/expenses`)
-    if (!response.ok) throw new Error('Failed request')
-    expenses.value = await response.json()
-    status.value = 'ready'
-  } catch {
-    expenses.value = localFallback
-    status.value = 'offline'
-  }
-}
-
-const formatCurrency = (value) => `$${Number(value).toFixed(2)}`
+const formatCurrency = (value) => formatMoney(value, displayedCurrency)
+const formatRowAmount = (value, currency) => formatMoney(value, currency)
+const amountTooltip = (amount, currency) => getConversionTooltip(amount, currency)
 
 onMounted(fetchExpenses)
 </script>
 
 <template>
-  <div class="mx-auto grid max-w-6xl gap-10 px-6 py-8 lg:px-8">
-    <!-- Header -->
-    <header class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-      <div class="flex items-center gap-3">
-        <span
-          class="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-accent to-teal-400 text-xl font-semibold text-white shadow-lg shadow-accent/25"
-        >
-          S
-        </span>
-        <div>
-          <p class="text-lg font-semibold text-ink">Subfolio</p>
-          <p class="text-sm text-muted">Recurrence overview</p>
-        </div>
-      </div>
-      <div class="flex flex-wrap items-center gap-3">
-        <RouterLink
-          to="/app"
-          class="inline-flex items-center gap-2 rounded-full border border-border bg-white/60 px-4 py-2 text-sm text-ink transition hover:border-accent hover:bg-white"
-        >
-          Back to tracker
-        </RouterLink>
-        <span
-          class="rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-wide"
-          :class="{
-            'bg-accent/10 text-accent-dark': status === 'ready' || status === 'loading',
-            'bg-sun/20 text-amber-700': status === 'offline',
-            'bg-gray-100 text-muted': status === 'idle'
-          }"
-        >
-          {{ status }}
-        </span>
-        <button
-          type="button"
-          class="inline-flex items-center gap-2 rounded-full border border-border bg-white/60 px-4 py-2 text-sm text-ink transition hover:border-accent hover:bg-white"
-          @click="logout"
-        >
-          Sign out
-        </button>
-      </div>
-    </header>
-
-    <!-- Hero Section -->
+  <div class="grid gap-8 p-6 lg:p-8">
+    <!-- Page Header -->
     <section
       class="flex flex-col items-start gap-6 rounded-3xl border border-border-strong bg-white p-7 shadow-card"
     >
@@ -205,15 +120,24 @@ onMounted(fetchExpenses)
         >
           <span class="font-medium text-ink">{{ item.name }}</span>
           <span class="text-muted">{{ item.category }}</span>
-          <span class="text-muted">{{ item.frequency }}</span>
-          <span class="font-semibold text-accent-dark sm:text-right">
-            {{ formatCurrency(item.yearly) }}
+          <span class="text-muted">{{ getFrequencyLabel(item.frequency) }}</span>
+          <span
+            class="font-semibold text-accent-dark sm:text-right"
+            :title="amountTooltip(item.yearly, item.currency)"
+          >
+            {{ formatRowAmount(item.yearly, item.currency) }}
           </span>
-          <span class="font-semibold text-accent-dark sm:text-right">
-            {{ formatCurrency(item.monthly) }}
+          <span
+            class="font-semibold text-accent-dark sm:text-right"
+            :title="amountTooltip(item.monthly, item.currency)"
+          >
+            {{ formatRowAmount(item.monthly, item.currency) }}
           </span>
-          <span class="font-semibold text-accent-dark sm:text-right">
-            {{ formatCurrency(item.perPay) }}
+          <span
+            class="font-semibold text-accent-dark sm:text-right"
+            :title="amountTooltip(item.perPay, item.currency)"
+          >
+            {{ formatRowAmount(item.perPay, item.currency) }}
           </span>
         </div>
       </div>

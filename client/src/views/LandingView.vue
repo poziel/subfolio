@@ -1,3 +1,24 @@
+<script setup>
+import { ref } from 'vue'
+import UiSelect from '../components/UiSelect.vue'
+
+const categoryOptions = [
+  { value: 'Subscriptions', label: 'Subscriptions' },
+  { value: 'Utilities', label: 'Utilities' },
+  { value: 'Groceries', label: 'Groceries' },
+  { value: 'Housing', label: 'Housing' }
+]
+
+const frequencyOptions = [
+  { value: 'Monthly', label: 'Monthly' },
+  { value: 'Weekly', label: 'Weekly' },
+  { value: 'Yearly', label: 'Yearly' }
+]
+
+const selectedCategory = ref('Subscriptions')
+const selectedFrequency = ref('Monthly')
+</script>
+
 <template>
   <div class="mx-auto flex max-w-6xl flex-col gap-20 px-6 py-8 pb-16 lg:px-8">
     <!-- Header -->
@@ -237,15 +258,12 @@
             </div>
             <div>
               <label for="expense-category" class="mb-1.5 block text-sm text-muted">Category</label>
-              <select
+              <UiSelect
                 id="expense-category"
-                class="w-full rounded-xl border border-border bg-surface-muted px-4 py-3 text-ink focus:border-accent focus:outline-none"
-              >
-                <option>Subscriptions</option>
-                <option>Utilities</option>
-                <option>Groceries</option>
-                <option>Housing</option>
-              </select>
+                v-model="selectedCategory"
+                :options="categoryOptions"
+                placeholder="Category"
+              />
             </div>
             <div>
               <label for="expense-amount" class="mb-1.5 block text-sm text-muted">Amount</label>
@@ -260,14 +278,12 @@
               <label for="expense-frequency" class="mb-1.5 block text-sm text-muted">
                 Frequency
               </label>
-              <select
+              <UiSelect
                 id="expense-frequency"
-                class="w-full rounded-xl border border-border bg-surface-muted px-4 py-3 text-ink focus:border-accent focus:outline-none"
-              >
-                <option>Monthly</option>
-                <option>Weekly</option>
-                <option>Yearly</option>
-              </select>
+                v-model="selectedFrequency"
+                :options="frequencyOptions"
+                placeholder="Frequency"
+              />
             </div>
             <div>
               <label for="expense-date" class="mb-1.5 block text-sm text-muted">Next due</label>
