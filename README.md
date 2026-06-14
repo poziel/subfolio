@@ -1,38 +1,70 @@
-# subfolio
+# Subfolio
 
-This template should help get you started developing with Vue 3 in Vite.
+Subfolio is a forward-looking finance app for tracking subscriptions and
+recurring expenses, projecting upcoming costs, and giving users a clearer view
+of where money goes over time.
 
-## Recommended IDE Setup
+The current repo focus is a frontend-only app shell. Users bring their own
+realtime database connection, so Subfolio can run without a hosted backend.
+Firebase Realtime Database and PocketBase are the first supported providers.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+Database connections can also be supplied with a `config` URL query parameter.
+The value is a base64-encoded JSON connection object. Subfolio accepts native
+connection objects such as `{ "provider": "pocketbase", "pocketbase": { ... } }`
+and Firebase config objects using either `databaseURL` or Refinimo-style
+`databaseUrl`.
 
-## Recommended Browser Setup
+## Project Structure
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- `src/`: Vue 3 + Vite app.
+- `src/components/PublicSiteShell.vue`: shared shell for public site pages.
+- `src/services/database/`: provider adapters for user-owned realtime databases.
+- `CHANGELOG.md`: release history rendered by the public changelog page.
+- `.github/`: pull request template and release workflow that can append
+  versioned release notes to the changelog.
+- `docs/`: architecture notes and project decisions.
+- `.ruler/`: source files for generated AI-agent instructions.
 
-## Customize configuration
+## Public Site
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Public routes include `/`, `/features`, `/about`, `/byodb`, `/pricing`,
+`/open-source`, and `/changelog`. Legal pages are linked from the footer at
+`/privacy`, `/terms`, `/refund-policy`, and `/license`.
 
-## Project Setup
+The public shell links to the project repository at
+`https://github.com/poziel/subfolio`.
+
+## Setup
+
+Install dependencies:
 
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+The UI is built with PrimeVue styled mode, an Aura-derived Subfolio theme preset,
+and PrimeIcons.
+
+## Development
 
 ```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+By default, Vite serves the app at `http://localhost:5173`.
+
+## Verification
 
 ```sh
-npm run build
+npm run check
+npm run lint
+npm run verify
 ```
+
+`npm run verify` runs the build check and lint in the same order expected by
+the project collaboration guide.
+
+## Agent Instructions
+
+Edit `.ruler/` source files first, then run `npm run ruler` to regenerate
+agent-specific instruction outputs such as `AGENTS.md`.
