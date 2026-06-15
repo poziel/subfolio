@@ -91,31 +91,31 @@ const insightCards = [
 
 <template>
   <PublicSiteShell>
-    <div class="grid gap-16">
-      <section class="subfolio-landing-hero grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr]">
-        <div class="grid gap-7">
-          <h1 class="font-serif text-6xl text-ink md:text-8xl">
+    <div class="grid gap-14 md:gap-16">
+      <section class="subfolio-landing-hero grid min-w-0 items-center gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:gap-12">
+        <div class="grid min-w-0 gap-6">
+          <h1 class="subfolio-hero-title font-serif text-5xl text-ink sm:text-6xl md:text-7xl xl:text-8xl">
             {{ t('landing.heroTitle') }}
           </h1>
-          <p class="max-w-2xl text-xl muted-copy">
+          <p class="max-w-xl text-lg muted-copy md:text-xl">
             {{ t('landing.heroBody') }}
           </p>
           <div class="flex flex-col gap-3 sm:flex-row">
             <RouterLink v-slot="{ navigate }" to="/app" custom>
-              <Button :label="t('common.openApp')" @click="navigate" />
+              <Button :label="t('common.openApp')" class="w-full sm:w-auto" @click="navigate" />
             </RouterLink>
             <RouterLink v-slot="{ navigate }" to="/features" custom>
-              <Button :label="t('landing.exploreFeatures')" icon="pi pi-table" severity="secondary" outlined @click="navigate" />
+              <Button :label="t('landing.exploreFeatures')" icon="pi pi-table" severity="secondary" outlined class="w-full sm:w-auto" @click="navigate" />
             </RouterLink>
           </div>
         </div>
 
-        <Card class="subfolio-hero-demo">
+        <Card class="subfolio-hero-demo w-full min-w-0">
           <template #title>{{ t('landing.formTitle') }}</template>
           <template #subtitle>{{ t('landing.obligationsSubtitle') }}</template>
           <template #content>
             <form class="grid gap-5" @submit.prevent="addDemoExpense">
-              <div class="grid gap-4 sm:grid-cols-[1fr_8rem]">
+              <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_8rem]">
                 <div class="subfolio-field">
                   <label for="hero-expense-name">{{ t('landing.expenseName') }}</label>
                   <InputText id="hero-expense-name" v-model="expenseName" class="w-full" />
@@ -133,7 +133,7 @@ const insightCards = [
                 </div>
               </div>
 
-              <div class="grid gap-4 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+              <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-end">
                 <div class="subfolio-field">
                   <label for="hero-expense-category">{{ t('landing.category') }}</label>
                   <Select
@@ -156,7 +156,7 @@ const insightCards = [
                     class="w-full"
                   />
                 </div>
-                <Button type="submit" :label="t('landing.previewExpense')" icon="pi pi-plus" />
+                <Button type="submit" :label="t('landing.previewExpense')" icon="pi pi-plus" severity="secondary" outlined />
               </div>
 
               <div class="subfolio-table-wrap">

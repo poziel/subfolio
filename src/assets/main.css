@@ -219,6 +219,7 @@ html[data-theme="dark"] {
 
   body {
     min-height: 100vh;
+    overflow-x: hidden;
     background:
       radial-gradient(ellipse at top left, rgba(0, 165, 148, 0.11), transparent 42%),
       radial-gradient(ellipse at 80% 20%, rgba(215, 175, 114, 0.14), transparent 36%),
@@ -295,8 +296,10 @@ html[data-theme="dark"] {
   }
 
   .subfolio-nav-link {
+    flex: 0 0 auto;
     border-radius: 999px;
-    padding: 0.45rem 0.85rem;
+    padding: 0.42rem 0.78rem;
+    white-space: nowrap;
     transition:
       background var(--transition-fast),
       box-shadow var(--transition-fast),
@@ -309,24 +312,66 @@ html[data-theme="dark"] {
   }
 
 .subfolio-nav-link--active {
-  background: linear-gradient(135deg, rgba(0, 165, 148, 0.16), rgba(183, 206, 195, 0.42));
-  box-shadow: inset 0 0 0 1px rgba(0, 165, 148, 0.18);
+  background: rgba(183, 206, 195, 0.32);
+  box-shadow: inset 0 0 0 1px rgba(0, 165, 148, 0.16);
   color: var(--brand-teal-dark);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .subfolio-landing-hero {
-  min-height: calc(100dvh - 9rem);
-  align-content: center;
-  padding-bottom: 2rem;
+  align-content: start;
+  padding-block: 2.5rem 2rem;
+}
+
+.subfolio-hero-title {
+  max-width: 12ch;
+  line-height: 1.06;
+}
+
+.subfolio-hero-demo.p-card {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-shadow: var(--shadow-md) !important;
 }
 
 .subfolio-hero-demo .p-card-body {
-  padding: 1.35rem;
+  min-width: 0;
+  padding: 1rem;
 }
 
 .subfolio-hero-demo .p-card-content {
+  min-width: 0;
+  overflow: hidden;
   padding-top: 1rem;
+}
+
+.subfolio-hero-demo .p-card-title {
+  font-size: 1.1rem;
+}
+
+.subfolio-hero-demo .p-inputnumber,
+.subfolio-hero-demo .p-inputtext,
+.subfolio-hero-demo .p-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.subfolio-hero-demo .p-inputnumber-input {
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .subfolio-hero-demo .p-card-body {
+    padding: 1.35rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .subfolio-landing-hero {
+    padding-block: 4rem 3rem;
+  }
 }
 
 .subfolio-card {
@@ -504,9 +549,11 @@ html[data-theme="dark"] {
   }
 
   .subfolio-table-wrap {
+    width: 100%;
     max-width: 100%;
     min-width: 0;
     overflow-x: auto;
+    scrollbar-gutter: stable;
   }
 
   .subfolio-datatable .p-datatable-header,
@@ -573,8 +620,10 @@ html[data-theme="dark"] {
 
 /* PrimeVue brand overrides */
 .subfolio-nav-link {
+  flex: 0 0 auto;
   border-radius: 999px;
-  padding: 0.45rem 0.85rem;
+  padding: 0.42rem 0.78rem;
+  white-space: nowrap;
   transition:
     background var(--transition-fast),
     box-shadow var(--transition-fast),
@@ -587,14 +636,10 @@ html[data-theme="dark"] {
 }
 
 .subfolio-nav-link--active {
-  background:
-    linear-gradient(135deg, rgba(0, 165, 148, 0.18), rgba(183, 206, 195, 0.5)),
-    var(--color-accent-soft);
-  box-shadow:
-    inset 0 0 0 1px rgba(0, 165, 148, 0.28),
-    0 4px 12px rgba(23, 60, 57, 0.06);
+  background: color-mix(in srgb, var(--brand-sage) 34%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(0, 165, 148, 0.16);
   color: var(--color-ink);
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .p-card {
@@ -805,6 +850,13 @@ html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
 
 .subfolio-header-controls--compact {
   gap: 0.35rem;
+}
+
+.subfolio-header-controls--compact .p-button {
+  min-width: 2.75rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 0;
 }
 
 .subfolio-language-button {

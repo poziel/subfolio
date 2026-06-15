@@ -56,41 +56,45 @@ const year = computed(() => new Date().getFullYear())
 </script>
 
 <template>
-  <div class="min-h-screen px-5 py-5 lg:px-10">
-    <header class="mx-auto flex max-w-7xl flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div class="flex items-center justify-between gap-4">
-        <RouterLink class="flex items-center gap-3" to="/">
+  <div class="min-h-screen overflow-x-hidden px-5 py-4 sm:py-5 lg:px-10">
+    <header class="mx-auto flex max-w-7xl min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div class="flex min-w-0 items-center justify-between gap-3">
+        <RouterLink class="flex min-w-0 items-center gap-3" to="/">
           <img
             :src="activeTheme === 'dark' ? '/images/subfolio-light-horizontal.svg' : '/images/subfolio-dark-horizontal.svg'"
             alt="Subfolio"
-            class="h-14 w-auto max-w-56"
+            class="h-11 w-auto max-w-[10.5rem] sm:h-14 sm:max-w-56"
           />
         </RouterLink>
 
-        <div class="flex items-center gap-2 lg:hidden">
-        <Button
-          as="a"
-          :href="repositoryUrl"
-          target="_blank"
-          rel="noreferrer"
-          :aria-label="t('common.githubRepo')"
-          icon="pi pi-github"
-          size="small"
-          severity="secondary"
-            outlined
-          />
-          <ThemeLanguageControls compact />
-          <RouterLink v-slot="{ navigate }" to="/app" custom>
+        <div class="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
+          <div class="hidden sm:block">
             <Button
-              :label="t('common.openApp')"
+              as="a"
+              :href="repositoryUrl"
+              target="_blank"
+              rel="noreferrer"
+              :aria-label="t('common.githubRepo')"
+              icon="pi pi-github"
               size="small"
-              @click="navigate"
+              severity="secondary"
+              outlined
             />
-          </RouterLink>
+          </div>
+          <ThemeLanguageControls compact />
+          <div class="hidden sm:block">
+            <RouterLink v-slot="{ navigate }" to="/app" custom>
+              <Button
+                :label="t('common.openApp')"
+                size="small"
+                @click="navigate"
+              />
+            </RouterLink>
+          </div>
         </div>
       </div>
 
-      <nav class="flex flex-wrap gap-1.5 text-sm" aria-label="Public navigation">
+      <nav class="flex max-w-full flex-wrap gap-1.5 text-sm" aria-label="Public navigation">
         <RouterLink
           v-for="item in navItems"
           :key="item.to"
@@ -124,7 +128,7 @@ const year = computed(() => new Date().getFullYear())
       </div>
     </header>
 
-    <main class="mx-auto max-w-7xl py-12 lg:py-16">
+    <main class="mx-auto max-w-7xl py-8 lg:py-10">
       <slot />
     </main>
 
