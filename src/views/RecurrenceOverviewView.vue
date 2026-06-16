@@ -66,22 +66,22 @@ onMounted(fetchExpenses)
 </script>
 
 <template>
-  <div class="app-page">
-    <Card>
-      <template #content>
-        <div class="grid gap-3">
-          <h1 class="font-serif text-4xl text-ink">
-            {{ t('recurrences.title') }}
-          </h1>
-          <p class="max-w-2xl muted-copy">
-            {{ t('recurrences.intro') }}
-          </p>
-        </div>
-      </template>
-    </Card>
+    <header class="grid gap-3">
+      <h1 class="font-serif text-4xl text-ink">
+        {{ t('recurrences.title') }}
+      </h1>
+      <p class="max-w-2xl muted-copy">
+        {{ t('recurrences.intro') }}
+      </p>
+    </header>
 
     <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <Card v-for="item in summaryTotals" :key="item.label" class="subfolio-card">
+      <Card
+        v-for="(item, index) in summaryTotals"
+        :key="item.label"
+        class="subfolio-card metric-card"
+        :class="{ 'metric-card--deep': index === 0 }"
+      >
         <template #content>
           <div class="grid gap-2">
             <Tag :value="item.label" :severity="item.severity" rounded class="w-fit" />
@@ -156,5 +156,4 @@ onMounted(fetchExpenses)
         </div>
       </template>
     </Card>
-  </div>
 </template>

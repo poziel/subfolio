@@ -65,8 +65,8 @@ defineProps({
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
-  color: #1f2933;
-  font-size: 0.95rem;
+  color: var(--made-with-love-color, currentColor);
+  font-size: var(--made-with-love-font-size, 0.95rem);
   line-height: 1.45;
 }
 
@@ -76,7 +76,7 @@ defineProps({
   width: var(--made-with-love-swap-icon-width, 1rem);
   align-items: center;
   justify-content: center;
-  color: #1f2933;
+  color: var(--made-with-love-emphasis-color, var(--made-with-love-color, currentColor));
   cursor: default;
   transition: width 180ms ease;
   user-select: none;
@@ -118,7 +118,7 @@ defineProps({
 }
 
 .made-with-love-credit__swap-label {
-  color: #1f2933;
+  color: var(--made-with-love-emphasis-color, var(--made-with-love-color, currentColor));
   font-weight: 700;
   font-style: normal;
   opacity: 0;
@@ -142,33 +142,40 @@ defineProps({
 }
 
 .made-with-love-credit__maker {
-  color: #1f2933;
+  color: var(--made-with-love-emphasis-color, var(--made-with-love-color, currentColor));
   font-weight: 700;
   text-decoration: none;
 }
 
 a.made-with-love-credit__maker:hover {
+  color: var(
+    --made-with-love-hover-color,
+    var(--made-with-love-emphasis-color, var(--made-with-love-color, currentColor))
+  );
   text-decoration: underline;
   text-underline-offset: 0.16em;
 }
 
 .subfolio-made-with-love-credit {
-  color: var(--light-text-secondary);
+  --made-with-love-color: var(--color-copy-secondary);
+  --made-with-love-emphasis-color: var(--color-ink);
+  --made-with-love-hover-color: var(--color-ink);
+  --made-with-love-font-size: inherit;
+  color: var(--made-with-love-color);
   font-family: var(--font-sans);
-  font-size: 0.95rem;
 }
 
 .subfolio-made-with-love-credit .made-with-love-credit__swap,
 .subfolio-made-with-love-credit .made-with-love-credit__swap-label {
-  color: var(--brand-teal-dark);
+  color: var(--made-with-love-emphasis-color);
 }
 
 .subfolio-made-with-love-credit .made-with-love-credit__maker {
-  color: var(--brand-teal-dark);
+  color: var(--made-with-love-emphasis-color);
   font-family: var(--font-sans);
 }
 
 .subfolio-made-with-love-credit a.made-with-love-credit__maker:hover {
-  color: var(--color-primary-hover);
+  color: var(--made-with-love-hover-color);
 }
 </style>

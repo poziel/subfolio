@@ -1,7 +1,6 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
@@ -13,6 +12,7 @@ import TabList from 'primevue/tablist'
 import TabPanel from 'primevue/tabpanel'
 import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
+import SubfolioButton from '../components/SubfolioButton.vue'
 import {
   databaseProviders,
   defaultFirebaseConnection,
@@ -134,16 +134,16 @@ const handleConnect = () => {
 
                 <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <RouterLink v-slot="{ navigate }" to="/" custom>
-                    <Button
+                    <SubfolioButton
                       type="button"
                       :label="t('connect.returnOverview')"
                       icon="pi pi-arrow-left"
-                      severity="secondary"
-                      text
+                      variant="tertiary"
+                      theme="secondary"
                       @click="navigate"
                     />
                   </RouterLink>
-                  <Button type="submit" :label="t('connect.signIn')" icon="pi pi-user" />
+                  <SubfolioButton type="submit" :label="t('connect.signIn')" icon="pi pi-user" />
                 </div>
               </form>
             </TabPanel>
@@ -247,16 +247,16 @@ const handleConnect = () => {
 
                 <div class="flex flex-col gap-3 sm:flex-row sm:justify-between">
                   <RouterLink v-slot="{ navigate }" to="/" custom>
-                    <Button
+                    <SubfolioButton
                       type="button"
                       :label="t('connect.returnOverview')"
                       icon="pi pi-arrow-left"
-                      severity="secondary"
-                      text
+                      variant="tertiary"
+                      theme="secondary"
                       @click="navigate"
                     />
                   </RouterLink>
-                  <Button type="submit" :label="t('connect.connectDatabase')" icon="pi pi-database" />
+                  <SubfolioButton type="submit" :label="t('connect.connectDatabase')" icon="pi pi-database" />
                 </div>
               </form>
             </TabPanel>

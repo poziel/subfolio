@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from 'vue'
-import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Message from 'primevue/message'
 import Panel from 'primevue/panel'
 import Tag from 'primevue/tag'
-import PublicSiteShell from '../components/PublicSiteShell.vue'
-import { useI18n } from '../composables/useI18n'
+import PublicSiteShell from '../../components/PublicSiteShell.vue'
+import SubfolioButton from '../../components/SubfolioButton.vue'
+import { useI18n } from '../../composables/useI18n'
 
 const repositoryUrl = 'https://github.com/poziel/subfolio'
 const architectureUrl = `${repositoryUrl}/blob/main/docs/architecture.md`
@@ -61,7 +61,7 @@ const contributionBody = computed(() => tm('pageData.contributionBody'))
           </template>
           <template #footer>
             <div class="flex flex-col gap-3 sm:flex-row">
-              <Button
+              <SubfolioButton
                 as="a"
                 :href="repositoryUrl"
                 target="_blank"
@@ -69,15 +69,15 @@ const contributionBody = computed(() => tm('pageData.contributionBody'))
                 :label="t('pages.openGithub')"
                 icon="pi pi-github"
               />
-              <Button
+              <SubfolioButton
                 as="a"
                 :href="architectureUrl"
                 target="_blank"
                 rel="noreferrer"
                 :label="t('pages.readArchitecture')"
                 icon="pi pi-arrow-up-right"
-                severity="secondary"
-                outlined
+                variant="secondary"
+                theme="secondary"
               />
             </div>
           </template>

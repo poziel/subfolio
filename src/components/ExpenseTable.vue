@@ -1,12 +1,14 @@
 <script setup>
 import { computed } from 'vue'
-import Button from 'primevue/button'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
+import { getExpenseIcon } from '../data/serviceCatalog'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
+import SubfolioIconTile from './icons/SubfolioIconTile.vue'
+import SubfolioButton from './SubfolioButton.vue'
 
 const props = defineProps({
   expenses: {
@@ -39,7 +41,7 @@ const {
   getNextOccurrence
 } = useExpenses()
 
-const { formatMoney, getConversionTooltip } = useSettings()
+const { formatMoney, getConversionTooltip, convertToDisplayed, displayedCurrency } = useSettings()
 const { t, locale } = useI18n()
 
 const paginatorEnabled = computed(() => props.showPagination && props.expenses.length > 10)
@@ -66,7 +68,22 @@ const nextOccurrence = (expense) => {
   return next ? formatDate(next) : '-'
 }
 
+const displayedAmount = (expense) =>
+  formatMoney(convertToDisplayed(expense.amount, expense.currency), displayedCurrency.value)
+
+const originalAmount = (expense) =>
+  formatMoney(expense.amount, expense.currency, { withCode: true })
+
 const rowClass = (item) => (item.active === false ? 'opacity-60' : '')
+
+const initials = (name) =>
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0])
+    .join('')
+    .toUpperCase()
 </script>
 
 <template>
@@ -90,22 +107,29 @@ const rowClass = (item) => (item.active === false ? 'opacity-60' : '')
 
       <Column field="name" :header="t('table.expense')" sortable>
         <template #body="{ data }">
-          <div class="flex items-center gap-2">
-            <span class="font-semibold text-ink">{{ data.name }}</span>
-            <Button
-              v-if="data.url"
-              as="a"
-              :href="data.url"
-              target="_blank"
-              rel="noopener noreferrer"
-              icon="pi pi-external-link"
-              text
-              rounded
-              size="small"
-              severity="secondary"
-              :title="t('table.openService')"
-              @click.stop
+          <div class="flex items-center gap-3">
+            <SubfolioIconTile
+              v-if="getExpenseIcon(data)"
+              :icon="getExpenseIcon(data)"
+              size="sm"
+              tone="neutral"
             />
+            <span v-else class="subfolio-avatar">{{ initials(data.name) }}</span>
+            <span class="min-w-0">
+              <a
+                v-if="data.url"
+                :href="data.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="subfolio-expense-link"
+                @click.stop
+              >
+                {{ data.name }}
+              </a>
+              <span v-else class="block truncate font-extrabold text-ink">{{ data.name }}</span>
+              <span class="block text-xs muted-copy">{{ originalAmount(data) }}</span>
+              <span v-if="data.note" class="subfolio-expense-note">{{ data.note }}</span>
+            </span>
           </div>
         </template>
       </Column>
@@ -131,16 +155,16 @@ const rowClass = (item) => (item.active === false ? 'opacity-60' : '')
       <Column :header="t('table.amount')" body-class="text-right">
         <template #body="{ data }">
           <span
-            class="font-semibold text-accent-dark"
+            class="subfolio-amount"
             :title="getConversionTooltip(data.amount, data.currency)"
           >
-            {{ formatMoney(data.amount, data.currency) }}
+            {{ displayedAmount(data) }}
           </span>
           <span
             class="ml-1 text-xs muted-copy"
             :title="getConversionTooltip(data.amount, data.currency)"
           >
-            {{ data.currency }}
+            {{ displayedCurrency }}
           </span>
           <Tag
             v-if="!data.includesTax && data.taxRate"
@@ -155,30 +179,27 @@ const rowClass = (item) => (item.active === false ? 'opacity-60' : '')
       <Column v-if="showActions" :header="t('table.actions')" body-class="text-right">
         <template #body="{ data }">
           <div class="flex justify-end gap-1">
-            <Button
+            <SubfolioButton
               type="button"
               :icon="data.active !== false ? 'pi pi-power-off' : 'pi pi-play'"
-              rounded
-              text
-              :severity="data.active !== false ? 'success' : 'secondary'"
+              variant="tertiary"
+              :theme="data.active !== false ? 'success' : 'secondary'"
               :title="data.active !== false ? t('table.deactivate') : t('table.activate')"
               @click="toggleExpenseActive(data.id)"
             />
-            <Button
+            <SubfolioButton
               type="button"
               icon="pi pi-pencil"
-              rounded
-              text
-              severity="secondary"
+              variant="tertiary"
+              theme="secondary"
               :title="t('table.edit')"
               @click="openEditModal(data)"
             />
-            <Button
+            <SubfolioButton
               type="button"
               icon="pi pi-trash"
-              rounded
-              text
-              severity="danger"
+              variant="tertiary"
+              theme="danger"
               :title="t('table.delete')"
               @click="deleteExpense(data.id)"
             />

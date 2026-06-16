@@ -2,6 +2,7 @@ import { reactive, ref, computed } from 'vue'
 import { useSettings } from './useSettings'
 import { useDatabaseConnection } from './useDatabaseConnection'
 import { getTaxRateForCurrency } from '../data/taxRates'
+import { findKnownService } from '../data/serviceCatalog'
 import { createExpenseConnection } from '../services/database/expenseConnections'
 
 const { displayedCurrency, availableCurrencies, allCurrencies } = useSettings()
@@ -63,6 +64,7 @@ const months = [
 // Shared state
 const expenses = ref([])
 const status = ref('idle')
+const statusError = ref('')
 const saving = ref(false)
 const showAddModal = ref(false)
 const editingId = ref(null)
@@ -90,6 +92,8 @@ const getDefaultForm = () => ({
   amount: '',
   currency: displayedCurrency.value || 'CAD',
   url: '',
+  icon: '',
+  note: '',
   includesTax: true,
   taxRate: 0,
   frequency: 'monthly',
@@ -1004,6 +1008,15 @@ export function useExpenses() {
     activeConnectionKey = null
   }
 
+  const clearStatusError = () => {
+    statusError.value = ''
+  }
+
+  const setOfflineStatus = (error) => {
+    status.value = 'offline'
+    statusError.value = error?.message || 'The configured database is not available.'
+  }
+
   const getWritableAdapter = () => {
     if (!connection.value) return null
     return createExpenseConnection(connection.value)
@@ -1033,6 +1046,8 @@ export function useExpenses() {
     form.amount = Number(item.amount)
     form.currency = item.currency || displayedCurrency.value || 'CAD'
     form.url = item.url || ''
+    form.icon = item.icon || findKnownService(item.name)?.icon || ''
+    form.note = item.note || ''
     form.includesTax = item.includesTax ?? true
     form.taxRate = form.includesTax ? 0 : getAutoTaxRate(form.currency)
     form.startDate = item.startDate || getDefaultForm().startDate
@@ -1053,6 +1068,7 @@ export function useExpenses() {
       expenses.value = localFallback
       registerKnownCategories(expenses.value)
       status.value = 'demo'
+      clearStatusError()
       return
     }
 
@@ -1064,6 +1080,7 @@ export function useExpenses() {
 
     stopActiveSubscription()
     status.value = 'loading'
+    clearStatusError()
 
     try {
       const adapter = createExpenseConnection(connection.value)
@@ -1075,21 +1092,22 @@ export function useExpenses() {
           expenses.value = items
           registerKnownCategories(items)
           status.value = 'ready'
+          clearStatusError()
         },
-        () => {
-          status.value = 'offline'
+        (error) => {
+          setOfflineStatus(error)
           if (!expenses.value.length) {
             expenses.value = localFallback
             registerKnownCategories(expenses.value)
           }
         }
       )
-    } catch {
+    } catch (error) {
       activeConnectionKey = null
       activeUnsubscribe = null
       expenses.value = localFallback
       registerKnownCategories(expenses.value)
-      status.value = 'offline'
+      setOfflineStatus(error)
     }
   }
 
@@ -1106,6 +1124,8 @@ export function useExpenses() {
       amount: Number(form.amount),
       currency: form.currency,
       url: form.url || '',
+      icon: form.icon || findKnownService(form.name)?.icon || '',
+      note: form.note || '',
       includesTax: form.includesTax,
       taxRate: resolvedTaxRate,
       startDate: form.startDate || null,
@@ -1138,8 +1158,8 @@ export function useExpenses() {
         expenses.value = [fallbackItem, ...expenses.value]
       }
       saved = true
-    } catch {
-      status.value = 'offline'
+    } catch (error) {
+      setOfflineStatus(error)
     } finally {
       saving.value = false
     }
@@ -1165,8 +1185,8 @@ export function useExpenses() {
         : { id: editingId.value, ...payload }
       expenses.value = expenses.value.map((item) => (item.id === updated.id ? updated : item))
       saved = true
-    } catch {
-      status.value = 'offline'
+    } catch (error) {
+      setOfflineStatus(error)
     } finally {
       saving.value = false
     }
@@ -1186,8 +1206,8 @@ export function useExpenses() {
       if (adapter) {
         await adapter.delete(id)
       }
-    } catch {
-      status.value = 'offline'
+    } catch (error) {
+      setOfflineStatus(error)
       expenses.value = existing
     }
   }
@@ -1207,8 +1227,8 @@ export function useExpenses() {
       if (adapter) {
         await adapter.update(id, { ...item, active: newActive })
       }
-    } catch {
-      status.value = 'offline'
+    } catch (error) {
+      setOfflineStatus(error)
       expenses.value = expenses.value.map((e) =>
         e.id === id ? { ...e, active: item.active } : e
       )
@@ -1232,6 +1252,7 @@ export function useExpenses() {
     // State
     expenses,
     status,
+    statusError,
     saving,
     showAddModal,
     editingId,

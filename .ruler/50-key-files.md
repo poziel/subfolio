@@ -13,7 +13,7 @@
 | `src/composables/useSettings.js` | Currency/settings state, local persistence, and conversion helpers |
 | `src/composables/useAuth.js` | Compatibility wrapper around saved connection state |
 | `src/services/database/expenseConnections.js` | Firebase and PocketBase expense adapters |
-| `src/views/LandingView.vue` | Public product page |
+| `src/views/landing/` | Public landing-site pages, including overview, features, BYODB, pricing, open source, changelog, and legal pages |
 | `src/views/LoginView.vue` | Bring-your-own-database connection page |
 | `src/views/HomeView.vue` | Connected dashboard |
 | `src/views/TrackerView.vue` | Expense tracker page |

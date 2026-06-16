@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
-import Button from 'primevue/button'
 import MadeWithLoveCredit from './MadeWithLoveCredit.vue'
+import SubfolioButton from './SubfolioButton.vue'
 import ThemeLanguageControls from './ThemeLanguageControls.vue'
 import { useI18n } from '../composables/useI18n'
 import { useTheme } from '../composables/useTheme'
@@ -20,9 +20,7 @@ const navItems = [
   { to: '/features', labelKey: 'nav.features' },
   { to: '/byodb', labelKey: 'nav.byodb' },
   { to: '/pricing', labelKey: 'nav.pricing' },
-  { to: '/open-source', labelKey: 'nav.openSource' },
-  { to: '/changelog', labelKey: 'nav.changelog' },
-  { to: '/about', labelKey: 'nav.about' }
+  { to: '/open-source', labelKey: 'nav.openSource' }
 ]
 
 const productItems = [
@@ -30,7 +28,8 @@ const productItems = [
   { to: '/features', labelKey: 'nav.features' },
   { to: '/byodb', labelKey: 'nav.byodb' },
   { to: '/pricing', labelKey: 'nav.pricing' },
-  { to: '/changelog', labelKey: 'nav.changelog' }
+  { to: '/changelog', labelKey: 'nav.changelog' },
+  { to: '/about', labelKey: 'nav.about' }
 ]
 
 const openSourceItems = [
@@ -56,123 +55,101 @@ const year = computed(() => new Date().getFullYear())
 </script>
 
 <template>
-  <div class="min-h-screen overflow-x-hidden px-5 py-4 sm:py-5 lg:px-10">
-    <header class="mx-auto flex max-w-7xl min-w-0 flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-      <div class="flex min-w-0 items-center justify-between gap-3">
+  <div class="public-shell">
+    <header class="public-shell__header">
+      <div class="public-shell__header-inner">
         <RouterLink class="flex min-w-0 items-center gap-3" to="/">
           <img
-            :src="activeTheme === 'dark' ? '/images/subfolio-light-horizontal.svg' : '/images/subfolio-dark-horizontal.svg'"
+            :src="activeTheme === 'dark' ? '/images/subfolio-light-horizontal-equal.svg' : '/images/subfolio-dark-horizontal-equal.svg'"
             alt="Subfolio"
-            class="h-11 w-auto max-w-[10.5rem] sm:h-14 sm:max-w-56"
+            class="public-shell__logo h-auto"
           />
         </RouterLink>
 
-        <div class="flex shrink-0 items-center gap-1.5 sm:gap-2 lg:hidden">
-          <div class="hidden sm:block">
-            <Button
-              as="a"
-              :href="repositoryUrl"
-              target="_blank"
-              rel="noreferrer"
-              :aria-label="t('common.githubRepo')"
-              icon="pi pi-github"
+        <nav class="public-shell__nav" aria-label="Public navigation">
+          <RouterLink
+            v-for="item in navItems"
+            :key="item.to"
+            :to="item.to"
+            class="subfolio-nav-link"
+            :class="{ 'subfolio-nav-link--active': isActive(item) }"
+          >
+            {{ t(item.labelKey) }}
+          </RouterLink>
+        </nav>
+
+        <div class="public-shell__actions">
+          <ThemeLanguageControls />
+          <SubfolioButton
+            as="a"
+            :href="repositoryUrl"
+            target="_blank"
+            rel="noreferrer"
+            :aria-label="t('common.githubRepo')"
+            icon="pi pi-github"
+            variant="tertiary"
+            theme="secondary"
+            size="small"
+          />
+          <RouterLink v-slot="{ navigate }" to="/app" custom>
+            <SubfolioButton
+              :label="t('common.openApp')"
               size="small"
-              severity="secondary"
-              outlined
+              @click="navigate"
             />
-          </div>
-          <ThemeLanguageControls compact />
-          <div class="hidden sm:block">
-            <RouterLink v-slot="{ navigate }" to="/app" custom>
-              <Button
-                :label="t('common.openApp')"
-                size="small"
-                @click="navigate"
-              />
-            </RouterLink>
-          </div>
+          </RouterLink>
         </div>
-      </div>
-
-      <nav class="flex max-w-full flex-wrap gap-1.5 text-sm" aria-label="Public navigation">
-        <RouterLink
-          v-for="item in navItems"
-          :key="item.to"
-          :to="item.to"
-          class="subfolio-nav-link"
-          :class="
-            isActive(item)
-              ? 'subfolio-nav-link--active'
-              : 'text-[var(--light-text-secondary)]'
-          "
-        >
-          {{ t(item.labelKey) }}
-        </RouterLink>
-      </nav>
-
-      <div class="hidden items-center gap-2 lg:flex">
-        <ThemeLanguageControls />
-        <Button
-          as="a"
-          :href="repositoryUrl"
-          target="_blank"
-          rel="noreferrer"
-          :aria-label="t('common.githubRepo')"
-          icon="pi pi-github"
-          severity="secondary"
-          outlined
-        />
-        <RouterLink v-slot="{ navigate }" to="/app" custom>
-          <Button :label="t('common.openApp')" @click="navigate" />
-        </RouterLink>
       </div>
     </header>
 
-    <main class="mx-auto max-w-7xl py-8 lg:py-10">
+    <main class="public-shell__main">
       <slot />
     </main>
 
-    <footer class="mx-auto grid max-w-7xl gap-8 border-t border-[var(--p-surface-200)] py-8 text-sm muted-copy lg:grid-cols-[1fr_auto_auto_auto]">
-      <div class="grid gap-3">
-        <RouterLink class="w-fit" to="/">
-          <img
-            :src="activeTheme === 'dark' ? '/images/subfolio-light-horizontal.svg' : '/images/subfolio-dark-horizontal.svg'"
-            alt="Subfolio"
-            class="h-9 w-auto max-w-40"
-          />
-        </RouterLink>
-        <p class="max-w-md">
-          {{ t('footer.tagline') }}
-        </p>
-        <MadeWithLoveCredit class="subfolio-made-with-love-credit" />
-        <p>&copy; {{ year }} Subfolio.</p>
-      </div>
+    <footer class="public-shell__footer text-sm">
+      <div class="public-shell__footer-inner">
+        <div class="grid gap-3">
+          <RouterLink class="w-fit" to="/">
+            <img
+              src="/images/subfolio-light-horizontal-equal.svg"
+              alt="Subfolio"
+              class="h-10 w-auto max-w-44"
+            />
+          </RouterLink>
+          <p class="max-w-md">
+            {{ t('footer.tagline') }}
+          </p>
+          <MadeWithLoveCredit class="subfolio-made-with-love-credit" />
+        </div>
 
-      <nav class="grid content-start gap-2" aria-label="Footer product navigation">
-        <p class="font-semibold text-ink">{{ t('nav.product') }}</p>
-        <RouterLink v-for="item in productItems" :key="item.to" :to="item.to" class="hover:text-ink">
-          {{ t(item.labelKey) }}
-        </RouterLink>
-      </nav>
-
-      <nav class="grid content-start gap-2" aria-label="Footer open source navigation">
-        <p class="font-semibold text-ink">{{ t('nav.openSource') }}</p>
-        <template v-for="item in openSourceItems" :key="item.labelKey">
-          <RouterLink v-if="item.to" :to="item.to" class="hover:text-ink">
+        <nav class="public-shell__footer-links" aria-label="Footer product navigation">
+          <p class="public-shell__footer-heading">{{ t('nav.product') }}</p>
+          <RouterLink v-for="item in productItems" :key="item.to" :to="item.to">
             {{ t(item.labelKey) }}
           </RouterLink>
-          <a v-else :href="item.href" target="_blank" rel="noreferrer" class="hover:text-ink">
-            {{ t(item.labelKey) }}
-          </a>
-        </template>
-      </nav>
+        </nav>
 
-      <nav class="grid content-start gap-2" aria-label="Footer legal navigation">
-        <p class="font-semibold text-ink">{{ t('nav.legal') }}</p>
-        <RouterLink v-for="item in legalItems" :key="item.to" :to="item.to" class="hover:text-ink">
-          {{ t(item.labelKey) }}
-        </RouterLink>
-      </nav>
+        <nav class="public-shell__footer-links" aria-label="Footer open source navigation">
+          <p class="public-shell__footer-heading">{{ t('nav.openSource') }}</p>
+          <template v-for="item in openSourceItems" :key="item.labelKey">
+            <RouterLink v-if="item.to" :to="item.to">
+              {{ t(item.labelKey) }}
+            </RouterLink>
+            <a v-else :href="item.href" target="_blank" rel="noreferrer">
+              {{ t(item.labelKey) }}
+            </a>
+          </template>
+        </nav>
+
+        <nav class="public-shell__footer-links" aria-label="Footer legal navigation">
+          <p class="public-shell__footer-heading">{{ t('nav.legal') }}</p>
+          <RouterLink v-for="item in legalItems" :key="item.to" :to="item.to">
+            {{ t(item.labelKey) }}
+          </RouterLink>
+        </nav>
+
+        <p class="public-shell__copyright">{{ t('footer.copyright', { year }) }}</p>
+      </div>
     </footer>
   </div>
 </template>

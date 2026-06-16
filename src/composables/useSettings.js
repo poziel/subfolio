@@ -5,10 +5,28 @@ const storageKey = 'subfolio-settings'
 const defaultSettings = {
   displayedCurrency: 'CAD',
   availableCurrencies: ['CAD', 'USD', 'EUR', 'GBP', 'AUD'],
-  defaultOrdering: 'dateAdded'
+  defaultOrdering: 'dateAdded',
+  contentLayoutMode: 'fluid',
+  selectedMetricIds: ['activeRecurrences', 'monthlyTotal', 'yearlyTotal', 'nextRecurrence'],
+  incomeType: 'annual',
+  salaryCurrency: 'CAD',
+  annualSalary: null,
+  hourlyRate: null,
+  hoursPerWeek: 40,
+  weeksPerYear: 52
 }
 
 const allCurrencies = ['CAD', 'USD', 'EUR', 'GBP', 'AUD', 'NZD', 'JPY', 'CHF', 'MXN', 'BRL', 'SGD']
+const metricIds = [
+  'activeRecurrences',
+  'monthlyTotal',
+  'yearlyTotal',
+  'nextRecurrence',
+  'weeklyTotal',
+  'dailyTotal',
+  'biWeeklyTotal'
+]
+const contentLayoutModes = ['fluid', 'focused']
 
 const symbolMap = {
   USD: '$',
@@ -36,6 +54,23 @@ const rateState = reactive({
 
 let ratesInitialized = false
 
+function sanitizeMetricIds(value) {
+  if (!Array.isArray(value)) return [...defaultSettings.selectedMetricIds]
+
+  const unique = []
+  value.forEach((id) => {
+    if (metricIds.includes(id) && !unique.includes(id)) {
+      unique.push(id)
+    }
+  })
+
+  return unique.slice(0, 4)
+}
+
+function normalizeMetricSlots(value) {
+  return [...sanitizeMetricIds(value), '', '', '', ''].slice(0, 4)
+}
+
 function loadSettings() {
   if (typeof localStorage === 'undefined') return { ...defaultSettings }
   try {
@@ -47,7 +82,23 @@ function loadSettings() {
       availableCurrencies: Array.isArray(parsed.availableCurrencies) && parsed.availableCurrencies.length
         ? parsed.availableCurrencies
         : [...defaultSettings.availableCurrencies],
-      defaultOrdering: parsed.defaultOrdering || defaultSettings.defaultOrdering
+      defaultOrdering: parsed.defaultOrdering || defaultSettings.defaultOrdering,
+      contentLayoutMode: contentLayoutModes.includes(parsed.contentLayoutMode)
+        ? parsed.contentLayoutMode
+        : defaultSettings.contentLayoutMode,
+      selectedMetricIds: Object.prototype.hasOwnProperty.call(parsed, 'selectedMetricIds')
+        ? sanitizeMetricIds(parsed.selectedMetricIds)
+        : [...defaultSettings.selectedMetricIds],
+      incomeType: ['annual', 'hourly'].includes(parsed.incomeType)
+        ? parsed.incomeType
+        : defaultSettings.incomeType,
+      salaryCurrency: allCurrencies.includes(parsed.salaryCurrency)
+        ? parsed.salaryCurrency
+        : parsed.displayedCurrency || defaultSettings.salaryCurrency,
+      annualSalary: Number(parsed.annualSalary) > 0 ? Number(parsed.annualSalary) : null,
+      hourlyRate: Number(parsed.hourlyRate) > 0 ? Number(parsed.hourlyRate) : null,
+      hoursPerWeek: Number(parsed.hoursPerWeek) > 0 ? Number(parsed.hoursPerWeek) : defaultSettings.hoursPerWeek,
+      weeksPerYear: Number(parsed.weeksPerYear) > 0 ? Number(parsed.weeksPerYear) : defaultSettings.weeksPerYear
     }
   } catch {
     return { ...defaultSettings }
@@ -74,10 +125,27 @@ const conversionStatus = computed(() => rateState.status)
 
 const formatMoney = (amount, currency, opts = {}) => {
   const value = Number(amount) || 0
-  const symbol = symbolMap[currency] || ''
+  const safeCurrency = allCurrencies.includes(currency) ? currency : displayedCurrency.value
   const withCode = opts.withCode ?? false
-  const formatted = `${symbol}${value.toFixed(2)}`
-  return withCode ? `${formatted} ${currency}` : formatted
+
+  try {
+    const formatted = new Intl.NumberFormat('en-CA', {
+      style: 'currency',
+      currency: safeCurrency,
+      currencyDisplay: 'narrowSymbol',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value)
+
+    return withCode ? `${formatted} ${safeCurrency}` : formatted
+  } catch {
+    const symbol = symbolMap[safeCurrency] || ''
+    const formatted = `${symbol}${new Intl.NumberFormat('en-CA', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value)}`
+    return withCode ? `${formatted} ${safeCurrency}` : formatted
+  }
 }
 
 const setDisplayedCurrency = (currency) => {
@@ -161,6 +229,107 @@ function setDefaultOrdering(value) {
   defaultOrdering.value = value
 }
 
+const contentLayoutMode = computed({
+  get: () => contentLayoutModes.includes(settingsState.value.contentLayoutMode)
+    ? settingsState.value.contentLayoutMode
+    : defaultSettings.contentLayoutMode,
+  set: (value) => {
+    if (!contentLayoutModes.includes(value)) return
+    settingsState.value.contentLayoutMode = value
+    persistSettings()
+  }
+})
+
+function setContentLayoutMode(value) {
+  contentLayoutMode.value = value
+}
+
+const selectedMetricIds = computed({
+  get: () => sanitizeMetricIds(settingsState.value.selectedMetricIds),
+  set: (value) => {
+    settingsState.value.selectedMetricIds = sanitizeMetricIds(value)
+    persistSettings()
+  }
+})
+
+function setSelectedMetricIds(value) {
+  selectedMetricIds.value = value
+}
+
+const selectedMetricSlots = computed({
+  get: () => normalizeMetricSlots(settingsState.value.selectedMetricIds),
+  set: (value) => {
+    settingsState.value.selectedMetricIds = sanitizeMetricIds(value)
+    persistSettings()
+  }
+})
+
+function setSelectedMetricSlots(value) {
+  selectedMetricSlots.value = value
+}
+
+const incomeType = computed({
+  get: () => settingsState.value.incomeType || defaultSettings.incomeType,
+  set: (value) => {
+    if (!['annual', 'hourly'].includes(value)) return
+    settingsState.value.incomeType = value
+    persistSettings()
+  }
+})
+
+const salaryCurrency = computed({
+  get: () => settingsState.value.salaryCurrency || displayedCurrency.value,
+  set: (value) => {
+    if (!allCurrencies.includes(value)) return
+    settingsState.value.salaryCurrency = value
+    persistSettings()
+  }
+})
+
+const annualSalary = computed({
+  get: () => settingsState.value.annualSalary,
+  set: (value) => {
+    settingsState.value.annualSalary = Number(value) > 0 ? Number(value) : null
+    persistSettings()
+  }
+})
+
+const hourlyRate = computed({
+  get: () => settingsState.value.hourlyRate,
+  set: (value) => {
+    settingsState.value.hourlyRate = Number(value) > 0 ? Number(value) : null
+    persistSettings()
+  }
+})
+
+const hoursPerWeek = computed({
+  get: () => settingsState.value.hoursPerWeek || defaultSettings.hoursPerWeek,
+  set: (value) => {
+    settingsState.value.hoursPerWeek = Number(value) > 0 ? Number(value) : defaultSettings.hoursPerWeek
+    persistSettings()
+  }
+})
+
+const weeksPerYear = computed({
+  get: () => settingsState.value.weeksPerYear || defaultSettings.weeksPerYear,
+  set: (value) => {
+    settingsState.value.weeksPerYear = Number(value) > 0 ? Number(value) : defaultSettings.weeksPerYear
+    persistSettings()
+  }
+})
+
+const annualIncome = computed(() => {
+  if (incomeType.value === 'hourly') {
+    return (Number(hourlyRate.value) || 0) * hoursPerWeek.value * weeksPerYear.value
+  }
+
+  return Number(annualSalary.value) || 0
+})
+
+const annualIncomeDisplayed = computed(() =>
+  convertToDisplayed(annualIncome.value, salaryCurrency.value)
+)
+
 export function useSettings() {
   ensureRates()
 
@@ -169,8 +338,21 @@ export function useSettings() {
     displayedCurrency,
     availableCurrencies,
     allCurrencies,
+    metricIds,
+    contentLayoutModes,
     conversionStatus,
     defaultOrdering,
+    contentLayoutMode,
+    selectedMetricIds,
+    selectedMetricSlots,
+    incomeType,
+    salaryCurrency,
+    annualSalary,
+    hourlyRate,
+    hoursPerWeek,
+    weeksPerYear,
+    annualIncome,
+    annualIncomeDisplayed,
 
     // formatting
     formatMoney,
@@ -181,6 +363,9 @@ export function useSettings() {
     // actions
     setDisplayedCurrency,
     setAvailableCurrencies,
-    setDefaultOrdering
+    setDefaultOrdering,
+    setContentLayoutMode,
+    setSelectedMetricIds,
+    setSelectedMetricSlots
   }
 }

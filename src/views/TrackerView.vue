@@ -5,41 +5,23 @@ import IconField from 'primevue/iconfield'
 import InputIcon from 'primevue/inputicon'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
-import Tag from 'primevue/tag'
 import ExpenseTable from '../components/ExpenseTable.vue'
+import MetricSummaryCards from '../components/MetricSummaryCards.vue'
+import SubfolioButton from '../components/SubfolioButton.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
-import { useSettings } from '../composables/useSettings'
 
 const {
   expenses,
   fetchExpenses,
-  getYearlyAmount
+  openAddModal,
+  status,
+  statusError
 } = useExpenses()
 
-const { formatMoney, convertToDisplayed, displayedCurrency } = useSettings()
 const { t } = useI18n()
 
 const searchQuery = ref('')
-
-const totalYearly = computed(() =>
-  expenses.value
-    .filter((item) => item.active !== false)
-    .reduce((sum, item) => sum + convertToDisplayed(getYearlyAmount(item), item.currency || displayedCurrency.value), 0)
-)
-
-const expenseSummary = computed(() => {
-  const yearly = totalYearly.value
-  const activeCount = expenses.value.filter((item) => item.active !== false).length
-  return [
-    { label: t('metrics.daily'), value: formatMoney(yearly / 365, displayedCurrency.value), severity: 'secondary' },
-    { label: t('metrics.weekly'), value: formatMoney(yearly / 52, displayedCurrency.value), severity: 'secondary' },
-    { label: t('metrics.biWeekly'), value: formatMoney(yearly / 26, displayedCurrency.value), severity: 'secondary' },
-    { label: t('metrics.monthly'), value: formatMoney(yearly / 12, displayedCurrency.value), severity: 'info' },
-    { label: t('metrics.yearly'), value: formatMoney(yearly, displayedCurrency.value), severity: 'success' },
-    { label: t('metrics.active'), value: activeCount, severity: 'warning' }
-  ]
-})
 
 const filteredExpenses = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
@@ -57,27 +39,34 @@ onMounted(fetchExpenses)
 </script>
 
 <template>
-  <div class="app-page">
-    <header class="grid gap-2">
-      <h1 class="font-serif text-3xl text-ink">{{ t('tracker.title') }}</h1>
-      <p class="muted-copy">{{ t('tracker.intro') }}</p>
+    <header class="app-page__header">
+      <div class="grid gap-2">
+        <h1 class="font-serif text-4xl text-ink">{{ t('tracker.title') }}</h1>
+        <p class="muted-copy">{{ t('tracker.intro') }}</p>
+      </div>
+      <SubfolioButton
+        type="button"
+        :label="t('appNav.addExpense')"
+        icon="pi pi-plus"
+        @click="openAddModal"
+      />
     </header>
 
-    <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
-      <Card v-for="item in expenseSummary" :key="item.label" class="subfolio-card">
-        <template #content>
-          <div class="grid gap-2">
-            <Tag :value="item.label" :severity="item.severity" rounded class="w-fit" />
-            <p class="metric-value">{{ item.value }}</p>
-          </div>
-        </template>
-      </Card>
-    </section>
+    <MetricSummaryCards :expenses="expenses" />
 
     <Card>
       <template #title>{{ t('tracker.ledgerTitle') }}</template>
       <template #subtitle>{{ t('tracker.ledgerSubtitle') }}</template>
       <template #content>
+        <Message
+          v-if="status === 'offline' && statusError"
+          severity="warn"
+          :closable="false"
+          class="mb-5"
+        >
+          {{ statusError }}
+        </Message>
+
         <div class="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <IconField class="w-full sm:w-80">
             <InputIcon class="pi pi-search" />
@@ -104,5 +93,4 @@ onMounted(fetchExpenses)
         />
       </template>
     </Card>
-  </div>
 </template>

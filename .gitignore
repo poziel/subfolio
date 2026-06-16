@@ -5,6 +5,8 @@ node_modules/
 dist/
 dist-ssr/
 coverage/
+
+# AI, smoke-test, Playwright, and local verification output
 output/
 playwright-report/
 .playwright-mcp/
@@ -23,9 +25,11 @@ test-results/
 .ruler/.env.*
 !.ruler/.env.example
 
-# Logs
+# Logs. Keep generated verification logs under output/ when they are needed.
 logs/
 *.log
+.vite*.log
+debug.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

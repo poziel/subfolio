@@ -1,12 +1,12 @@
 <script setup>
 import { computed } from 'vue'
-import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Message from 'primevue/message'
 import Panel from 'primevue/panel'
 import Tag from 'primevue/tag'
-import PublicSiteShell from '../components/PublicSiteShell.vue'
-import { useI18n } from '../composables/useI18n'
+import PublicSiteShell from '../../components/PublicSiteShell.vue'
+import SubfolioButton from '../../components/SubfolioButton.vue'
+import { useI18n } from '../../composables/useI18n'
 
 const { t, tm } = useI18n()
 
@@ -76,7 +76,7 @@ const steps = computed(() => tm('pageData.byodbSteps'))
         </template>
         <template #footer>
           <RouterLink v-slot="{ navigate }" to="/app" custom>
-            <Button :label="t('common.openApp')" @click="navigate" />
+            <SubfolioButton :label="t('common.openApp')" @click="navigate" />
           </RouterLink>
         </template>
       </Card>

@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 import Card from 'primevue/card'
 import Message from 'primevue/message'
-import PublicSiteShell from '../components/PublicSiteShell.vue'
-import { useI18n } from '../composables/useI18n'
+import PublicSiteShell from '../../components/PublicSiteShell.vue'
+import { useI18n } from '../../composables/useI18n'
 
 const props = defineProps({
   page: {

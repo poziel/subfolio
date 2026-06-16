@@ -1,17 +1,17 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LandingView from '../views/LandingView.vue'
-import FeaturesView from '../views/FeaturesView.vue'
-import AboutView from '../views/AboutView.vue'
-import ByodbView from '../views/ByodbView.vue'
-import PricingView from '../views/PricingView.vue'
-import OpenSourceView from '../views/OpenSourceView.vue'
-import ChangelogView from '../views/ChangelogView.vue'
-import LegalView from '../views/LegalView.vue'
+import LandingView from '../views/landing/LandingView.vue'
+import FeaturesView from '../views/landing/FeaturesView.vue'
+import AboutView from '../views/landing/AboutView.vue'
+import ByodbView from '../views/landing/ByodbView.vue'
+import PricingView from '../views/landing/PricingView.vue'
+import OpenSourceView from '../views/landing/OpenSourceView.vue'
+import ChangelogView from '../views/landing/ChangelogView.vue'
+import LegalView from '../views/landing/LegalView.vue'
 import LoginView from '../views/LoginView.vue'
 import HomeView from '../views/HomeView.vue'
+import DashboardView from '../views/DashboardView.vue'
 import TrackerView from '../views/TrackerView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
-import RecurrenceOverviewView from '../views/RecurrenceOverviewView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import { useAuth } from '../composables/useAuth'
 import { useDatabaseConnection } from '../composables/useDatabaseConnection'
@@ -92,6 +92,12 @@ const routes = [
     meta: { requiresConnection: true }
   },
   {
+    path: '/app/dashboard',
+    name: 'dashboard',
+    component: DashboardView,
+    meta: { requiresConnection: true }
+  },
+  {
     path: '/app/expenses',
     name: 'expenses',
     component: TrackerView,
@@ -105,9 +111,7 @@ const routes = [
   },
   {
     path: '/app/recurrences',
-    name: 'recurrences',
-    component: RecurrenceOverviewView,
-    meta: { requiresConnection: true }
+    redirect: { name: 'dashboard' }
   },
   {
     path: '/app/settings',

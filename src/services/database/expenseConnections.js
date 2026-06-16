@@ -1,6 +1,7 @@
 import { initializeApp, getApp, getApps } from 'firebase/app'
 import { getDatabase, onValue, push, ref as firebaseRef, remove, set, update } from 'firebase/database'
 import PocketBase from 'pocketbase'
+import { ensurePocketBaseSchema } from './pocketbaseSchema'
 
 const defaultExpensePath = 'subfolio/expenses'
 
@@ -27,6 +28,8 @@ export const normalizeExpenseRecord = (record) => {
     amount: Number(source.amount) || 0,
     currency: source.currency || 'CAD',
     url: source.url || '',
+    icon: source.icon || '',
+    note: source.note || '',
     includesTax: source.includesTax !== false,
     taxRate: Number(source.taxRate) || 0,
     frequency: source.frequency || 'monthly',
@@ -58,6 +61,8 @@ const serializeExpenseRecord = (expense) => {
     amount: Number(expense.amount) || 0,
     currency: expense.currency || 'CAD',
     url: expense.url || '',
+    icon: expense.icon || '',
+    note: expense.note || '',
     includesTax: expense.includesTax !== false,
     taxRate: Number(expense.taxRate) || 0,
     frequency: expense.frequency || 'monthly',
@@ -140,10 +145,18 @@ const createFirebaseExpenseConnection = (config) => {
 const createPocketBaseExpenseConnection = (config) => {
   const client = new PocketBase(config.url)
   const collection = config.collection
+  let schemaReady = false
+
+  const ensureReady = async () => {
+    if (schemaReady) return
+    await ensurePocketBaseSchema(client, collection)
+    schemaReady = true
+  }
 
   const listExpenses = async () => {
+    await ensureReady()
     const records = await client.collection(collection).getFullList({
-      sort: '-created'
+      sort: '-createdAt'
     })
 
     return records.map(normalizeExpenseRecord)
@@ -173,16 +186,19 @@ const createPocketBaseExpenseConnection = (config) => {
     },
 
     async create(expense) {
+      await ensureReady()
       const created = await client.collection(collection).create(serializeExpenseRecord(expense))
       return normalizeExpenseRecord(created)
     },
 
     async update(id, expense) {
+      await ensureReady()
       const updated = await client.collection(collection).update(id, serializeExpenseRecord(expense))
       return normalizeExpenseRecord(updated)
     },
 
     async delete(id) {
+      await ensureReady()
       await client.collection(collection).delete(id)
     }
   }

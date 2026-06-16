@@ -4,10 +4,20 @@ import globals from 'globals'
 
 export default [
   {
-    ignores: ['dist/**', '.vite/**', 'node_modules/**']
+    ignores: ['dist/**', '.vite/**', 'node_modules/**', 'pocketbase/**']
   },
   js.configs.recommended,
   ...vue.configs['flat/recommended'],
+  {
+    files: ['scripts/**/*.{js,mjs}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.node
+      }
+    }
+  },
   {
     files: ['**/*.{js,vue}'],
     languageOptions: {

@@ -1,11 +1,11 @@
 <script setup>
 import { computed } from 'vue'
-import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
 import Tag from 'primevue/tag'
-import PublicSiteShell from '../components/PublicSiteShell.vue'
-import { useI18n } from '../composables/useI18n'
+import PublicSiteShell from '../../components/PublicSiteShell.vue'
+import SubfolioButton from '../../components/SubfolioButton.vue'
+import { useI18n } from '../../composables/useI18n'
 
 const { t, tm } = useI18n()
 
@@ -82,10 +82,10 @@ const workflow = computed(() => tm('pageData.workflow'))
           <template #footer>
             <div class="flex flex-col gap-3 sm:flex-row">
               <RouterLink v-slot="{ navigate }" to="/app" custom>
-                <Button :label="t('common.openApp')" @click="navigate" />
+                <SubfolioButton :label="t('common.openApp')" @click="navigate" />
               </RouterLink>
               <RouterLink v-slot="{ navigate }" to="/byodb" custom>
-                <Button :label="t('pages.learnByodb')" icon="pi pi-arrow-right" icon-pos="right" severity="secondary" outlined @click="navigate" />
+                <SubfolioButton :label="t('pages.learnByodb')" icon="pi pi-arrow-right" icon-pos="right" variant="secondary" theme="secondary" @click="navigate" />
               </RouterLink>
             </div>
           </template>

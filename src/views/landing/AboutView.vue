@@ -1,10 +1,10 @@
 <script setup>
 import { computed } from 'vue'
-import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
-import PublicSiteShell from '../components/PublicSiteShell.vue'
-import { useI18n } from '../composables/useI18n'
+import PublicSiteShell from '../../components/PublicSiteShell.vue'
+import SubfolioButton from '../../components/SubfolioButton.vue'
+import { useI18n } from '../../composables/useI18n'
 
 const repositoryUrl = 'https://github.com/poziel/subfolio'
 const { t, tm } = useI18n()
@@ -51,7 +51,7 @@ const technology = computed(() => tm('pageData.aboutTechnology'))
             </ul>
           </template>
           <template #footer>
-            <Button
+            <SubfolioButton
               as="a"
               :href="repositoryUrl"
               target="_blank"
@@ -93,7 +93,7 @@ const technology = computed(() => tm('pageData.aboutTechnology'))
               </p>
             </div>
             <RouterLink v-slot="{ navigate }" to="/app" custom>
-              <Button :label="t('common.openApp')" @click="navigate" />
+              <SubfolioButton :label="t('common.openApp')" @click="navigate" />
             </RouterLink>
           </div>
         </template>

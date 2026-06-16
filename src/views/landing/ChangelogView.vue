@@ -1,8 +1,8 @@
 <script setup>
 import { computed } from 'vue'
 import Card from 'primevue/card'
-import PublicSiteShell from '../components/PublicSiteShell.vue'
-import changelogMarkdown from '../../CHANGELOG.md?raw'
+import PublicSiteShell from '../../components/PublicSiteShell.vue'
+import changelogMarkdown from '../../../CHANGELOG.md?raw'
 
 const formatInlineText = (value) => String(value)
     .replace(/`([^`]+)`/g, '$1')
