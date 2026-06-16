@@ -1,15 +1,15 @@
 import { computed, ref } from 'vue'
+import {
+  createManagedPocketBaseConnection,
+  managedPocketBaseConfig
+} from '../config/pocketbase'
 
 const storageKey = 'subfolio-database-connection'
 
 export const databaseProviders = [
   {
-    value: 'firebase',
-    label: 'Firebase Realtime Database'
-  },
-  {
     value: 'pocketbase',
-    label: 'PocketBase'
+    label: 'Managed PocketBase'
   }
 ]
 
@@ -23,8 +23,8 @@ export const defaultFirebaseConnection = {
 }
 
 export const defaultPocketBaseConnection = {
-  url: '',
-  collection: 'expenses'
+  url: managedPocketBaseConfig.url,
+  collection: managedPocketBaseConfig.collection
 }
 
 const readStoredConnection = () => {
@@ -32,7 +32,7 @@ const readStoredConnection = () => {
 
   try {
     const raw = localStorage.getItem(storageKey)
-    return raw ? sanitizeConnection(JSON.parse(raw)) : null
+    return raw ? sanitizeManagedConnection(JSON.parse(raw)) : null
   } catch {
     return null
   }
@@ -123,14 +123,24 @@ export const sanitizeConnection = (value) => {
   return null
 }
 
+const isManagedPocketBaseConnection = (value) =>
+  value?.provider === 'pocketbase' &&
+  value.pocketbase?.url === managedPocketBaseConfig.url &&
+  value.pocketbase?.collection === managedPocketBaseConfig.collection
+
+const sanitizeManagedConnection = (value) => {
+  const sanitized = sanitizeConnection(value)
+  return isManagedPocketBaseConnection(sanitized) ? sanitized : null
+}
+
 const connection = ref(readStoredConnection())
 const version = ref(0)
 
 const saveConnection = (value) => {
-  const sanitized = sanitizeConnection(value)
+  const sanitized = sanitizeManagedConnection(value)
 
   if (!sanitized) {
-    throw new Error('Database connection is incomplete.')
+    throw new Error('Managed PocketBase configuration is incomplete.')
   }
 
   connection.value = sanitized
@@ -140,6 +150,8 @@ const saveConnection = (value) => {
     localStorage.setItem(storageKey, JSON.stringify(sanitized))
   }
 }
+
+const saveManagedConnection = () => saveConnection(createManagedPocketBaseConnection())
 
 const applyConnectionFromBase64 = (configString) => {
   try {
@@ -172,6 +184,7 @@ export const useDatabaseConnection = () => ({
   hasConnection,
   providerLabel,
   saveConnection,
+  saveManagedConnection,
   applyConnectionFromBase64,
   clearConnection
 })

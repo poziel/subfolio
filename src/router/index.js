@@ -14,7 +14,6 @@ import TrackerView from '../views/TrackerView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import { useAuth } from '../composables/useAuth'
-import { useDatabaseConnection } from '../composables/useDatabaseConnection'
 
 const routes = [
   {
@@ -127,11 +126,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const { applyConnectionFromBase64 } = useDatabaseConnection()
-
   if ('config' in to.query) {
-    applyConnectionFromBase64(String(to.query.config))
-
     const query = { ...to.query }
     delete query.config
     return {

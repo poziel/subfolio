@@ -1,11 +1,11 @@
 import { computed } from 'vue'
 import { useDatabaseConnection } from './useDatabaseConnection'
 
-const { hasConnection, saveConnection, clearConnection } = useDatabaseConnection()
+const { hasConnection, saveManagedConnection, clearConnection } = useDatabaseConnection()
 
 const isAuthenticated = computed(() => hasConnection.value)
 
-const login = (connection) => saveConnection(connection)
+const login = () => saveManagedConnection()
 
 const logout = () => clearConnection()
 

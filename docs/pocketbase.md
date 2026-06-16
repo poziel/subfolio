@@ -5,6 +5,21 @@ PocketBase itself. The browser app performs a lightweight schema preflight when
 it connects, but the actual migration files must be present beside the
 PocketBase executable.
 
+## App configuration
+
+The browser app now uses the managed PocketBase deployment configured through
+Vite environment variables instead of asking users to paste database details at
+sign-in.
+
+```bash
+VITE_POCKETBASE_URL=http://127.0.0.1:8090
+VITE_POCKETBASE_EXPENSES_COLLECTION=expenses
+```
+
+Copy `.env.example` to `.env.local` for local development and change the URL to
+the PocketBase application you want the frontend to use. Production deployments
+should set the same variables in the hosting environment.
+
 ## Migrations
 
 Subfolio includes a PocketBase command wrapper for local development. It uses a

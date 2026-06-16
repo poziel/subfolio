@@ -6,10 +6,7 @@ import Message from 'primevue/message'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
-import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
-import SubfolioButton from '../components/SubfolioButton.vue'
 import { useSettings } from '../composables/useSettings'
-import { useDatabaseConnection } from '../composables/useDatabaseConnection'
 import { useI18n } from '../composables/useI18n'
 
 const {
@@ -38,7 +35,6 @@ const {
   formatMoney
 } = useSettings()
 
-const { connection, providerLabel } = useDatabaseConnection()
 const { t } = useI18n()
 
 const sortedCurrencies = computed(() => [...allCurrencies].sort())
@@ -167,18 +163,6 @@ const weeksPerYearModel = computed({
     weeksPerYear.value = value
   }
 })
-
-const connectionDetail = computed(() => {
-  if (connection.value?.provider === 'firebase') {
-    return connection.value.firebase.databaseURL
-  }
-
-  if (connection.value?.provider === 'pocketbase') {
-    return `${connection.value.pocketbase.url} / ${connection.value.pocketbase.collection}`
-  }
-
-  return t('settings.noConnection')
-})
 </script>
 
 <template>
@@ -187,38 +171,6 @@ const connectionDetail = computed(() => {
       <p class="muted-copy">{{ t('settings.intro') }}</p>
       <p class="text-sm muted-copy">{{ t('settings.local') }}</p>
     </header>
-
-    <Card>
-      <template #content>
-          <div class="flex flex-col gap-5">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex items-start gap-3">
-              <SubfolioIconTile icon="pi pi-database" />
-              <div>
-                <h2 class="text-xl font-semibold text-ink">{{ t('settings.databaseTitle') }}</h2>
-                <p class="mt-1 break-all text-sm muted-copy">{{ connectionDetail }}</p>
-              </div>
-            </div>
-            <Tag :value="providerLabel" severity="info" rounded />
-          </div>
-          <Message severity="success" :closable="false">
-            {{ t('settings.databaseTitle') }}: {{ providerLabel }}
-          </Message>
-        </div>
-      </template>
-      <template #footer>
-        <RouterLink v-slot="{ navigate }" to="/connect" custom>
-          <SubfolioButton
-            type="button"
-            :label="t('settings.changeConnection')"
-            icon="pi pi-database"
-            variant="secondary"
-            theme="secondary"
-            @click="navigate"
-          />
-        </RouterLink>
-      </template>
-    </Card>
 
     <Card>
       <template #title>{{ t('settings.currencyTitle') }}</template>
