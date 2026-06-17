@@ -815,6 +815,118 @@ html[data-theme="dark"] {
     font-weight: 800;
   }
 
+  .subfolio-field__label-row {
+    display: flex;
+    min-width: 0;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .subfolio-preset-select .p-select-label {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .subfolio-preset-panel .p-select-option {
+    min-height: 4rem;
+  }
+
+  .subfolio-preset-option,
+  .subfolio-preset-value {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 0.85rem;
+  }
+
+  .subfolio-preset-assist {
+    margin-top: -0.45rem;
+    color: var(--color-copy-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .subfolio-inline-action {
+    border: 0;
+    background: transparent;
+    color: var(--brand-teal);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 850;
+    padding: 0;
+    text-decoration: underline;
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.18em;
+  }
+
+  .subfolio-inline-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .subfolio-inline-action:focus-visible {
+    outline: 2px solid var(--brand-teal);
+    outline-offset: 3px;
+  }
+
+  .subfolio-tax-card {
+    display: grid;
+    border: 1px solid var(--expense-dialog-border);
+    border-radius: var(--radius-sm);
+    background: var(--expense-dialog-container-bg);
+    gap: 0.75rem;
+    padding: 0.75rem 0.8rem;
+  }
+
+  .subfolio-tax-card__summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .subfolio-tax-card__copy {
+    display: grid;
+    min-width: 0;
+    gap: 0.18rem;
+  }
+
+  .subfolio-tax-card__copy label {
+    color: var(--color-copy-secondary);
+    font-size: 0.875rem;
+    font-weight: 850;
+  }
+
+  .subfolio-tax-card__copy p,
+  .subfolio-tax-card__selected {
+    color: var(--color-copy-secondary);
+    font-size: 0.82rem;
+    line-height: 1.35;
+    margin: 0;
+  }
+
+  .subfolio-tax-card__select {
+    padding-top: 0.1rem;
+  }
+
+  .subfolio-frequency-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  .subfolio-frequency-grid--custom {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    .subfolio-frequency-grid--custom {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .subfolio-currency-select .p-multiselect-label {
     display: flex;
     flex-wrap: wrap;

@@ -55,17 +55,24 @@ const formatFrequency = (expense) => {
   return freq ? t(`frequencies.${freq.value}`) : expense.frequency
 }
 
-const formatDate = (value) => {
+const formatDate = (value, withTime = false) => {
   if (!value) return '-'
-  return new Date(value).toLocaleDateString(locale.value === 'fr' ? 'fr-CA' : 'en-US', {
+  const options = {
     month: 'short',
     day: '2-digit'
-  })
+  }
+
+  if (withTime) {
+    options.hour = '2-digit'
+    options.minute = '2-digit'
+  }
+
+  return new Date(value).toLocaleDateString(locale.value === 'fr' ? 'fr-CA' : 'en-US', options)
 }
 
 const nextOccurrence = (expense) => {
   const next = getNextOccurrence(expense)
-  return next ? formatDate(next) : '-'
+  return next ? formatDate(next, expense.frequency === 'hourly') : '-'
 }
 
 const displayedAmount = (expense) =>

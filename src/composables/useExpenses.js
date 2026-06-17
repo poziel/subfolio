@@ -1,8 +1,14 @@
 import { reactive, ref, computed } from 'vue'
 import { useSettings } from './useSettings'
 import { useDatabaseConnection } from './useDatabaseConnection'
-import { getTaxRateForCurrency } from '../data/taxRates'
-import { findKnownService } from '../data/serviceCatalog'
+import {
+  getDefaultTaxRateOptionForCurrency,
+  getTaxRateForCurrency,
+  getTaxRateOptionForSelection,
+  getTaxRateOptionsForCurrency
+} from '../data/taxRates'
+import { buildRecurrenceSchedule, getDefaultPaymentTimezone, normalizeDatePattern } from '../data/recurrenceRules'
+import { findKnownService, findKnownServiceById } from '../data/serviceCatalog'
 import { createExpenseConnection } from '../services/database/expenseConnections'
 
 const { displayedCurrency, availableCurrencies, allCurrencies } = useSettings()
@@ -13,22 +19,34 @@ const currencyUniverse = allCurrencies
 
 // Frequency options
 const frequencyOptions = [
+  { value: 'once', label: 'Once', timesPerYear: 1 },
+  { value: 'yearly', label: 'Yearly', timesPerYear: 1 },
+  { value: 'monthly', label: 'Monthly', timesPerYear: 12 },
   { value: 'weekly', label: 'Weekly', timesPerYear: 52 },
   { value: 'bi-weekly', label: 'Bi-Weekly', timesPerYear: 26 },
-  { value: 'monthly', label: 'Monthly', timesPerYear: 12 },
+  { value: 'daily', label: 'Daily', timesPerYear: 365 },
+  { value: 'hourly', label: 'Hourly', timesPerYear: 8760 },
   { value: 'quarterly', label: 'Quarterly', timesPerYear: 4 },
   { value: 'semi-annually', label: 'Semi-Annually', timesPerYear: 2 },
-  { value: 'yearly', label: 'Yearly', timesPerYear: 1 },
   { value: 'custom', label: 'Custom', timesPerYear: null }
 ]
 
 // Date pattern types based on frequency
 const datePatternTypes = {
+  once: [
+    { value: 'once', label: 'One-time payment' }
+  ],
   weekly: [
     { value: 'day-of-week', label: 'Day of week' } // e.g., Every Monday
   ],
   'bi-weekly': [
     { value: 'day-of-week', label: 'Day of week' } // e.g., Every other Monday
+  ],
+  daily: [
+    { value: 'interval', label: 'Every X days' }
+  ],
+  hourly: [
+    { value: 'interval', label: 'Every X hours' }
   ],
   monthly: [
     { value: 'day-of-month', label: 'Day of month' }, // e.g., 15th of each month
@@ -84,10 +102,15 @@ const currencies = computed(() => {
 })
 
 const getAutoTaxRate = (currency) => getTaxRateForCurrency(currency)
+const getAutoTaxRateId = (currency) => getDefaultTaxRateOptionForCurrency(currency)?.id || null
+const getTaxRateOptions = (currency) => getTaxRateOptionsForCurrency(currency)
+const getSelectedTaxRateOption = (currency, taxRateId, taxRate) =>
+  getTaxRateOptionForSelection(currency, taxRateId, taxRate)
 
 // Default form state
 const getDefaultForm = () => ({
   name: '',
+  presetId: null,
   category: 'Subscriptions',
   amount: '',
   currency: displayedCurrency.value || 'CAD',
@@ -95,17 +118,21 @@ const getDefaultForm = () => ({
   icon: '',
   note: '',
   includesTax: true,
+  taxRateId: null,
   taxRate: 0,
   frequency: 'monthly',
   customTimesPerYear: 4,
+  paymentTimezone: getDefaultPaymentTimezone(),
   startDate: new Date().toISOString().slice(0, 10),
+  startTime: '09:00',
   datePattern: {
     type: 'day-of-month',
     dayOfMonth: 1,
     dayOfWeek: 1, // Monday
     nthWeek: 1, // 1st
     month: 0, // January
-    intervalDays: 30
+    intervalDays: 1,
+    intervalHours: 1
   }
 })
 
@@ -829,7 +856,7 @@ const getEffectiveAmount = (expense) => {
 // Calculate times per year for an expense
 const getTimesPerYear = (expense) => {
   if (expense.frequency === 'custom') {
-    return expense.customTimesPerYear || 1
+    return Math.max(0.01, Number(expense.customTimesPerYear) || 1)
   }
   const freq = frequencyOptions.find(f => f.value === expense.frequency)
   return freq ? freq.timesPerYear : 12
@@ -849,9 +876,24 @@ const toDate = (value) => {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate())
 }
 
+const toDateTime = (dateValue, timeValue = '00:00') => {
+  if (!dateValue) return null
+  const [hours, minutes] = String(timeValue || '00:00').split(':').map((part) => Number(part) || 0)
+  const date = toDate(dateValue)
+  if (!date) return null
+  date.setHours(hours, minutes, 0, 0)
+  return date
+}
+
 const addDays = (date, days) => {
   const next = new Date(date)
   next.setDate(next.getDate() + days)
+  return next
+}
+
+const addHours = (date, hours) => {
+  const next = new Date(date)
+  next.setHours(next.getHours() + hours)
   return next
 }
 
@@ -881,9 +923,32 @@ const getNthWeekdayOfMonth = (year, month, nthWeek, dayOfWeek) => {
 
 const getNextOccurrence = (expense, referenceDate = new Date()) => {
   const today = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate())
+  const now = new Date(referenceDate)
   const startDate = toDate(expense.startDate)
+  const startDateTime = toDateTime(expense.startDate, expense.startTime)
   const pattern = expense.datePattern || {}
   const frequency = expense.frequency || 'monthly'
+
+  if (frequency === 'once') {
+    if (!startDate) return null
+    return startDate >= today ? startDate : null
+  }
+
+  if (frequency === 'daily') {
+    const intervalDays = Number(pattern.intervalDays) || 1
+    if (!startDateTime) return null
+    const diffDays = Math.max(0, Math.floor((now - startDateTime) / 86400000))
+    const steps = Math.ceil(diffDays / intervalDays)
+    return addDays(startDateTime, steps * intervalDays)
+  }
+
+  if (frequency === 'hourly') {
+    const intervalHours = Number(pattern.intervalHours) || 1
+    if (!startDateTime) return null
+    const diffHours = Math.max(0, Math.floor((now - startDateTime) / 3600000))
+    const steps = Math.ceil(diffHours / intervalHours)
+    return addHours(startDateTime, steps * intervalHours)
+  }
 
   if (pattern.type === 'interval') {
     const intervalDays = Number(pattern.intervalDays) || 1
@@ -895,9 +960,10 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
 
   if (frequency === 'weekly' || frequency === 'bi-weekly') {
     const targetDay = pattern.dayOfWeek ?? (startDate ? startDate.getDay() : 1)
-    const currentDay = today.getDay()
+    const baseDate = startDate && startDate > today ? startDate : today
+    const currentDay = baseDate.getDay()
     const offset = (targetDay - currentDay + 7) % 7
-    let candidate = addDays(today, offset)
+    let candidate = addDays(baseDate, offset)
     if (frequency === 'bi-weekly' && startDate) {
       const diffWeeks = Math.floor((candidate - startDate) / (86400000 * 7))
       if (diffWeeks % 2 !== 0) {
@@ -917,6 +983,10 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
         const nextMonth = addMonths(new Date(today.getFullYear(), today.getMonth(), 1), intervalMonths)
         candidate = getNthWeekdayOfMonth(nextMonth.getFullYear(), nextMonth.getMonth(), nthWeek, dayOfWeek)
       }
+      while (startDate && candidate < startDate) {
+        const nextMonth = addMonths(new Date(candidate.getFullYear(), candidate.getMonth(), 1), intervalMonths)
+        candidate = getNthWeekdayOfMonth(nextMonth.getFullYear(), nextMonth.getMonth(), nthWeek, dayOfWeek)
+      }
       return candidate
     }
 
@@ -927,6 +997,11 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
     candidate.setDate(Math.min(dayOfMonth, max))
     if (candidate < today) {
       const nextMonth = addMonths(baseMonth, intervalMonths)
+      const nextMax = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate()
+      candidate = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), Math.min(dayOfMonth, nextMax))
+    }
+    while (startDate && candidate < startDate) {
+      const nextMonth = addMonths(new Date(candidate.getFullYear(), candidate.getMonth(), 1), intervalMonths)
       const nextMax = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate()
       candidate = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), Math.min(dayOfMonth, nextMax))
     }
@@ -942,6 +1017,9 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
       if (candidate < today) {
         candidate = getNthWeekdayOfMonth(today.getFullYear() + 1, month, nthWeek, dayOfWeek)
       }
+      while (startDate && candidate < startDate) {
+        candidate = getNthWeekdayOfMonth(candidate.getFullYear() + 1, month, nthWeek, dayOfWeek)
+      }
       return candidate
     }
 
@@ -952,6 +1030,9 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
     candidate.setDate(Math.min(dayOfMonth, max))
     if (candidate < today) {
       candidate = new Date(today.getFullYear() + 1, month, Math.min(dayOfMonth, max))
+    }
+    while (startDate && candidate < startDate) {
+      candidate = new Date(candidate.getFullYear() + 1, month, Math.min(dayOfMonth, max))
     }
     return candidate
   }
@@ -979,7 +1060,7 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
 }
 
 export function useExpenses() {
-  const normalizeCategory = (value) => value.trim()
+  const normalizeCategory = (value) => String(value || '').trim()
 
   const registerCategory = (value) => {
     const normalized = normalizeCategory(value)
@@ -1022,6 +1103,23 @@ export function useExpenses() {
     return createExpenseConnection(connection.value)
   }
 
+  const registerAdapterCategories = async (adapter) => {
+    if (!adapter?.listCategories) return
+
+    const categories = await adapter.listCategories()
+    categories.forEach((category) => registerCategory(category.name || category.category || ''))
+  }
+
+  const ensurePayloadCategory = async (adapter, payload) => {
+    if (!adapter?.ensureCategory || !payload.category) return payload
+
+    const category = await adapter.ensureCategory(payload.category)
+    return {
+      ...payload,
+      categoryId: category?.id || payload.categoryId || null
+    }
+  }
+
   const upsertExpense = (expense) => {
     expenses.value = [
       expense,
@@ -1041,20 +1139,41 @@ export function useExpenses() {
 
   const openEditModal = (item) => {
     editingId.value = item.id
-    form.name = item.name
+    const preset = findKnownServiceById(item.presetId)
+    form.presetId = preset?.id || item.presetId || null
+    form.name = item.name || preset?.name || ''
     form.category = item.category
     form.amount = Number(item.amount)
     form.currency = item.currency || displayedCurrency.value || 'CAD'
-    form.url = item.url || ''
-    form.icon = item.icon || findKnownService(item.name)?.icon || ''
+    form.url = preset?.url || item.url || ''
+    form.icon = preset?.icon || item.icon || findKnownService(item.name)?.icon || ''
     form.note = item.note || ''
     form.includesTax = item.includesTax ?? true
-    form.taxRate = form.includesTax ? 0 : getAutoTaxRate(form.currency)
+    const taxRateOption = form.includesTax
+      ? null
+      : getSelectedTaxRateOption(form.currency, item.taxRateId, item.taxRate)
+    form.taxRateId = taxRateOption?.id || null
+    form.taxRate = form.includesTax
+      ? 0
+      : taxRateOption?.rate ?? (Number(item.taxRate) || getAutoTaxRate(form.currency))
+    form.paymentTimezone = item.paymentTimezone || getDefaultPaymentTimezone()
     form.startDate = item.startDate || getDefaultForm().startDate
+    form.startTime = item.startTime || getDefaultForm().startTime
     form.frequency = item.frequency || 'monthly'
     form.customTimesPerYear = item.customTimesPerYear || 4
     form.datePattern = item.datePattern ? { ...getDefaultForm().datePattern, ...item.datePattern } : getDefaultForm().datePattern
     showAddModal.value = true
+  }
+
+  const applyPreset = (presetId) => {
+    form.presetId = presetId || null
+    const preset = findKnownServiceById(presetId)
+    if (!preset) return
+
+    form.name = preset.name
+    form.url = preset.url
+    form.category = preset.category
+    form.icon = preset.icon
   }
 
   const closeModal = () => {
@@ -1086,6 +1205,8 @@ export function useExpenses() {
       const adapter = createExpenseConnection(connection.value)
       if (!adapter) throw new Error('Missing database adapter')
 
+      await registerAdapterCategories(adapter)
+
       activeConnectionKey = connectionKey
       activeUnsubscribe = await adapter.subscribe(
         (items) => {
@@ -1112,40 +1233,64 @@ export function useExpenses() {
   }
 
   const buildPayload = () => {
-    const normalizedCategory = normalizeCategory(form.category) || baseCategories[0]
-    const resolvedTaxRate = form.includesTax
-      ? 0
-      : (form.taxRate === '' || form.taxRate === null || form.taxRate === undefined)
-        ? getAutoTaxRate(form.currency)
-        : Number(form.taxRate) || 0
+    const preset = findKnownServiceById(form.presetId)
+    const normalizedCategory = normalizeCategory(form.category || preset?.category) || baseCategories[0]
+    let resolvedTaxRate = 0
+    let resolvedTaxRateId = null
+
+    if (!form.includesTax) {
+      const taxRateOption = getSelectedTaxRateOption(form.currency, form.taxRateId, form.taxRate)
+      resolvedTaxRate = taxRateOption?.rate ?? (
+        form.taxRate === '' || form.taxRate === null || form.taxRate === undefined
+          ? getAutoTaxRate(form.currency)
+          : Number(form.taxRate) || 0
+      )
+      resolvedTaxRateId = taxRateOption?.id || form.taxRateId || getAutoTaxRateId(form.currency)
+    }
+    const datePattern = normalizeDatePattern(form.datePattern)
+    const recurrenceSource = {
+      frequency: form.frequency,
+      customTimesPerYear: Number(form.customTimesPerYear) || 1,
+      paymentTimezone: form.paymentTimezone || getDefaultPaymentTimezone(),
+      startDate: form.startDate || null,
+      startTime: form.startTime || null,
+      datePattern
+    }
+
     return {
-      name: form.name,
+      name: normalizeCategory(form.name) || preset?.name || '',
+      presetId: preset?.id || null,
       category: normalizedCategory,
       amount: Number(form.amount),
       currency: form.currency,
-      url: form.url || '',
-      icon: form.icon || findKnownService(form.name)?.icon || '',
+      url: preset?.url || form.url || '',
+      icon: preset?.icon || form.icon || findKnownService(form.name)?.icon || '',
       note: form.note || '',
       includesTax: form.includesTax,
+      taxRateId: resolvedTaxRateId,
       taxRate: resolvedTaxRate,
+      paymentTimezone: recurrenceSource.paymentTimezone,
       startDate: form.startDate || null,
+      startTime: form.startTime || null,
       frequency: form.frequency,
-      customTimesPerYear: form.frequency === 'custom' ? Number(form.customTimesPerYear) || 1 : undefined,
-      datePattern: { ...form.datePattern },
+      customTimesPerYear: form.frequency === 'custom' ? Math.max(0.01, Number(form.customTimesPerYear) || 1) : undefined,
+      datePattern,
+      recurrenceSchedule: buildRecurrenceSchedule(recurrenceSource),
       active: true
     }
   }
 
   const addExpense = async () => {
-    if (!form.name || !form.amount) return
     if (saving.value) return
 
     saving.value = true
-    const payload = buildPayload()
     const adapter = getWritableAdapter()
     let saved = false
 
     try {
+      const payload = await ensurePayloadCategory(adapter, buildPayload())
+      if (!payload.name || !payload.amount || !payload.startDate) return
+
       if (adapter) {
         const created = await adapter.create(payload)
         upsertExpense(created)
@@ -1158,6 +1303,7 @@ export function useExpenses() {
         expenses.value = [fallbackItem, ...expenses.value]
       }
       saved = true
+      registerCategory(payload.category)
     } catch (error) {
       setOfflineStatus(error)
     } finally {
@@ -1165,26 +1311,28 @@ export function useExpenses() {
     }
 
     if (saved) {
-      registerCategory(payload.category)
       closeModal()
     }
   }
 
   const updateExpense = async () => {
-    if (!form.name || !form.amount || editingId.value === null) return
+    if (editingId.value === null) return
     if (saving.value) return
 
     saving.value = true
-    const payload = buildPayload()
     const adapter = getWritableAdapter()
     let saved = false
 
     try {
+      const payload = await ensurePayloadCategory(adapter, buildPayload())
+      if (!payload.name || !payload.amount || !payload.startDate) return
+
       const updated = adapter
         ? await adapter.update(editingId.value, payload)
         : { id: editingId.value, ...payload }
       expenses.value = expenses.value.map((item) => (item.id === updated.id ? updated : item))
       saved = true
+      registerCategory(payload.category)
     } catch (error) {
       setOfflineStatus(error)
     } finally {
@@ -1192,7 +1340,6 @@ export function useExpenses() {
     }
 
     if (saved) {
-      registerCategory(payload.category)
       closeModal()
     }
   }
@@ -1276,6 +1423,9 @@ export function useExpenses() {
     getTimesPerYear,
     getYearlyAmount,
     getAutoTaxRate,
+    getAutoTaxRateId,
+    getTaxRateOptions,
+    getSelectedTaxRateOption,
     getNextOccurrence,
 
     // Actions
@@ -1287,6 +1437,7 @@ export function useExpenses() {
     saveExpense,
     openAddModal,
     openEditModal,
+    applyPreset,
     closeModal,
     resetForm
   }

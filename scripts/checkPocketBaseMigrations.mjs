@@ -10,6 +10,8 @@ const migrationsDir = path.join(root, 'pocketbase', 'pb_migrations')
 const expectedExpenseFields = new Map([
   ['user', 'relation'],
   ['name', 'text'],
+  ['presetId', 'text'],
+  ['categoryId', 'text'],
   ['category', 'text'],
   ['amount', 'number'],
   ['currency', 'text'],
@@ -17,12 +19,24 @@ const expectedExpenseFields = new Map([
   ['icon', 'text'],
   ['note', 'text'],
   ['includesTax', 'bool'],
+  ['taxRateId', 'text'],
   ['taxRate', 'number'],
   ['frequency', 'text'],
   ['customTimesPerYear', 'number'],
   ['startDate', 'text'],
+  ['startTime', 'text'],
+  ['paymentTimezone', 'text'],
   ['datePattern', 'json'],
+  ['recurrenceSchedule', 'json'],
   ['active', 'bool'],
+  ['createdAt', 'text'],
+  ['updatedAt', 'text']
+])
+
+const expectedCategoryFields = new Map([
+  ['user', 'relation'],
+  ['name', 'text'],
+  ['normalizedName', 'text'],
   ['createdAt', 'text'],
   ['updatedAt', 'text']
 ])
@@ -48,11 +62,22 @@ class RelationField {
   }
 }
 
+class JsonField {
+  constructor(model = {}) {
+    Object.assign(this, { type: 'json' }, model)
+  }
+}
+
 const createFieldsList = (fields = []) => {
   const list = [...fields]
   list.add = (field) => {
     list.push(field)
     return field
+  }
+  list.addMarshaledJSON = (rawJSON) => {
+    const parsed = JSON.parse(rawJSON)
+    const fieldsToAdd = Array.isArray(parsed) ? parsed : [parsed]
+    fieldsToAdd.forEach((field) => list.add(field))
   }
   return list
 }
@@ -127,12 +152,19 @@ const assertAuthSchema = (app) => {
   assertUsersCollection(collection)
 }
 
+const assertCategorySchema = (app) => {
+  const collection = app.findCollectionByNameOrId('categories')
+  assertCategoryCollection(collection)
+}
+
 const loadMigration = async (filePath) => {
   const source = await fs.readFile(filePath, 'utf8')
   let captured = null
 
   const context = vm.createContext({
     Collection,
+    JSONField: JsonField,
+    JsonField,
     RelationField,
     TextField,
     console,
@@ -182,6 +214,42 @@ const assertExpenseCollection = (collection) => {
     if (actualFields.get(name) !== type) {
       throw new Error(`Expected expenses.${name} to be type "${type}".`)
     }
+  }
+}
+
+const assertCategoryCollection = (collection) => {
+  if (collection.name !== 'categories') {
+    throw new Error(`Expected collection name "categories", received "${collection.name}".`)
+  }
+
+  if (collection.type !== 'base') {
+    throw new Error(`Expected categories collection type "base", received "${collection.type}".`)
+  }
+
+  const ownerRule = '@request.auth.id != "" && user = @request.auth.id'
+
+  if (collection.listRule !== ownerRule || collection.viewRule !== ownerRule) {
+    throw new Error('Categories collection must be readable only by the authenticated owner.')
+  }
+
+  if (
+    collection.createRule !== ownerRule ||
+    collection.updateRule !== ownerRule ||
+    collection.deleteRule !== ownerRule
+  ) {
+    throw new Error('Categories collection writes must be restricted to the authenticated owner.')
+  }
+
+  const actualFields = new Map(collection.fields.map((field) => [field.name, field.type]))
+
+  for (const [name, type] of expectedCategoryFields) {
+    if (actualFields.get(name) !== type) {
+      throw new Error(`Expected categories.${name} to be type "${type}".`)
+    }
+  }
+
+  if (!collection.indexes?.some((index) => index.includes('idx_categories_user_normalized_name'))) {
+    throw new Error('Categories collection must enforce unique normalized names per user.')
   }
 }
 
@@ -257,6 +325,7 @@ const main = async () => {
   }
 
   assertExpenseSchema(app)
+  assertCategorySchema(app)
   assertAuthSchema(app)
 
   for (const { migration } of loadedMigrations.toReversed()) {
