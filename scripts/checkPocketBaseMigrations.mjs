@@ -8,6 +8,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const migrationsDir = path.join(root, 'pocketbase', 'pb_migrations')
 
 const expectedExpenseFields = new Map([
+  ['user', 'relation'],
   ['name', 'text'],
   ['category', 'text'],
   ['amount', 'number'],
@@ -26,6 +27,8 @@ const expectedExpenseFields = new Map([
   ['updatedAt', 'text']
 ])
 
+const expectedAuthIdentityFields = ['username', 'email']
+
 class Collection {
   constructor(model = {}) {
     Object.assign(this, model)
@@ -39,6 +42,12 @@ class TextField {
   }
 }
 
+class RelationField {
+  constructor(model = {}) {
+    Object.assign(this, { type: 'relation' }, model)
+  }
+}
+
 const createFieldsList = (fields = []) => {
   const list = [...fields]
   list.add = (field) => {
@@ -48,8 +57,34 @@ const createFieldsList = (fields = []) => {
   return list
 }
 
+const registerCollection = (collections, collection) => {
+  collections.set(collection.name, collection)
+
+  if (collection.id) {
+    collections.set(collection.id, collection)
+  }
+}
+
+const createDefaultUsersCollection = () =>
+  new Collection({
+    id: '_pb_users_auth_',
+    type: 'auth',
+    name: 'users',
+    fields: [
+      { type: 'email', name: 'email', required: true },
+      { type: 'bool', name: 'verified', required: false },
+      { type: 'text', name: 'name', required: false, max: 255 }
+    ],
+    indexes: ['CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != \'\''],
+    passwordAuth: {
+      enabled: true,
+      identityFields: ['email']
+    }
+  })
+
 const createApp = () => {
   const collections = new Map()
+  registerCollection(collections, createDefaultUsersCollection())
 
   return {
     saved: [],
@@ -67,7 +102,7 @@ const createApp = () => {
         throw new Error(`Collection "${collection.name}" fields must be an array.`)
       }
 
-      collections.set(collection.name, collection)
+      registerCollection(collections, collection)
       this.saved.push(collection)
       return collection
     },
@@ -75,6 +110,7 @@ const createApp = () => {
     delete(collection) {
       if (!collection?.name) throw new Error('Deleted collection is missing a name.')
       collections.delete(collection.name)
+      if (collection.id) collections.delete(collection.id)
       this.deleted.push(collection)
       return true
     }
@@ -86,12 +122,18 @@ const assertExpenseSchema = (app) => {
   assertExpenseCollection(collection)
 }
 
+const assertAuthSchema = (app) => {
+  const collection = app.findCollectionByNameOrId('_pb_users_auth_')
+  assertUsersCollection(collection)
+}
+
 const loadMigration = async (filePath) => {
   const source = await fs.readFile(filePath, 'utf8')
   let captured = null
 
   const context = vm.createContext({
     Collection,
+    RelationField,
     TextField,
     console,
     migrate(up, down) {
@@ -120,12 +162,18 @@ const assertExpenseCollection = (collection) => {
     throw new Error(`Expected expenses collection type "base", received "${collection.type}".`)
   }
 
-  if (collection.listRule !== '' || collection.viewRule !== '') {
-    throw new Error('Expenses collection must be publicly readable for the frontend adapter.')
+  const ownerRule = '@request.auth.id != "" && user = @request.auth.id'
+
+  if (collection.listRule !== ownerRule || collection.viewRule !== ownerRule) {
+    throw new Error('Expenses collection must be readable only by the authenticated owner.')
   }
 
-  if (collection.createRule !== '' || collection.updateRule !== '' || collection.deleteRule !== '') {
-    throw new Error('Expenses collection must allow frontend create, update, and delete operations.')
+  if (
+    collection.createRule !== ownerRule ||
+    collection.updateRule !== ownerRule ||
+    collection.deleteRule !== ownerRule
+  ) {
+    throw new Error('Expenses collection writes must be restricted to the authenticated owner.')
   }
 
   const actualFields = new Map(collection.fields.map((field) => [field.name, field.type]))
@@ -134,6 +182,50 @@ const assertExpenseCollection = (collection) => {
     if (actualFields.get(name) !== type) {
       throw new Error(`Expected expenses.${name} to be type "${type}".`)
     }
+  }
+}
+
+const assertUsersCollection = (collection) => {
+  if (collection.name !== 'users') {
+    throw new Error(`Expected auth collection name "users", received "${collection.name}".`)
+  }
+
+  if (collection.type !== 'auth') {
+    throw new Error(`Expected users collection type "auth", received "${collection.type}".`)
+  }
+
+  if (collection.passwordAuth?.enabled !== true) {
+    throw new Error('Users collection must have password auth enabled.')
+  }
+
+  const identityFields = collection.passwordAuth?.identityFields || []
+
+  for (const field of expectedAuthIdentityFields) {
+    if (!identityFields.includes(field)) {
+      throw new Error(`Users password auth must accept "${field}" as an identity field.`)
+    }
+  }
+
+  const actualFields = new Map(collection.fields.map((field) => [field.name, field.type]))
+
+  if (actualFields.get('username') !== 'text') {
+    throw new Error('Expected users.username to be type "text".')
+  }
+
+  const fieldNames = collection.fields.map((field) => field.name)
+  const usernameIndex = fieldNames.indexOf('username')
+  const emailIndex = fieldNames.indexOf('email')
+
+  if (usernameIndex === -1 || emailIndex === -1 || usernameIndex > emailIndex) {
+    throw new Error('Expected users.username to be ordered before users.email.')
+  }
+
+  if (actualFields.get('name') !== 'text') {
+    throw new Error('Expected users.name to be type "text".')
+  }
+
+  if (!collection.indexes?.some((index) => index.includes('idx_username__pb_users_auth_'))) {
+    throw new Error('Users collection must enforce unique usernames.')
   }
 }
 
@@ -161,12 +253,11 @@ const main = async () => {
       throw new Error(`${fileName} did not save a collection in the up migration.`)
     }
 
-    if (fileName.includes('expense')) {
-      assertExpenseSchema(app)
-    }
-
     console.log(`Checked ${fileName}`)
   }
+
+  assertExpenseSchema(app)
+  assertAuthSchema(app)
 
   for (const { migration } of loadedMigrations.toReversed()) {
     await migration.down(app)

@@ -2,12 +2,14 @@
 
 ## Current direction
 - Build Subfolio as a frontend-only app shell.
-- Users bring their own realtime database connection, so the project does not
-  need a hosted Subfolio backend.
+- Use the managed PocketBase application for user accounts, email verification,
+  authenticated sessions, and recurring expense storage.
+- User accounts include a username for preferred sign-in, an email for
+  verification and optional sign-in, and a display name for in-app references.
 - Keep all persistence behind provider adapters so Firebase, PocketBase, and
   future realtime data sources can share the same expense workflow.
-- Treat a saved database connection as the current app entry condition. Real
-  user authentication can be layered in later if a provider needs it.
+- Treat a valid authenticated and email-verified PocketBase user as the current
+  app entry condition.
 
 ## Frontend structure
 - Frontend lives at the repo root.
@@ -23,29 +25,36 @@
   - open source (`/open-source`)
   - changelog (`/changelog`)
   - legal pages (`/privacy`, `/terms`, `/refund-policy`, `/license`)
-  - database connection (`/connect`)
+  - account connection (`/connect`)
   - dashboard (`/app`)
   - expense tracker (`/app/expenses`)
   - category overview (`/app/categories`)
   - recurrence overview (`/app/recurrences`)
   - settings (`/app/settings`)
 - `/login` redirects to `/connect` for backward-compatible links.
-- Route guard requires a saved database connection for app routes.
+- Route guard requires a refreshed, verified PocketBase user session for app
+  routes.
 - Any route may include a `config` query parameter. The router applies the
   base64-encoded JSON connection before route guards run, saves it as the
   active database connection, then removes `config` from the URL with a replace
   navigation.
 - `TrackerView` reads/writes expenses through the selected provider adapter,
-  with demo data as a local fallback when no connection is configured.
+  using the authenticated managed PocketBase client for the current default app
+  flow.
 - Shared tracker state lives in `src/composables/useExpenses.js`.
-- Database connection state lives in `src/composables/useDatabaseConnection.js`.
+- PocketBase user session state lives in `src/composables/useAuth.js`.
+- `/connect` accepts verification-link token query parameters and confirms
+  email verification without exposing verification as a separate login tab.
+- Managed database connection state lives in
+  `src/composables/useDatabaseConnection.js` for adapter compatibility.
 - User display preferences live in `src/composables/useSettings.js` and are
   persisted locally in the browser.
 
 ## Public site and changelog
 - Public marketing/documentation pages share `src/components/PublicSiteShell.vue`.
-- Public CTAs use "Open App" and route to `/app`; when no database connection
-  is saved, the route guard sends users to `/connect` for setup.
+- Public CTAs use "Open App" and route to `/app`; when no verified PocketBase
+  session is available, the route guard sends users to `/connect` for account
+  access.
 - The public shell links to the source repository at
   `https://github.com/poziel/subfolio`.
 - Legal pages are footer-only links and are intentionally excluded from the top
@@ -59,11 +68,14 @@
 ## Database providers
 - Provider adapters live in `src/services/database/expenseConnections.js`.
 - Firebase uses Realtime Database paths supplied by the user.
-- PocketBase uses a user-supplied URL and collection name.
+- PocketBase uses the managed URL and collection names from Vite environment
+  variables.
 - URL config links accept native Subfolio connection objects and raw Firebase
   config objects using either `databaseURL` or Refinimo-style `databaseUrl`.
 - Both adapters expose realtime subscribe, create, update, and delete methods
   for recurring expense records.
+- Managed PocketBase expense records include a `user` relation and collection
+  rules restrict reads and writes to `@request.auth.id`.
 - Expense records include amount, currency, tax, category, recurrence,
   date-pattern, URL, active/inactive state, and timestamps.
 - Additional realtime providers should be added by implementing the same
@@ -71,7 +83,8 @@
 
 ## Environment
 - Start the app with `npm run dev`.
-- No Subfolio backend URL is required.
+- `VITE_POCKETBASE_URL` points the frontend at the managed PocketBase
+  application.
 - Do not commit user database credentials, API keys, or provider secrets.
 
 ## Next planned steps

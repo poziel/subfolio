@@ -1,5 +1,6 @@
 export const pocketBaseExpenseFields = [
   'id',
+  'user',
   'name',
   'category',
   'amount',

@@ -11,6 +11,10 @@ Upcoming release notes are copied from merged pull request changelog sections.
 
 ### Added
 
+- Added PocketBase account creation with username, email, display name, email-link verification, sign-in, session restore, and sign-out for protected app access.
+- Added authenticated PocketBase expense ownership so recurring expense records are scoped to the signed-in user.
+- Added PocketBase auth schema migration support for username-or-email sign-in.
+- Added generated PocketBase expense seeding by username or email with configurable item and category counts.
 - Added the public site structure with Overview, Features, About, BYODB, Pricing, and Changelog pages.
 - Added an Open Source page and GitHub repository links in the public header and footer.
 - Added footer-only legal pages for privacy, terms, refund policy, and license information.
@@ -19,6 +23,7 @@ Upcoming release notes are copied from merged pull request changelog sections.
 
 ### Modified
 
+- Changed protected app routes to require a verified PocketBase user session instead of only a saved database connection.
 - Restyled PrimeVue status colors, page tags, card typography, card icons, active navigation, and card/panel surfaces around the Subfolio palette.
 
 [Unreleased]: https://github.com/poziel/subfolio/compare/v0.0.0...HEAD

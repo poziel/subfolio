@@ -4,21 +4,20 @@ Subfolio is a forward-looking finance app for tracking subscriptions and
 recurring expenses, projecting upcoming costs, and giving users a clearer view
 of where money goes over time.
 
-The current repo focus is a frontend-only app shell. Users bring their own
-realtime database connection, so Subfolio can run without a hosted backend.
-Firebase Realtime Database and PocketBase are the first supported providers.
+The current repo focus is a frontend-only app shell backed by a managed
+PocketBase application for user accounts, verified sessions, and recurring
+expense storage. Accounts store a username for sign-in, an email address for
+verification, and a display name for in-app identity.
 
-Database connections can also be supplied with a `config` URL query parameter.
-The value is a base64-encoded JSON connection object. Subfolio accepts native
-connection objects such as `{ "provider": "pocketbase", "pocketbase": { ... } }`
-and Firebase config objects using either `databaseURL` or Refinimo-style
-`databaseUrl`.
+Legacy database connections can still be supplied with a `config` URL query
+parameter, but protected app routes now require a valid verified PocketBase user
+session.
 
 ## Project Structure
 
 - `src/`: Vue 3 + Vite app.
 - `src/components/PublicSiteShell.vue`: shared shell for public site pages.
-- `src/services/database/`: provider adapters for user-owned realtime databases.
+- `src/services/database/`: provider adapters for recurring expense storage.
 - `CHANGELOG.md`: release history rendered by the public changelog page.
 - `.github/`: pull request template and release workflow that can append
   versioned release notes to the changelog.
@@ -45,6 +44,14 @@ npm install
 The UI is built with PrimeVue styled mode, an Aura-derived Subfolio theme preset,
 and PrimeIcons.
 
+Local PocketBase configuration is read from Vite environment variables:
+
+```sh
+VITE_POCKETBASE_URL=http://127.0.0.1:8090
+VITE_POCKETBASE_EXPENSES_COLLECTION=expenses
+VITE_POCKETBASE_AUTH_COLLECTION=users
+```
+
 ## Development
 
 ```sh
@@ -52,6 +59,12 @@ npm run dev
 ```
 
 By default, Vite serves the app at `http://localhost:5173`.
+
+Generate local PocketBase expense data for a username or email:
+
+```sh
+npm run seed:pocketbase -- --user=poziel --count=100 --categories=12
+```
 
 ## Verification
 

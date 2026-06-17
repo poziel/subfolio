@@ -1,6 +1,7 @@
 import { initializeApp, getApp, getApps } from 'firebase/app'
 import { getDatabase, onValue, push, ref as firebaseRef, remove, set, update } from 'firebase/database'
 import PocketBase from 'pocketbase'
+import { getManagedPocketBaseClient, isManagedPocketBaseConnection } from '../pocketbaseClient'
 import { ensurePocketBaseSchema } from './pocketbaseSchema'
 
 const defaultExpensePath = 'subfolio/expenses'
@@ -23,6 +24,7 @@ export const normalizeExpenseRecord = (record) => {
 
   return {
     id: String(id || ''),
+    user: source.user || '',
     name: source.name || '',
     category: source.category || 'Subscriptions',
     amount: Number(source.amount) || 0,
@@ -53,9 +55,10 @@ const parseJsonField = (value) => {
   }
 }
 
-const serializeExpenseRecord = (expense) => {
+const serializeExpenseRecord = (expense, options = {}) => {
   const now = new Date().toISOString()
   return cleanRecord({
+    user: options.userId || expense.user || undefined,
     name: expense.name,
     category: expense.category,
     amount: Number(expense.amount) || 0,
@@ -143,9 +146,23 @@ const createFirebaseExpenseConnection = (config) => {
 }
 
 const createPocketBaseExpenseConnection = (config) => {
-  const client = new PocketBase(config.url)
+  const client = isManagedPocketBaseConnection(config)
+    ? getManagedPocketBaseClient()
+    : new PocketBase(config.url)
   const collection = config.collection
   let schemaReady = false
+
+  const getAuthUserId = () => client.authStore.record?.id || ''
+
+  const serializePocketBaseExpense = (expense) => {
+    const userId = getAuthUserId()
+
+    if (!userId) {
+      throw new Error('Sign in before changing PocketBase expenses.')
+    }
+
+    return serializeExpenseRecord(expense, { userId })
+  }
 
   const ensureReady = async () => {
     if (schemaReady) return
@@ -187,13 +204,13 @@ const createPocketBaseExpenseConnection = (config) => {
 
     async create(expense) {
       await ensureReady()
-      const created = await client.collection(collection).create(serializeExpenseRecord(expense))
+      const created = await client.collection(collection).create(serializePocketBaseExpense(expense))
       return normalizeExpenseRecord(created)
     },
 
     async update(id, expense) {
       await ensureReady()
-      const updated = await client.collection(collection).update(id, serializeExpenseRecord(expense))
+      const updated = await client.collection(collection).update(id, serializePocketBaseExpense(expense))
       return normalizeExpenseRecord(updated)
     },
 

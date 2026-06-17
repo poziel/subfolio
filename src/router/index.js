@@ -14,6 +14,7 @@ import TrackerView from '../views/TrackerView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import { useAuth } from '../composables/useAuth'
+import { useDatabaseConnection } from '../composables/useDatabaseConnection'
 
 const routes = [
   {
@@ -77,7 +78,7 @@ const routes = [
   },
   {
     path: '/login',
-    redirect: { name: 'connect' }
+    redirect: (to) => ({ name: 'connect', query: to.query, hash: to.hash })
   },
   {
     path: '/connect',
@@ -88,25 +89,25 @@ const routes = [
     path: '/app',
     name: 'home',
     component: HomeView,
-    meta: { requiresConnection: true }
+    meta: { requiresAuth: true }
   },
   {
     path: '/app/dashboard',
     name: 'dashboard',
     component: DashboardView,
-    meta: { requiresConnection: true }
+    meta: { requiresAuth: true }
   },
   {
     path: '/app/expenses',
     name: 'expenses',
     component: TrackerView,
-    meta: { requiresConnection: true }
+    meta: { requiresAuth: true }
   },
   {
     path: '/app/categories',
     name: 'categories',
     component: CategoriesView,
-    meta: { requiresConnection: true }
+    meta: { requiresAuth: true }
   },
   {
     path: '/app/recurrences',
@@ -116,7 +117,7 @@ const routes = [
     path: '/app/settings',
     name: 'settings',
     component: SettingsView,
-    meta: { requiresConnection: true }
+    meta: { requiresAuth: true }
   }
 ]
 
@@ -125,8 +126,11 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if ('config' in to.query) {
+    const { applyConnectionFromBase64 } = useDatabaseConnection()
+    applyConnectionFromBase64(to.query.config)
+
     const query = { ...to.query }
     delete query.config
     return {
@@ -138,12 +142,18 @@ router.beforeEach((to) => {
     }
   }
 
-  if (!to.meta.requiresConnection) return true
+  if (!to.meta.requiresAuth) return true
 
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, restoreSession } = useAuth()
   if (isAuthenticated.value) return true
 
-  return { name: 'connect' }
+  const restored = await restoreSession()
+  if (restored) return true
+
+  return {
+    name: 'connect',
+    query: to.fullPath === '/app' ? {} : { redirect: to.fullPath }
+  }
 })
 
 export default router

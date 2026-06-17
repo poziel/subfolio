@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Menu from 'primevue/menu'
 import Tag from 'primevue/tag'
 import { useAuth } from '../composables/useAuth'
@@ -14,7 +14,8 @@ import SubfolioButton from './SubfolioButton.vue'
 import ThemeLanguageControls from './ThemeLanguageControls.vue'
 
 const route = useRoute()
-const { logout } = useAuth()
+const router = useRouter()
+const { currentUser, logout } = useAuth()
 const { providerLabel } = useDatabaseConnection()
 const { openAddModal } = useExpenses()
 const { t } = useI18n()
@@ -47,6 +48,12 @@ const mainClass = computed(() => ({
   'app-shell__main--layout-fluid': contentLayoutMode.value === 'fluid',
   'app-shell__main--layout-focused': contentLayoutMode.value === 'focused'
 }))
+const accountLabel = computed(() =>
+  currentUser.value?.name ||
+  currentUser.value?.username ||
+  currentUser.value?.email ||
+  t('appNav.profile')
+)
 const profileMenuItems = computed(() => [
   { key: 'theme', label: t('appNav.changeTheme'), type: 'theme' },
   { key: 'language', label: t('appNav.changeLanguage'), type: 'language' },
@@ -55,9 +62,14 @@ const profileMenuItems = computed(() => [
     key: 'disconnect',
     label: t('appNav.disconnect'),
     icon: 'pi pi-sign-out',
-    command: () => logout()
+    command: () => handleLogout()
   }
 ])
+
+const handleLogout = async () => {
+  logout()
+  await router.push({ name: 'connect' })
+}
 
 const toggleProfileMenu = (event) => {
   profileMenu.value.toggle(event)
@@ -91,7 +103,7 @@ watch(sidebarCollapsed, (collapsed) => {
           <SubfolioButton
             type="button"
             icon="pi pi-user"
-            :aria-label="t('appNav.profile')"
+            :aria-label="accountLabel"
             variant="tertiary"
             theme="secondary"
             aria-haspopup="true"
@@ -161,12 +173,12 @@ watch(sidebarCollapsed, (collapsed) => {
           <div class="app-shell__footer-controls">
             <SubfolioButton
               type="button"
-              :label="sidebarCollapsed ? '' : t('appNav.profile')"
+              :label="sidebarCollapsed ? '' : accountLabel"
               icon="pi pi-user"
               variant="tertiary"
               theme="secondary"
               class="app-shell__profile-button w-full justify-start"
-              :aria-label="t('appNav.profile')"
+              :aria-label="accountLabel"
               aria-haspopup="true"
               :aria-expanded="profileMenuOpen"
               @click="toggleProfileMenu"

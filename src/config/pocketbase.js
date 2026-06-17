@@ -3,7 +3,9 @@ const trimTrailingSlash = (value) => trimEnv(value).replace(/\/+$/, '')
 
 export const managedPocketBaseConfig = Object.freeze({
   url: trimTrailingSlash(import.meta.env.VITE_POCKETBASE_URL || 'http://127.0.0.1:8090'),
-  collection: trimEnv(import.meta.env.VITE_POCKETBASE_EXPENSES_COLLECTION) || 'expenses'
+  collection: trimEnv(import.meta.env.VITE_POCKETBASE_EXPENSES_COLLECTION) || 'expenses',
+  authCollection: trimEnv(import.meta.env.VITE_POCKETBASE_AUTH_COLLECTION) || 'users',
+  authStoreKey: 'subfolio-pocketbase-auth'
 })
 
 export const createManagedPocketBaseConnection = () => ({

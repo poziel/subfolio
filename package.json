@@ -32,6 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",
+    "@faker-js/faker": "^10.4.0",
     "@intellectronica/ruler": "^0.2.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@vitejs/plugin-vue": "^6.0.3",
