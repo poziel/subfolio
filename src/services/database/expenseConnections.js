@@ -32,6 +32,11 @@ export const normalizeExpenseRecord = (record) => {
       ? parseJsonField(source.recurrenceSchedule)
       : source.recurrenceSchedule || null
   const normalizedSchedule = normalizeRecurrenceSchedule(recurrenceSchedule, {
+    scheduleType: source.scheduleType,
+    paymentDate: source.paymentDate || source.startDate || source.dueDate || null,
+    repeatInterval: source.repeatInterval,
+    repeatUnit: source.repeatUnit,
+    repeatPattern: source.repeatPattern,
     frequency: source.frequency,
     customTimesPerYear: source.customTimesPerYear,
     startDate: source.startDate || source.dueDate || null,
@@ -39,6 +44,7 @@ export const normalizeExpenseRecord = (record) => {
     paymentTimezone: source.paymentTimezone || source.timezone || null,
     datePattern
   })
+  const normalizedScheduleType = source.scheduleType || normalizedSchedule.scheduleType || 'recurring'
 
   return {
     id: String(id || ''),
@@ -55,9 +61,21 @@ export const normalizeExpenseRecord = (record) => {
     includesTax: source.includesTax !== false,
     taxRateId: source.taxRateId || null,
     taxRate: Number(source.taxRate) || 0,
+    scheduleType: normalizedScheduleType,
+    paymentDate: source.paymentDate || normalizedSchedule.paymentDate || source.startDate || source.dueDate || null,
+    repeatInterval: normalizedScheduleType === 'one-time'
+      ? null
+      : Number(source.repeatInterval) || normalizedSchedule.repeat?.interval || normalizedSchedule.repeatInterval || 1,
+    repeatUnit: normalizedScheduleType === 'one-time'
+      ? null
+      : source.repeatUnit || normalizedSchedule.repeat?.unit || normalizedSchedule.repeatUnit || 'month',
+    repeatPattern: normalizedScheduleType === 'one-time'
+      ? null
+      : source.repeatPattern || normalizedSchedule.repeatPattern || null,
+    recurrenceSummary: source.recurrenceSummary || normalizedSchedule.summary || '',
     frequency: source.frequency || 'monthly',
     customTimesPerYear: source.customTimesPerYear || null,
-    startDate: source.startDate || source.dueDate || null,
+    startDate: source.startDate || source.dueDate || normalizedSchedule.paymentDate || null,
     startTime: source.startTime || null,
     paymentTimezone: source.paymentTimezone || source.timezone || normalizedSchedule.timezone,
     datePattern,
@@ -90,6 +108,7 @@ const parseJsonField = (value) => {
 
 const serializeExpenseRecord = (expense, options = {}) => {
   const now = new Date().toISOString()
+  const scheduleType = expense.scheduleType || expense.recurrenceSchedule?.scheduleType || 'recurring'
   return cleanRecord({
     user: options.userId || expense.user || undefined,
     name: expense.name,
@@ -104,6 +123,12 @@ const serializeExpenseRecord = (expense, options = {}) => {
     includesTax: expense.includesTax !== false,
     taxRateId: expense.taxRateId || null,
     taxRate: Number(expense.taxRate) || 0,
+    scheduleType,
+    paymentDate: expense.paymentDate || expense.startDate || null,
+    repeatInterval: scheduleType === 'one-time' ? null : Number(expense.repeatInterval) || null,
+    repeatUnit: scheduleType === 'one-time' ? null : expense.repeatUnit || null,
+    repeatPattern: scheduleType === 'one-time' ? null : expense.repeatPattern || null,
+    recurrenceSummary: expense.recurrenceSummary || expense.recurrenceSchedule?.summary || '',
     frequency: expense.frequency || 'monthly',
     customTimesPerYear: expense.customTimesPerYear || null,
     startDate: expense.startDate || null,

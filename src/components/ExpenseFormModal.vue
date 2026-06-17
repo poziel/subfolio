@@ -6,8 +6,10 @@ import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
+import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch'
+import { buildRecurrenceSummaryParts } from '../data/recurrenceRules'
 import { findKnownServiceById, groupedKnownServices, knownServices, serviceIconOptions } from '../data/serviceCatalog'
 import { getTimeZoneOptions } from '../data/timeZones'
 import { useExpenses } from '../composables/useExpenses'
@@ -26,16 +28,15 @@ const {
   closeModal,
   saveExpense,
   currencies,
-  frequencyOptions,
-  weekdays,
-  ordinals,
-  months,
-  availableDatePatternTypes,
+  scheduleTypes,
+  repeatUnits,
+  repeatPatterns,
+  repeatUnitSupportsPattern,
   getTaxRateOptions,
   getSelectedTaxRateOption,
   applyPreset
 } = useExpenses()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const isEditing = computed(() => editingId.value !== null)
 const categorySuggestions = ref([])
@@ -54,8 +55,25 @@ const modalSubtitle = computed(() =>
 const buttonLabel = computed(() => (isEditing.value ? t('expenseForm.saveButton') : t('expenseForm.addButton')))
 
 const currencyOptions = computed(() => currencies.value.map((curr) => ({ value: curr, label: curr })))
-const frequencySelectOptions = computed(() => frequencyOptions.map((freq) => ({ value: freq.value, label: t(`frequencies.${freq.value}`) })))
-const servicePresetGroups = computed(() =>
+const scheduleTypeOptions = computed(() =>
+  scheduleTypes.map((type) => ({
+    value: type,
+    label: t(`expenseForm.scheduleTypes.${type}`)
+  }))
+)
+const repeatUnitOptions = computed(() =>
+  repeatUnits.map((unit) => ({
+    value: unit,
+    label: t(`expenseForm.repeatUnits.${unit}`)
+  }))
+)
+const repeatPatternOptions = computed(() =>
+  repeatPatterns.map((pattern) => ({
+    value: pattern.value,
+    label: t(`expenseForm.repeatPatterns.${pattern.value}`)
+  }))
+)
+const presetGroups = computed(() =>
   groupedKnownServices(knownServices).map((group) => ({
     label: group.label,
     items: group.items.map((service) => ({
@@ -68,11 +86,6 @@ const servicePresetGroups = computed(() =>
   }))
 )
 const iconOptions = computed(() => serviceIconOptions)
-const patternTypeOptions = computed(() => availableDatePatternTypes.value.map((pt) => ({ value: pt.value, label: t(`expenseForm.patterns.${pt.value}`) === `expenseForm.patterns.${pt.value}` ? pt.label : t(`expenseForm.patterns.${pt.value}`) })))
-const dayOptions = computed(() => daysInMonth.map((day) => ({ value: day, label: String(day) })))
-const weekdayOptions = computed(() => weekdays.map((day, idx) => ({ value: idx, label: t(`expenseForm.weekdays.${idx}`) === `expenseForm.weekdays.${idx}` ? day : t(`expenseForm.weekdays.${idx}`) })))
-const ordinalOptions = computed(() => ordinals.map((ord, idx) => ({ value: idx + 1, label: t(`expenseForm.ordinals.${idx}`) === `expenseForm.ordinals.${idx}` ? ord : t(`expenseForm.ordinals.${idx}`) })))
-const monthOptions = computed(() => months.map((month, idx) => ({ value: idx, label: t(`expenseForm.months.${idx}`) === `expenseForm.months.${idx}` ? month : t(`expenseForm.months.${idx}`) })))
 const timeZoneOptions = computed(() => getTimeZoneOptions(form.paymentTimezone))
 const taxRateOptions = computed(() =>
   getTaxRateOptions(form.currency).map((rate) => ({
@@ -94,6 +107,16 @@ const showPreferredNameField = computed(() =>
   Boolean(selectedPreset.value && (showPreferredName.value || hasPreferredPresetName.value))
 )
 const preferredNamePlaceholder = computed(() => selectedPreset.value?.name || t('expenseForm.namePlaceholder'))
+const isRecurringSchedule = computed(() => form.scheduleType === 'recurring')
+const showRepeatPattern = computed(() => isRecurringSchedule.value && repeatUnitSupportsPattern(form.repeatUnit))
+const recurrenceSummaryParts = computed(() => buildRecurrenceSummaryParts({
+  scheduleType: form.scheduleType,
+  paymentDate: form.paymentDate,
+  repeatInterval: form.repeatInterval,
+  repeatUnit: form.repeatUnit,
+  repeatPattern: form.repeatPattern,
+  paymentTimezone: form.paymentTimezone
+}, locale.value))
 const addTaxModel = computed({
   get: () => !form.includesTax,
   set: (value) => {
@@ -107,19 +130,6 @@ const taxRateModel = computed({
     applyTaxRateOption(option)
   }
 })
-const intervalModel = computed({
-  get: () => form.frequency === 'hourly' ? form.datePattern.intervalHours : form.datePattern.intervalDays,
-  set: (value) => {
-    if (form.frequency === 'hourly') {
-      form.datePattern.intervalHours = value
-    } else {
-      form.datePattern.intervalDays = value
-    }
-  }
-})
-const intervalLabel = computed(() =>
-  form.frequency === 'hourly' ? t('expenseForm.everyXHours') : t('expenseForm.everyXDays')
-)
 
 const formatDateInput = (date) => {
   const year = date.getFullYear()
@@ -128,10 +138,11 @@ const formatDateInput = (date) => {
   return `${year}-${month}-${day}`
 }
 
-const startDateModel = computed({
-  get: () => (form.startDate ? new Date(`${form.startDate}T00:00:00`) : null),
+const paymentDateModel = computed({
+  get: () => (form.paymentDate ? new Date(`${form.paymentDate}T00:00:00`) : null),
   set: (date) => {
-    form.startDate = date instanceof Date ? formatDateInput(date) : ''
+    form.paymentDate = date instanceof Date ? formatDateInput(date) : ''
+    form.startDate = form.paymentDate
   }
 })
 
@@ -142,7 +153,7 @@ const searchCategories = (event) => {
   )
 }
 
-const applyServicePreset = (value) => {
+const applypreset = (value) => {
   applyPreset(value)
   showPreferredName.value = false
 }
@@ -176,11 +187,16 @@ const handleVisibleChange = (visible) => {
   if (!visible) closeModal()
 }
 
-watch(() => form.frequency, () => {
-  const availableTypes = availableDatePatternTypes.value
-  if (!availableTypes.find((type) => type.value === form.datePattern.type)) {
-    form.datePattern.type = availableTypes[0]?.value || 'day-of-month'
+watch(() => [form.scheduleType, form.repeatUnit], () => {
+  if (form.scheduleType === 'recurring' && repeatUnitSupportsPattern(form.repeatUnit)) {
+    form.repeatPattern = form.repeatPattern || 'same-calendar-day'
+  } else {
+    form.repeatPattern = null
   }
+})
+
+watch(() => form.paymentDate, (value) => {
+  form.startDate = value
 })
 
 watch(() => form.currency, syncTaxRateSelection)
@@ -196,8 +212,6 @@ watch(() => showAddModal.value, (visible) => {
     showPreferredName.value = true
   }
 })
-
-const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
 </script>
 
 <template>
@@ -232,11 +246,11 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
     <form id="subfolio-expense-form" class="subfolio-expense-form grid gap-5" @submit.prevent="saveExpense">
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="subfolio-field sm:col-span-2">
-          <label for="modal-service-preset">{{ t('expenseForm.servicePreset') }}</label>
+          <label for="modal-service-preset">{{ t('expenseForm.preset') }}</label>
           <Select
             v-model="form.presetId"
             input-id="modal-service-preset"
-            :options="servicePresetGroups"
+            :options="presetGroups"
             option-group-label="label"
             option-group-children="items"
             option-label="label"
@@ -245,11 +259,11 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
             show-clear
             scroll-height="28rem"
             panel-class="subfolio-preset-panel"
-            :placeholder="t('expenseForm.servicePresetPlaceholder')"
+            :placeholder="t('expenseForm.presetPlaceholder')"
             :disabled="saving"
             class="subfolio-preset-select w-full"
             data-test-id="recurrence-preset"
-            @update:model-value="applyServicePreset"
+            @update:model-value="applypreset"
           >
             <template #optiongroup="{ option }">
               <span class="text-xs font-extrabold uppercase muted-copy">
@@ -277,7 +291,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
 
         <div v-if="selectedPreset" class="subfolio-preset-assist sm:col-span-2">
           <p>
-            {{ t('expenseForm.servicePresetMaintained') }}
+            {{ t('expenseForm.presetMaintained') }}
             <button
               v-if="!showPreferredNameField"
               type="button"
@@ -286,7 +300,7 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
               data-test-id="recurrence-preferred-name-reveal"
               @click="revealPreferredName"
             >
-              {{ t('expenseForm.servicePresetCustomNameCta') }}
+              {{ t('expenseForm.presetCustomNameCta') }}
             </button>
           </p>
         </div>
@@ -454,74 +468,99 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
         </p>
       </div>
 
-      <div
-        class="subfolio-frequency-grid"
-        :class="{ 'subfolio-frequency-grid--custom': form.frequency === 'custom' }"
-      >
-        <div class="subfolio-field">
-          <label for="modal-expense-frequency">{{ t('expenseForm.frequency') }}</label>
-          <Select
-            v-model="form.frequency"
-            input-id="modal-expense-frequency"
-            :options="frequencySelectOptions"
-            option-label="label"
-            option-value="value"
-            :placeholder="t('expenseForm.selectFrequency')"
-            :disabled="saving"
-            class="w-full"
-            data-test-id="recurrence-frequency"
-          />
-        </div>
-
-        <div v-if="form.frequency === 'custom'" class="subfolio-field">
-          <label for="modal-expense-custom-freq">{{ t('expenseForm.timesPerYear') }}</label>
-          <InputNumber
-            v-model="form.customTimesPerYear"
-            input-id="modal-expense-custom-freq"
-            :min="0.01"
-            :max="10000"
-            :min-fraction-digits="0"
-            :max-fraction-digits="2"
-            :disabled="saving"
-            class="w-full"
-            data-test-id="recurrence-times-per-year"
-          />
-        </div>
-      </div>
-
       <section class="subfolio-expense-section" aria-labelledby="modal-payment-schedule-title">
         <div class="subfolio-expense-section__header">
           <h3 id="modal-payment-schedule-title" class="subfolio-expense-section__title">
             {{ t('expenseForm.paymentSchedule') }}
           </h3>
+          <p class="subfolio-recurrence-summary">
+            <template
+              v-for="(part, index) in recurrenceSummaryParts"
+              :key="`${index}-${part.text}`"
+            >
+              <span
+                :class="{ 'subfolio-recurrence-summary__value': part.emphasized }"
+              >
+                {{ part.text }}
+              </span>
+            </template>
+          </p>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="subfolio-field">
-            <label for="modal-start-date">{{ t('expenseForm.startDate') }}</label>
+          <div class="subfolio-field sm:col-span-2">
+            <label for="modal-schedule-type">{{ t('expenseForm.scheduleType') }}</label>
+            <SelectButton
+              v-model="form.scheduleType"
+              input-id="modal-schedule-type"
+              :options="scheduleTypeOptions"
+              option-label="label"
+              option-value="value"
+              :allow-empty="false"
+              :disabled="saving"
+              class="subfolio-segmented w-full"
+              data-test-id="recurrence-schedule-type"
+            />
+          </div>
+
+          <div class="subfolio-field sm:col-span-2">
+            <label for="modal-payment-date">{{ t('expenseForm.paymentDate') }}</label>
             <DatePicker
-              v-model="startDateModel"
-              input-id="modal-start-date"
+              v-model="paymentDateModel"
+              input-id="modal-payment-date"
               date-format="yy-mm-dd"
               show-icon
               :disabled="saving"
               class="w-full"
-              data-test-id="recurrence-start-date"
+              data-test-id="recurrence-payment-date"
             />
           </div>
 
-          <div v-if="form.frequency === 'daily' || form.frequency === 'hourly'" class="subfolio-field">
-            <label for="modal-start-time">{{ t('expenseForm.startTime') }}</label>
-            <InputText
-              id="modal-start-time"
-              v-model="form.startTime"
-              type="time"
+          <div v-if="isRecurringSchedule" class="subfolio-repeat-grid sm:col-span-2">
+            <div class="subfolio-field">
+              <label for="modal-repeat-interval">{{ t('expenseForm.repeatEvery') }}</label>
+              <InputNumber
+                v-model="form.repeatInterval"
+                input-id="modal-repeat-interval"
+                :min="1"
+                :max="10000"
+                :min-fraction-digits="0"
+                :max-fraction-digits="0"
+                :disabled="saving"
+                class="w-full"
+                data-test-id="recurrence-repeat-interval"
+              />
+            </div>
+
+            <div class="subfolio-field">
+              <label for="modal-repeat-unit">{{ t('expenseForm.repeatUnit') }}</label>
+              <Select
+                v-model="form.repeatUnit"
+                input-id="modal-repeat-unit"
+                :options="repeatUnitOptions"
+                option-label="label"
+                option-value="value"
+                :disabled="saving"
+                class="w-full"
+                data-test-id="recurrence-repeat-unit"
+              />
+            </div>
+          </div>
+
+          <div v-if="showRepeatPattern" class="subfolio-field sm:col-span-2">
+            <label for="modal-repeat-pattern">{{ t('expenseForm.repeatPattern') }}</label>
+            <Select
+              v-model="form.repeatPattern"
+              input-id="modal-repeat-pattern"
+              :options="repeatPatternOptions"
+              option-label="label"
+              option-value="value"
               :disabled="saving"
               class="w-full"
-              data-test-id="recurrence-start-time"
+              data-test-id="recurrence-repeat-pattern"
             />
           </div>
 
-          <div class="subfolio-field">
+          <div v-if="isRecurringSchedule" class="subfolio-field">
             <label for="modal-payment-timezone">{{ t('expenseForm.paymentTimezone') }}</label>
             <Select
               v-model="form.paymentTimezone"
@@ -533,163 +572,6 @@ const daysInMonth = Array.from({ length: 31 }, (_, i) => i + 1)
               :disabled="saving"
               class="w-full"
               data-test-id="recurrence-payment-timezone"
-            />
-          </div>
-
-          <div v-if="form.frequency !== 'once'" class="subfolio-field">
-            <label for="modal-pattern-type">{{ t('expenseForm.patternType') }}</label>
-            <Select
-              v-model="form.datePattern.type"
-              input-id="modal-pattern-type"
-              :options="patternTypeOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('expenseForm.selectPattern')"
-              :disabled="saving"
-              class="w-full"
-              data-test-id="recurrence-pattern-type"
-            />
-          </div>
-
-          <div v-if="form.frequency !== 'once' && form.datePattern.type === 'day-of-month'" class="subfolio-field sm:col-span-2">
-            <label for="modal-pattern-day">{{ t('expenseForm.dayOfMonth') }}</label>
-            <Select
-              v-model="form.datePattern.dayOfMonth"
-              input-id="modal-pattern-day"
-              :options="dayOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('expenseForm.day')"
-              :disabled="saving"
-              class="w-full"
-            />
-          </div>
-
-          <div v-if="form.frequency !== 'once' && form.datePattern.type === 'day-of-week'" class="subfolio-field sm:col-span-2">
-            <label for="modal-pattern-weekday">{{ t('expenseForm.dayOfWeek') }}</label>
-            <Select
-              v-model="form.datePattern.dayOfWeek"
-              input-id="modal-pattern-weekday"
-              :options="weekdayOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('expenseForm.weekday')"
-              :disabled="saving"
-              class="w-full"
-            />
-          </div>
-
-          <template v-if="form.frequency !== 'once' && form.datePattern.type === 'nth-weekday'">
-            <div class="subfolio-field">
-              <label for="modal-pattern-nth">{{ t('expenseForm.whichWeek') }}</label>
-              <Select
-                v-model="form.datePattern.nthWeek"
-                input-id="modal-pattern-nth"
-                :options="ordinalOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.week')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-            <div class="subfolio-field">
-              <label for="modal-pattern-weekday2">{{ t('expenseForm.dayOfWeek') }}</label>
-              <Select
-                v-model="form.datePattern.dayOfWeek"
-                input-id="modal-pattern-weekday2"
-                :options="weekdayOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.weekday')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-          </template>
-
-          <template v-if="form.frequency !== 'once' && form.datePattern.type === 'day-of-year'">
-            <div class="subfolio-field">
-              <label for="modal-pattern-month">{{ t('expenseForm.month') }}</label>
-              <Select
-                v-model="form.datePattern.month"
-                input-id="modal-pattern-month"
-                :options="monthOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.month')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-            <div class="subfolio-field">
-              <label for="modal-pattern-day-year">{{ t('expenseForm.day') }}</label>
-              <Select
-                v-model="form.datePattern.dayOfMonth"
-                input-id="modal-pattern-day-year"
-                :options="dayOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.day')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-          </template>
-
-          <template v-if="form.frequency !== 'once' && form.datePattern.type === 'nth-weekday-year'">
-            <div class="subfolio-field">
-              <label for="modal-pattern-nth-year">{{ t('expenseForm.whichWeek') }}</label>
-              <Select
-                v-model="form.datePattern.nthWeek"
-                input-id="modal-pattern-nth-year"
-                :options="ordinalOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.week')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-            <div class="subfolio-field">
-              <label for="modal-pattern-weekday-year">{{ t('expenseForm.dayOfWeek') }}</label>
-              <Select
-                v-model="form.datePattern.dayOfWeek"
-                input-id="modal-pattern-weekday-year"
-                :options="weekdayOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.weekday')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-            <div class="subfolio-field sm:col-span-2">
-              <label for="modal-pattern-month-year">{{ t('expenseForm.month') }}</label>
-              <Select
-                v-model="form.datePattern.month"
-                input-id="modal-pattern-month-year"
-                :options="monthOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('expenseForm.month')"
-                :disabled="saving"
-                class="w-full"
-              />
-            </div>
-          </template>
-
-          <div v-if="form.frequency !== 'once' && form.datePattern.type === 'interval'" class="subfolio-field sm:col-span-2">
-            <label for="modal-pattern-interval">{{ intervalLabel }}</label>
-            <InputNumber
-              v-model="intervalModel"
-              input-id="modal-pattern-interval"
-              :min="1"
-              :max="form.frequency === 'hourly' ? 8760 : 3650"
-              placeholder="1"
-              :disabled="saving"
-              class="w-full"
-              data-test-id="recurrence-interval"
             />
           </div>
         </div>

@@ -16,7 +16,7 @@ const {
   fetchExpenses,
   getEffectiveAmount,
   getNextOccurrence,
-  frequencyOptions,
+  getRecurrenceSummary,
   openAddModal
 } = useExpenses()
 const { formatMoney, displayedCurrency, convertToDisplayed } = useSettings()
@@ -51,14 +51,7 @@ const formatDate = (value) => {
   })
 }
 
-const formatFrequency = (expense) => {
-  if (expense.frequency === 'custom') {
-    return t('frequencies.timesPerYear', { count: expense.customTimesPerYear })
-  }
-
-  const frequency = frequencyOptions.find((item) => item.value === expense.frequency)
-  return frequency ? t(`frequencies.${frequency.value}`) : expense.frequency
-}
+const formatFrequency = (expense) => getRecurrenceSummary(expense, locale.value)
 
 const initials = (name) =>
   name

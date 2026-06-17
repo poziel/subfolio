@@ -8,14 +8,9 @@ import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
 
-const { expenses, fetchExpenses, getYearlyAmount, frequencyOptions } = useExpenses()
+const { expenses, fetchExpenses, getYearlyAmount, getRecurrenceSummary } = useExpenses()
 const { formatMoney, getConversionTooltip, convertToDisplayed, displayedCurrency } = useSettings()
-const { t } = useI18n()
-
-const getFrequencyLabel = (frequency) => {
-  const option = frequencyOptions.find((item) => item.value === frequency)
-  return option ? t(`frequencies.${option.value}`) : frequency
-}
+const { t, locale } = useI18n()
 
 const summaryTotals = computed(() => {
   const activeExpenses = expenses.value.filter((item) => item.active !== false)
@@ -117,9 +112,9 @@ onMounted(fetchExpenses)
                 <Tag :value="data.category" severity="secondary" rounded />
               </template>
             </Column>
-            <Column :header="t('table.frequency')" sortable sort-field="frequency">
+            <Column :header="t('table.frequency')" sortable sort-field="recurrenceSummary">
               <template #body="{ data }">
-                {{ getFrequencyLabel(data.frequency) }}
+                {{ getRecurrenceSummary(data, locale.value) }}
               </template>
             </Column>
             <Column :header="t('table.yearly')" body-class="text-right">

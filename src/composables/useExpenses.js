@@ -7,7 +7,25 @@ import {
   getTaxRateOptionForSelection,
   getTaxRateOptionsForCurrency
 } from '../data/taxRates'
-import { buildRecurrenceSchedule, getDefaultPaymentTimezone, normalizeDatePattern } from '../data/recurrenceRules'
+import {
+  buildRecurrenceSchedule,
+  buildRecurrenceSummary,
+  deriveLegacyDatePattern,
+  deriveLegacyFrequency,
+  formatDateOnly,
+  getDefaultPaymentTimezone,
+  getTimesPerYearFromRepeat,
+  normalizeRecurrenceSchedule,
+  normalizeRepeatInterval,
+  normalizeRepeatPattern,
+  normalizeRepeatUnit,
+  normalizeScheduleType,
+  parseDateOnly,
+  repeatPatterns,
+  repeatUnits,
+  repeatUnitSupportsPattern,
+  scheduleTypes
+} from '../data/recurrenceRules'
 import { findKnownService, findKnownServiceById } from '../data/serviceCatalog'
 import { createExpenseConnection } from '../services/database/expenseConnections'
 
@@ -25,7 +43,6 @@ const frequencyOptions = [
   { value: 'weekly', label: 'Weekly', timesPerYear: 52 },
   { value: 'bi-weekly', label: 'Bi-Weekly', timesPerYear: 26 },
   { value: 'daily', label: 'Daily', timesPerYear: 365 },
-  { value: 'hourly', label: 'Hourly', timesPerYear: 8760 },
   { value: 'quarterly', label: 'Quarterly', timesPerYear: 4 },
   { value: 'semi-annually', label: 'Semi-Annually', timesPerYear: 2 },
   { value: 'custom', label: 'Custom', timesPerYear: null }
@@ -44,9 +61,6 @@ const datePatternTypes = {
   ],
   daily: [
     { value: 'interval', label: 'Every X days' }
-  ],
-  hourly: [
-    { value: 'interval', label: 'Every X hours' }
   ],
   monthly: [
     { value: 'day-of-month', label: 'Day of month' }, // e.g., 15th of each month
@@ -106,6 +120,19 @@ const getAutoTaxRateId = (currency) => getDefaultTaxRateOptionForCurrency(curren
 const getTaxRateOptions = (currency) => getTaxRateOptionsForCurrency(currency)
 const getSelectedTaxRateOption = (currency, taxRateId, taxRate) =>
   getTaxRateOptionForSelection(currency, taxRateId, taxRate)
+const getNormalizedRecurrence = (expense = {}) =>
+  normalizeRecurrenceSchedule(expense.recurrenceSchedule, expense)
+const getRecurrenceSummary = (expense = {}, locale = 'en') => {
+  const recurrence = getNormalizedRecurrence(expense)
+  return buildRecurrenceSummary({
+    scheduleType: recurrence.scheduleType || expense.scheduleType,
+    paymentDate: recurrence.paymentDate || expense.paymentDate || expense.startDate,
+    repeatInterval: recurrence.repeat?.interval || expense.repeatInterval,
+    repeatUnit: recurrence.repeat?.unit || expense.repeatUnit,
+    repeatPattern: recurrence.repeatPattern || expense.repeatPattern,
+    paymentTimezone: recurrence.timezone || expense.paymentTimezone
+  }, locale)
+}
 
 // Default form state
 const getDefaultForm = () => ({
@@ -120,11 +147,16 @@ const getDefaultForm = () => ({
   includesTax: true,
   taxRateId: null,
   taxRate: 0,
+  scheduleType: 'recurring',
+  paymentDate: new Date().toISOString().slice(0, 10),
+  repeatInterval: 1,
+  repeatUnit: 'month',
+  repeatPattern: 'same-calendar-day',
   frequency: 'monthly',
   customTimesPerYear: 4,
   paymentTimezone: getDefaultPaymentTimezone(),
   startDate: new Date().toISOString().slice(0, 10),
-  startTime: '09:00',
+  startTime: null,
   datePattern: {
     type: 'day-of-month',
     dayOfMonth: 1,
@@ -855,11 +887,24 @@ const getEffectiveAmount = (expense) => {
 
 // Calculate times per year for an expense
 const getTimesPerYear = (expense) => {
+  if (expense.scheduleType === 'one-time' || expense.recurrenceSchedule?.scheduleType === 'one-time') {
+    return 1
+  }
+
+  if (expense.repeatUnit || expense.recurrenceSchedule?.repeat) {
+    return getTimesPerYearFromRepeat(expense)
+  }
+
   if (expense.frequency === 'custom') {
     return Math.max(0.01, Number(expense.customTimesPerYear) || 1)
   }
+
+  if (expense.frequency === 'hourly') {
+    return getTimesPerYearFromRepeat(expense)
+  }
+
   const freq = frequencyOptions.find(f => f.value === expense.frequency)
-  return freq ? freq.timesPerYear : 12
+  return freq ? freq.timesPerYear : getTimesPerYearFromRepeat(expense)
 }
 
 // Calculate yearly amount for an expense
@@ -870,30 +915,12 @@ const getYearlyAmount = (expense) => {
 }
 
 const toDate = (value) => {
-  if (!value) return null
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return null
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate())
-}
-
-const toDateTime = (dateValue, timeValue = '00:00') => {
-  if (!dateValue) return null
-  const [hours, minutes] = String(timeValue || '00:00').split(':').map((part) => Number(part) || 0)
-  const date = toDate(dateValue)
-  if (!date) return null
-  date.setHours(hours, minutes, 0, 0)
-  return date
+  return parseDateOnly(value)
 }
 
 const addDays = (date, days) => {
   const next = new Date(date)
   next.setDate(next.getDate() + days)
-  return next
-}
-
-const addHours = (date, hours) => {
-  const next = new Date(date)
-  next.setHours(next.getHours() + hours)
   return next
 }
 
@@ -921,142 +948,60 @@ const getNthWeekdayOfMonth = (year, month, nthWeek, dayOfWeek) => {
   return new Date(year, month, day)
 }
 
+const getCalendarMonthCandidate = (monthAnchor, anchorDate) => {
+  const max = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0).getDate()
+  return new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), Math.min(anchorDate.getDate(), max))
+}
+
+const getRelativeMonthCandidate = (monthAnchor, pattern) => (
+  getNthWeekdayOfMonth(
+    monthAnchor.getFullYear(),
+    monthAnchor.getMonth(),
+    pattern.nthWeek || 1,
+    pattern.dayOfWeek ?? 1
+  )
+)
+
 const getNextOccurrence = (expense, referenceDate = new Date()) => {
+  const recurrence = getNormalizedRecurrence(expense)
+  const anchorDate = toDate(recurrence.paymentDate || recurrence.startsOn)
+  if (!anchorDate) return null
   const today = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate())
-  const now = new Date(referenceDate)
-  const startDate = toDate(expense.startDate)
-  const startDateTime = toDateTime(expense.startDate, expense.startTime)
-  const pattern = expense.datePattern || {}
-  const frequency = expense.frequency || 'monthly'
 
-  if (frequency === 'once') {
-    if (!startDate) return null
-    return startDate >= today ? startDate : null
+  if (recurrence.scheduleType === 'one-time') {
+    return anchorDate >= today ? anchorDate : null
   }
 
-  if (frequency === 'daily') {
-    const intervalDays = Number(pattern.intervalDays) || 1
-    if (!startDateTime) return null
-    const diffDays = Math.max(0, Math.floor((now - startDateTime) / 86400000))
-    const steps = Math.ceil(diffDays / intervalDays)
-    return addDays(startDateTime, steps * intervalDays)
+  const repeatInterval = Number(recurrence.repeat?.interval || recurrence.repeatInterval) || 1
+  const repeatUnit = recurrence.repeat?.unit || recurrence.repeatUnit || 'month'
+
+  if (anchorDate >= today) return anchorDate
+
+  if (repeatUnit === 'day') {
+    const steps = Math.ceil((today.getTime() - anchorDate.getTime()) / (repeatInterval * 86400000))
+    return addDays(anchorDate, steps * repeatInterval)
   }
 
-  if (frequency === 'hourly') {
-    const intervalHours = Number(pattern.intervalHours) || 1
-    if (!startDateTime) return null
-    const diffHours = Math.max(0, Math.floor((now - startDateTime) / 3600000))
-    const steps = Math.ceil(diffHours / intervalHours)
-    return addHours(startDateTime, steps * intervalHours)
+  if (repeatUnit === 'week') {
+    const steps = Math.ceil((today.getTime() - anchorDate.getTime()) / (repeatInterval * 7 * 86400000))
+    return addDays(anchorDate, steps * repeatInterval * 7)
   }
 
-  if (pattern.type === 'interval') {
-    const intervalDays = Number(pattern.intervalDays) || 1
-    if (!startDate) return null
-    const diffDays = Math.max(0, Math.floor((today - startDate) / 86400000))
-    const steps = Math.ceil(diffDays / intervalDays)
-    return addDays(startDate, steps * intervalDays)
+  const intervalMonths = repeatUnit === 'year' ? repeatInterval * 12 : repeatInterval
+  const pattern = recurrence.pattern || {}
+  let monthAnchor = new Date(anchorDate.getFullYear(), anchorDate.getMonth(), 1)
+  let candidate = pattern.type === 'same-relative-weekday'
+    ? getRelativeMonthCandidate(monthAnchor, pattern)
+    : getCalendarMonthCandidate(monthAnchor, anchorDate)
+
+  while (candidate < today) {
+    monthAnchor = addMonths(monthAnchor, intervalMonths)
+    candidate = pattern.type === 'same-relative-weekday'
+      ? getRelativeMonthCandidate(monthAnchor, pattern)
+      : getCalendarMonthCandidate(monthAnchor, anchorDate)
   }
 
-  if (frequency === 'weekly' || frequency === 'bi-weekly') {
-    const targetDay = pattern.dayOfWeek ?? (startDate ? startDate.getDay() : 1)
-    const baseDate = startDate && startDate > today ? startDate : today
-    const currentDay = baseDate.getDay()
-    const offset = (targetDay - currentDay + 7) % 7
-    let candidate = addDays(baseDate, offset)
-    if (frequency === 'bi-weekly' && startDate) {
-      const diffWeeks = Math.floor((candidate - startDate) / (86400000 * 7))
-      if (diffWeeks % 2 !== 0) {
-        candidate = addDays(candidate, 7)
-      }
-    }
-    return candidate
-  }
-
-  if (frequency === 'monthly' || frequency === 'quarterly' || frequency === 'semi-annually') {
-    const intervalMonths = frequency === 'monthly' ? 1 : frequency === 'quarterly' ? 3 : 6
-    if (pattern.type === 'nth-weekday') {
-      const nthWeek = pattern.nthWeek || 1
-      const dayOfWeek = pattern.dayOfWeek ?? 1
-      let candidate = getNthWeekdayOfMonth(today.getFullYear(), today.getMonth(), nthWeek, dayOfWeek)
-      if (candidate < today) {
-        const nextMonth = addMonths(new Date(today.getFullYear(), today.getMonth(), 1), intervalMonths)
-        candidate = getNthWeekdayOfMonth(nextMonth.getFullYear(), nextMonth.getMonth(), nthWeek, dayOfWeek)
-      }
-      while (startDate && candidate < startDate) {
-        const nextMonth = addMonths(new Date(candidate.getFullYear(), candidate.getMonth(), 1), intervalMonths)
-        candidate = getNthWeekdayOfMonth(nextMonth.getFullYear(), nextMonth.getMonth(), nthWeek, dayOfWeek)
-      }
-      return candidate
-    }
-
-    const dayOfMonth = pattern.dayOfMonth || (startDate ? startDate.getDate() : 1)
-    const baseMonth = new Date(today.getFullYear(), today.getMonth(), 1)
-    let candidate = new Date(baseMonth.getFullYear(), baseMonth.getMonth(), dayOfMonth)
-    const max = new Date(candidate.getFullYear(), candidate.getMonth() + 1, 0).getDate()
-    candidate.setDate(Math.min(dayOfMonth, max))
-    if (candidate < today) {
-      const nextMonth = addMonths(baseMonth, intervalMonths)
-      const nextMax = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate()
-      candidate = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), Math.min(dayOfMonth, nextMax))
-    }
-    while (startDate && candidate < startDate) {
-      const nextMonth = addMonths(new Date(candidate.getFullYear(), candidate.getMonth(), 1), intervalMonths)
-      const nextMax = new Date(nextMonth.getFullYear(), nextMonth.getMonth() + 1, 0).getDate()
-      candidate = new Date(nextMonth.getFullYear(), nextMonth.getMonth(), Math.min(dayOfMonth, nextMax))
-    }
-    return candidate
-  }
-
-  if (frequency === 'yearly') {
-    if (pattern.type === 'nth-weekday-year') {
-      const nthWeek = pattern.nthWeek || 1
-      const dayOfWeek = pattern.dayOfWeek ?? 1
-      const month = pattern.month ?? (startDate ? startDate.getMonth() : 0)
-      let candidate = getNthWeekdayOfMonth(today.getFullYear(), month, nthWeek, dayOfWeek)
-      if (candidate < today) {
-        candidate = getNthWeekdayOfMonth(today.getFullYear() + 1, month, nthWeek, dayOfWeek)
-      }
-      while (startDate && candidate < startDate) {
-        candidate = getNthWeekdayOfMonth(candidate.getFullYear() + 1, month, nthWeek, dayOfWeek)
-      }
-      return candidate
-    }
-
-    const month = pattern.month ?? (startDate ? startDate.getMonth() : 0)
-    const dayOfMonth = pattern.dayOfMonth || (startDate ? startDate.getDate() : 1)
-    let candidate = new Date(today.getFullYear(), month, dayOfMonth)
-    const max = new Date(candidate.getFullYear(), candidate.getMonth() + 1, 0).getDate()
-    candidate.setDate(Math.min(dayOfMonth, max))
-    if (candidate < today) {
-      candidate = new Date(today.getFullYear() + 1, month, Math.min(dayOfMonth, max))
-    }
-    while (startDate && candidate < startDate) {
-      candidate = new Date(candidate.getFullYear() + 1, month, Math.min(dayOfMonth, max))
-    }
-    return candidate
-  }
-
-  if (startDate) {
-    let candidate = new Date(startDate)
-    if (frequency === 'custom') {
-      const intervalDays = Math.max(1, Math.round(365 / (expense.customTimesPerYear || 1)))
-      while (candidate < today) {
-        candidate = addDays(candidate, intervalDays)
-      }
-      return candidate
-    }
-    const intervalMonths = frequencyOptions.find((f) => f.value === frequency)?.timesPerYear
-    if (intervalMonths) {
-      const months = Math.round(12 / intervalMonths)
-      while (candidate < today) {
-        candidate = addMonths(candidate, months)
-      }
-      return candidate
-    }
-  }
-
-  return null
+  return candidate
 }
 
 export function useExpenses() {
@@ -1156,9 +1101,18 @@ export function useExpenses() {
     form.taxRate = form.includesTax
       ? 0
       : taxRateOption?.rate ?? (Number(item.taxRate) || getAutoTaxRate(form.currency))
-    form.paymentTimezone = item.paymentTimezone || getDefaultPaymentTimezone()
-    form.startDate = item.startDate || getDefaultForm().startDate
-    form.startTime = item.startTime || getDefaultForm().startTime
+    const recurrence = getNormalizedRecurrence(item)
+    form.scheduleType = recurrence.scheduleType || item.scheduleType || getDefaultForm().scheduleType
+    form.paymentTimezone = item.paymentTimezone || recurrence.timezone || getDefaultPaymentTimezone()
+    form.paymentDate = recurrence.paymentDate || item.paymentDate || item.startDate || getDefaultForm().paymentDate
+    form.repeatInterval = recurrence.repeat?.interval || item.repeatInterval || getDefaultForm().repeatInterval
+    form.repeatUnit = recurrence.repeat?.unit || item.repeatUnit || getDefaultForm().repeatUnit
+    form.repeatPattern = normalizeRepeatPattern(
+      recurrence.repeatPattern || item.repeatPattern || recurrence.pattern?.type,
+      form.repeatUnit
+    ) || getDefaultForm().repeatPattern
+    form.startDate = form.paymentDate
+    form.startTime = null
     form.frequency = item.frequency || 'monthly'
     form.customTimesPerYear = item.customTimesPerYear || 4
     form.datePattern = item.datePattern ? { ...getDefaultForm().datePattern, ...item.datePattern } : getDefaultForm().datePattern
@@ -1247,15 +1201,25 @@ export function useExpenses() {
       )
       resolvedTaxRateId = taxRateOption?.id || form.taxRateId || getAutoTaxRateId(form.currency)
     }
-    const datePattern = normalizeDatePattern(form.datePattern)
+    const scheduleType = normalizeScheduleType(form.scheduleType)
+    const repeatUnit = scheduleType === 'recurring' ? normalizeRepeatUnit(form.repeatUnit) : null
+    const repeatInterval = scheduleType === 'recurring' ? normalizeRepeatInterval(form.repeatInterval) : null
+    const repeatPattern = scheduleType === 'recurring' ? normalizeRepeatPattern(form.repeatPattern, repeatUnit) : null
+    const paymentDate = formatDateOnly(form.paymentDate || form.startDate)
     const recurrenceSource = {
-      frequency: form.frequency,
-      customTimesPerYear: Number(form.customTimesPerYear) || 1,
-      paymentTimezone: form.paymentTimezone || getDefaultPaymentTimezone(),
-      startDate: form.startDate || null,
-      startTime: form.startTime || null,
-      datePattern
+      scheduleType,
+      paymentTimezone: scheduleType === 'recurring'
+        ? form.paymentTimezone || getDefaultPaymentTimezone()
+        : null,
+      paymentDate,
+      repeatInterval,
+      repeatUnit,
+      repeatPattern,
+      startDate: paymentDate
     }
+    const recurrenceSchedule = buildRecurrenceSchedule(recurrenceSource)
+    const datePattern = deriveLegacyDatePattern(recurrenceSource)
+    const frequency = deriveLegacyFrequency(recurrenceSource)
 
     return {
       name: normalizeCategory(form.name) || preset?.name || '',
@@ -1269,13 +1233,19 @@ export function useExpenses() {
       includesTax: form.includesTax,
       taxRateId: resolvedTaxRateId,
       taxRate: resolvedTaxRate,
+      scheduleType,
       paymentTimezone: recurrenceSource.paymentTimezone,
-      startDate: form.startDate || null,
-      startTime: form.startTime || null,
-      frequency: form.frequency,
-      customTimesPerYear: form.frequency === 'custom' ? Math.max(0.01, Number(form.customTimesPerYear) || 1) : undefined,
+      paymentDate,
+      repeatInterval,
+      repeatUnit,
+      repeatPattern,
+      recurrenceSummary: recurrenceSchedule.summary,
+      startDate: paymentDate,
+      startTime: null,
+      frequency,
+      customTimesPerYear: frequency === 'custom' ? getTimesPerYearFromRepeat(recurrenceSource) : undefined,
       datePattern,
-      recurrenceSchedule: buildRecurrenceSchedule(recurrenceSource),
+      recurrenceSchedule,
       active: true
     }
   }
@@ -1289,7 +1259,7 @@ export function useExpenses() {
 
     try {
       const payload = await ensurePayloadCategory(adapter, buildPayload())
-      if (!payload.name || !payload.amount || !payload.startDate) return
+      if (!payload.name || !payload.amount || !payload.paymentDate) return
 
       if (adapter) {
         const created = await adapter.create(payload)
@@ -1325,7 +1295,7 @@ export function useExpenses() {
 
     try {
       const payload = await ensurePayloadCategory(adapter, buildPayload())
-      if (!payload.name || !payload.amount || !payload.startDate) return
+      if (!payload.name || !payload.amount || !payload.paymentDate) return
 
       const updated = adapter
         ? await adapter.update(editingId.value, payload)
@@ -1414,6 +1384,9 @@ export function useExpenses() {
     weekdays,
     ordinals,
     months,
+    scheduleTypes,
+    repeatUnits,
+    repeatPatterns,
 
     // Computed
     availableDatePatternTypes,
@@ -1426,7 +1399,10 @@ export function useExpenses() {
     getAutoTaxRateId,
     getTaxRateOptions,
     getSelectedTaxRateOption,
+    getNormalizedRecurrence,
+    getRecurrenceSummary,
     getNextOccurrence,
+    repeatUnitSupportsPattern,
 
     // Actions
     fetchExpenses,

@@ -37,7 +37,7 @@ const {
   openEditModal,
   deleteExpense,
   toggleExpenseActive,
-  frequencyOptions,
+  getRecurrenceSummary,
   getNextOccurrence
 } = useExpenses()
 
@@ -46,25 +46,13 @@ const { t, locale } = useI18n()
 
 const paginatorEnabled = computed(() => props.showPagination && props.expenses.length > 10)
 
-const formatFrequency = (expense) => {
-  if (expense.frequency === 'custom') {
-    return t('frequencies.timesPerYear', { count: expense.customTimesPerYear })
-  }
+const formatFrequency = (expense) => getRecurrenceSummary(expense, locale.value)
 
-  const freq = frequencyOptions.find((f) => f.value === expense.frequency)
-  return freq ? t(`frequencies.${freq.value}`) : expense.frequency
-}
-
-const formatDate = (value, withTime = false) => {
+const formatDate = (value) => {
   if (!value) return '-'
   const options = {
     month: 'short',
     day: '2-digit'
-  }
-
-  if (withTime) {
-    options.hour = '2-digit'
-    options.minute = '2-digit'
   }
 
   return new Date(value).toLocaleDateString(locale.value === 'fr' ? 'fr-CA' : 'en-US', options)
@@ -72,7 +60,7 @@ const formatDate = (value, withTime = false) => {
 
 const nextOccurrence = (expense) => {
   const next = getNextOccurrence(expense)
-  return next ? formatDate(next, expense.frequency === 'hourly') : '-'
+  return next ? formatDate(next) : '-'
 }
 
 const displayedAmount = (expense) =>
@@ -147,7 +135,7 @@ const initials = (name) =>
         </template>
       </Column>
 
-      <Column :header="t('table.frequency')" sortable sort-field="frequency">
+      <Column :header="t('table.frequency')" sortable sort-field="recurrenceSummary">
         <template #body="{ data }">
           {{ formatFrequency(data) }}
         </template>

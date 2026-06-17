@@ -16,10 +16,11 @@ const {
   fetchExpenses,
   openAddModal,
   status,
-  statusError
+  statusError,
+  getRecurrenceSummary
 } = useExpenses()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const searchQuery = ref('')
 
@@ -30,6 +31,7 @@ const filteredExpenses = computed(() => {
   return expenses.value.filter((item) => (
     item.name.toLowerCase().includes(query) ||
     item.category.toLowerCase().includes(query) ||
+    getRecurrenceSummary(item, locale.value).toLowerCase().includes(query) ||
     (item.frequency && item.frequency.toLowerCase().includes(query)) ||
     (item.currency && item.currency.toLowerCase().includes(query))
   ))

@@ -328,11 +328,11 @@ const messages = {
       saveButton: 'Save changes',
       name: 'Expense name',
       namePlaceholder: 'Netflix, Spotify, etc.',
-      servicePreset: 'Known service',
-      servicePresetPlaceholder: 'Search or choose a preset',
+      preset: 'Preset',
+      presetPlaceholder: 'Search or choose a preset',
       selectedService: 'Selected service',
-      servicePresetMaintained: 'Details will be prefilled with maintained data for this service.',
-      servicePresetCustomNameCta: 'Click here to set a custom display name.',
+      presetMaintained: 'Details will be prefilled with maintained data for this service.',
+      presetCustomNameCta: 'Click here to set a custom display name.',
       preferredName: 'Preferred name',
       preferredNamePlaceholder: 'Custom display name',
       removePreferredName: 'Remove preferred name',
@@ -359,6 +359,13 @@ const messages = {
       selectFrequency: 'Select frequency',
       timesPerYear: 'Times per year',
       paymentSchedule: 'Payment schedule',
+      scheduleType: 'Schedule type',
+      paymentDate: 'Payment date',
+      repeatEvery: 'Repeat every',
+      repeatInterval: 'Interval',
+      repeatUnit: 'Time unit',
+      repeatPattern: 'Repeat pattern',
+      recurrenceSummary: 'Schedule summary',
       startDate: 'Start date',
       startTime: 'Start time',
       paymentTimezone: 'Payment timezone',
@@ -383,6 +390,20 @@ const messages = {
         'day-of-year': 'Day of year',
         'nth-weekday-year': 'Nth weekday of month',
         interval: 'Interval'
+      },
+      repeatUnits: {
+        year: 'Year',
+        month: 'Month',
+        week: 'Week',
+        day: 'Day'
+      },
+      scheduleTypes: {
+        'one-time': 'One-time',
+        recurring: 'Recurring'
+      },
+      repeatPatterns: {
+        'same-calendar-day': 'Same calendar day',
+        'same-relative-weekday': 'Same relative weekday'
       },
       weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
       ordinals: ['1st', '2nd', '3rd', '4th', 'Last'],
@@ -912,11 +933,11 @@ const messages = {
       saveButton: 'Enregistrer',
       name: 'Nom de la dépense',
       namePlaceholder: 'Netflix, Spotify, etc.',
-      servicePreset: 'Service connu',
-      servicePresetPlaceholder: 'Rechercher ou choisir un modèle',
+      preset: 'Modèle',
+      presetPlaceholder: 'Rechercher ou choisir un modèle',
       selectedService: 'Service sélectionné',
-      servicePresetMaintained: 'Les détails seront préremplis avec les données maintenues pour ce service.',
-      servicePresetCustomNameCta: 'Cliquez ici pour définir un nom d’affichage personnalisé.',
+      presetMaintained: 'Les détails seront préremplis avec les données maintenues pour ce service.',
+      presetCustomNameCta: 'Cliquez ici pour définir un nom d’affichage personnalisé.',
       preferredName: 'Nom préféré',
       preferredNamePlaceholder: 'Nom d’affichage personnalisé',
       removePreferredName: 'Retirer le nom préféré',
@@ -943,6 +964,13 @@ const messages = {
       selectFrequency: 'Sélectionner une fréquence',
       timesPerYear: 'Fois par an',
       paymentSchedule: 'Calendrier de paiement',
+      scheduleType: 'Type de calendrier',
+      paymentDate: 'Date de paiement',
+      repeatEvery: 'Répéter tous les',
+      repeatInterval: 'Intervalle',
+      repeatUnit: 'Unité de temps',
+      repeatPattern: 'Modèle de répétition',
+      recurrenceSummary: 'Résumé du calendrier',
       startDate: 'Date de début',
       startTime: 'Heure de début',
       paymentTimezone: 'Fuseau horaire du paiement',
@@ -967,6 +995,20 @@ const messages = {
         'day-of-year': 'Jour de l’année',
         'nth-weekday-year': 'Nième jour de semaine du mois',
         interval: 'Intervalle'
+      },
+      repeatUnits: {
+        year: 'Année',
+        month: 'Mois',
+        week: 'Semaine',
+        day: 'Jour'
+      },
+      scheduleTypes: {
+        'one-time': 'Ponctuel',
+        recurring: 'Récurrent'
+      },
+      repeatPatterns: {
+        'same-calendar-day': 'Même jour du calendrier',
+        'same-relative-weekday': 'Même jour relatif'
       },
       weekdays: ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'],
       ordinals: ['1er', '2e', '3e', '4e', 'Dernier'],

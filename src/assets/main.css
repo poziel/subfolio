@@ -917,14 +917,50 @@ html[data-theme="dark"] {
     grid-template-columns: 1fr;
   }
 
+  .subfolio-repeat-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(8rem, 0.42fr) minmax(10rem, 0.58fr);
+  }
+
+  .subfolio-segmented {
+    display: flex;
+  }
+
+  .subfolio-segmented .p-button,
+  .subfolio-segmented .p-togglebutton {
+    flex: 1 1 0;
+  }
+
   .subfolio-frequency-grid--custom {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @media (max-width: 640px) {
+    .subfolio-repeat-grid,
     .subfolio-frequency-grid--custom {
       grid-template-columns: 1fr;
     }
+  }
+
+  .subfolio-recurrence-summary {
+    background: color-mix(in srgb, var(--color-accent-primary) 8%, var(--color-surface-muted));
+    padding: 0.8rem 0.9rem;
+    color: var(--color-copy-secondary);
+    font-size: 0.78rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  .subfolio-recurrence-summary__value {
+    color: var(--color-accent-dark);
+    display: inline-block;
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0.08rem 0.2rem;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 3px;
   }
 
   .subfolio-currency-select .p-multiselect-label {
