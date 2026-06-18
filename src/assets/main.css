@@ -871,6 +871,28 @@ html[data-theme="dark"] {
     outline-offset: 3px;
   }
 
+  .subfolio-preferred-name-group.p-inputgroup {
+    width: 100%;
+  }
+
+  .subfolio-preferred-name-group .p-inputtext {
+    min-width: 0;
+  }
+
+  .subfolio-preferred-name-addon.p-inputgroupaddon {
+    padding: 0;
+    overflow: hidden;
+    background: var(--expense-dialog-field-bg);
+    border-color: var(--expense-dialog-field-border);
+  }
+
+  .subfolio-preferred-name-remove.p-button {
+    width: 2.75rem;
+    height: 100%;
+    min-height: 100%;
+    border-radius: 0;
+  }
+
   .subfolio-tax-card {
     display: grid;
     border: 1px solid var(--expense-dialog-border);

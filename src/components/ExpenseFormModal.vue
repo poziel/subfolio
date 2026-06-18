@@ -1,8 +1,11 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import AutoComplete from 'primevue/autocomplete'
+import Button from 'primevue/button'
 import DatePicker from 'primevue/datepicker'
 import Dialog from 'primevue/dialog'
+import InputGroup from 'primevue/inputgroup'
+import InputGroupAddon from 'primevue/inputgroupaddon'
 import InputNumber from 'primevue/inputnumber'
 import InputText from 'primevue/inputtext'
 import Select from 'primevue/select'
@@ -11,7 +14,6 @@ import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch'
 import { buildRecurrenceSummaryParts } from '../data/recurrenceRules'
 import { findKnownServiceById, groupedKnownServices, knownServices, serviceIconOptions } from '../data/serviceCatalog'
-import { getTimeZoneOptions } from '../data/timeZones'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import SubfolioIconTile from './icons/SubfolioIconTile.vue'
@@ -86,7 +88,6 @@ const presetGroups = computed(() =>
   }))
 )
 const iconOptions = computed(() => serviceIconOptions)
-const timeZoneOptions = computed(() => getTimeZoneOptions(form.paymentTimezone))
 const taxRateOptions = computed(() =>
   getTaxRateOptions(form.currency).map((rate) => ({
     value: rate.id,
@@ -306,26 +307,30 @@ watch(() => showAddModal.value, (visible) => {
         </div>
 
         <div v-if="showPreferredNameField" class="subfolio-field sm:col-span-2">
-          <div class="subfolio-field__label-row">
-            <label for="modal-preferred-name">{{ t('expenseForm.preferredName') }}</label>
-            <button
-              type="button"
-              class="subfolio-inline-action"
+          <label for="modal-preferred-name">{{ t('expenseForm.preferredName') }}</label>
+          <InputGroup class="subfolio-preferred-name-group">
+            <InputText
+              id="modal-preferred-name"
+              v-model="form.name"
+              :placeholder="preferredNamePlaceholder"
               :disabled="saving"
-              data-test-id="recurrence-preferred-name-remove"
-              @click="removePreferredName"
-            >
-              {{ t('expenseForm.removePreferredName') }}
-            </button>
-          </div>
-          <InputText
-            id="modal-preferred-name"
-            v-model="form.name"
-            :placeholder="preferredNamePlaceholder"
-            :disabled="saving"
-            class="w-full"
-            data-test-id="recurrence-preferred-name"
-          />
+              class="w-full"
+              data-test-id="recurrence-preferred-name"
+            />
+            <InputGroupAddon class="subfolio-preferred-name-addon">
+              <Button
+                type="button"
+                icon="pi pi-times"
+                severity="secondary"
+                variant="text"
+                class="subfolio-preferred-name-remove"
+                :disabled="saving"
+                :aria-label="t('expenseForm.removePreferredName')"
+                data-test-id="recurrence-preferred-name-remove"
+                @click="removePreferredName"
+              />
+            </InputGroupAddon>
+          </InputGroup>
         </div>
 
         <template v-if="!selectedPreset">
@@ -557,21 +562,6 @@ watch(() => showAddModal.value, (visible) => {
               :disabled="saving"
               class="w-full"
               data-test-id="recurrence-repeat-pattern"
-            />
-          </div>
-
-          <div v-if="isRecurringSchedule" class="subfolio-field">
-            <label for="modal-payment-timezone">{{ t('expenseForm.paymentTimezone') }}</label>
-            <Select
-              v-model="form.paymentTimezone"
-              input-id="modal-payment-timezone"
-              :options="timeZoneOptions"
-              option-label="label"
-              option-value="value"
-              filter
-              :disabled="saving"
-              class="w-full"
-              data-test-id="recurrence-payment-timezone"
             />
           </div>
         </div>

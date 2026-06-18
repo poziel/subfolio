@@ -37,7 +37,6 @@ const {
   openEditModal,
   deleteExpense,
   toggleExpenseActive,
-  getRecurrenceSummary,
   getNextOccurrence
 } = useExpenses()
 
@@ -45,8 +44,6 @@ const { formatMoney, getConversionTooltip, convertToDisplayed, displayedCurrency
 const { t, locale } = useI18n()
 
 const paginatorEnabled = computed(() => props.showPagination && props.expenses.length > 10)
-
-const formatFrequency = (expense) => getRecurrenceSummary(expense, locale.value)
 
 const formatDate = (value) => {
   if (!value) return '-'
@@ -92,7 +89,7 @@ const initials = (name) =>
       :rows="10"
       :rows-per-page-options="[5, 10, 20]"
       striped-rows
-      table-style="min-width: 58rem"
+      table-style="min-width: 48rem"
     >
       <template #empty>
         <div class="py-10 text-center muted-copy">
@@ -132,12 +129,6 @@ const initials = (name) =>
       <Column v-if="showCategory" field="category" :header="t('table.category')" sortable>
         <template #body="{ data }">
           <Tag :value="data.category" severity="secondary" rounded />
-        </template>
-      </Column>
-
-      <Column :header="t('table.frequency')" sortable sort-field="recurrenceSummary">
-        <template #body="{ data }">
-          {{ formatFrequency(data) }}
         </template>
       </Column>
 

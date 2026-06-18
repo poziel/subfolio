@@ -13,7 +13,6 @@ import {
   deriveLegacyDatePattern,
   deriveLegacyFrequency,
   formatDateOnly,
-  getDefaultPaymentTimezone,
   getTimesPerYearFromRepeat,
   normalizeRecurrenceSchedule,
   normalizeRepeatInterval,
@@ -154,7 +153,6 @@ const getDefaultForm = () => ({
   repeatPattern: 'same-calendar-day',
   frequency: 'monthly',
   customTimesPerYear: 4,
-  paymentTimezone: getDefaultPaymentTimezone(),
   startDate: new Date().toISOString().slice(0, 10),
   startTime: null,
   datePattern: {
@@ -1103,7 +1101,6 @@ export function useExpenses() {
       : taxRateOption?.rate ?? (Number(item.taxRate) || getAutoTaxRate(form.currency))
     const recurrence = getNormalizedRecurrence(item)
     form.scheduleType = recurrence.scheduleType || item.scheduleType || getDefaultForm().scheduleType
-    form.paymentTimezone = item.paymentTimezone || recurrence.timezone || getDefaultPaymentTimezone()
     form.paymentDate = recurrence.paymentDate || item.paymentDate || item.startDate || getDefaultForm().paymentDate
     form.repeatInterval = recurrence.repeat?.interval || item.repeatInterval || getDefaultForm().repeatInterval
     form.repeatUnit = recurrence.repeat?.unit || item.repeatUnit || getDefaultForm().repeatUnit
@@ -1208,9 +1205,6 @@ export function useExpenses() {
     const paymentDate = formatDateOnly(form.paymentDate || form.startDate)
     const recurrenceSource = {
       scheduleType,
-      paymentTimezone: scheduleType === 'recurring'
-        ? form.paymentTimezone || getDefaultPaymentTimezone()
-        : null,
       paymentDate,
       repeatInterval,
       repeatUnit,
@@ -1234,7 +1228,6 @@ export function useExpenses() {
       taxRateId: resolvedTaxRateId,
       taxRate: resolvedTaxRate,
       scheduleType,
-      paymentTimezone: recurrenceSource.paymentTimezone,
       paymentDate,
       repeatInterval,
       repeatUnit,

@@ -1,5 +1,3 @@
-import { getDefaultPaymentTimezone } from './timeZones'
-
 export { getDefaultPaymentTimezone } from './timeZones'
 
 export const scheduleTypes = ['one-time', 'recurring']
@@ -313,9 +311,7 @@ const normalizeRecurrenceInput = (source = {}) => {
   return {
     scheduleType,
     paymentDate,
-    paymentTimezone: scheduleType === oneTimeType
-      ? null
-      : source.paymentTimezone || source.timezone || getDefaultPaymentTimezone(),
+    paymentTimezone: null,
     repeatInterval,
     repeatUnit,
     repeatPattern,
