@@ -153,7 +153,7 @@ onMounted(fetchExpenses)
               <RouterLink
                 v-for="expense in upcomingExpenses"
                 :key="expense.id"
-                to="/app/expenses"
+                :to="{ name: 'expense-detail', params: { id: expense.id } }"
                 class="recurrence-preview-item"
               >
                 <div class="recurrence-preview-item__main">

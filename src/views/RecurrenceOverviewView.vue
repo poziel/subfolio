@@ -91,14 +91,13 @@ onMounted(fetchExpenses)
       <template #title>{{ t('recurrences.allTitle') }}</template>
       <template #subtitle>{{ t('recurrences.allSubtitle') }}</template>
       <template #content>
-        <div class="subfolio-table-wrap">
-          <DataTable
-            :value="projectedRows"
-            class="subfolio-datatable"
-            data-key="id"
-            striped-rows
-            table-style="min-width: 58rem"
-          >
+        <DataTable
+          :value="projectedRows"
+          class="subfolio-datatable"
+          data-key="id"
+          striped-rows
+          table-style="min-width: 58rem"
+        >
             <template #empty>
               <div class="py-10 text-center muted-copy">{{ t('recurrences.empty') }}</div>
             </template>
@@ -147,8 +146,7 @@ onMounted(fetchExpenses)
                 </span>
               </template>
             </Column>
-          </DataTable>
-        </div>
+        </DataTable>
       </template>
     </Card>
 </template>

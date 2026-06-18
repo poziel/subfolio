@@ -47,6 +47,21 @@ const expectedCategoryFields = new Map([
   ['updatedAt', 'text']
 ])
 
+const expectedPaymentHistoryFields = new Map([
+  ['user', 'relation'],
+  ['expense', 'relation'],
+  ['scheduledDate', 'text'],
+  ['paidDate', 'text'],
+  ['amount', 'number'],
+  ['currency', 'text'],
+  ['status', 'text'],
+  ['source', 'text'],
+  ['changeType', 'text'],
+  ['details', 'json'],
+  ['createdAt', 'text'],
+  ['updatedAt', 'text']
+])
+
 const expectedAuthIdentityFields = ['username', 'email']
 
 class Collection {
@@ -163,6 +178,11 @@ const assertCategorySchema = (app) => {
   assertCategoryCollection(collection)
 }
 
+const assertPaymentHistorySchema = (app) => {
+  const collection = app.findCollectionByNameOrId('expensePaymentHistory')
+  assertPaymentHistoryCollection(collection)
+}
+
 const loadMigration = async (filePath) => {
   const source = await fs.readFile(filePath, 'utf8')
   let captured = null
@@ -259,6 +279,42 @@ const assertCategoryCollection = (collection) => {
   }
 }
 
+const assertPaymentHistoryCollection = (collection) => {
+  if (collection.name !== 'expensePaymentHistory') {
+    throw new Error(`Expected collection name "expensePaymentHistory", received "${collection.name}".`)
+  }
+
+  if (collection.type !== 'base') {
+    throw new Error(`Expected expensePaymentHistory collection type "base", received "${collection.type}".`)
+  }
+
+  const ownerRule = '@request.auth.id != "" && user = @request.auth.id'
+
+  if (collection.listRule !== ownerRule || collection.viewRule !== ownerRule) {
+    throw new Error('Expense payment history collection must be readable only by the authenticated owner.')
+  }
+
+  if (
+    collection.createRule !== ownerRule ||
+    collection.updateRule !== ownerRule ||
+    collection.deleteRule !== ownerRule
+  ) {
+    throw new Error('Expense payment history writes must be restricted to the authenticated owner.')
+  }
+
+  const actualFields = new Map(collection.fields.map((field) => [field.name, field.type]))
+
+  for (const [name, type] of expectedPaymentHistoryFields) {
+    if (actualFields.get(name) !== type) {
+      throw new Error(`Expected expensePaymentHistory.${name} to be type "${type}".`)
+    }
+  }
+
+  if (!collection.indexes?.some((index) => index.includes('idx_expense_payment_history_expense_scheduled'))) {
+    throw new Error('Expense payment history must enforce one record per expense scheduled date.')
+  }
+}
+
 const assertUsersCollection = (collection) => {
   if (collection.name !== 'users') {
     throw new Error(`Expected auth collection name "users", received "${collection.name}".`)
@@ -332,6 +388,7 @@ const main = async () => {
 
   assertExpenseSchema(app)
   assertCategorySchema(app)
+  assertPaymentHistorySchema(app)
   assertAuthSchema(app)
 
   for (const { migration } of loadedMigrations.toReversed()) {

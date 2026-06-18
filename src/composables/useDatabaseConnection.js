@@ -24,7 +24,9 @@ export const defaultFirebaseConnection = {
 
 export const defaultPocketBaseConnection = {
   url: managedPocketBaseConfig.url,
-  collection: managedPocketBaseConfig.collection
+  collection: managedPocketBaseConfig.collection,
+  categoryCollection: managedPocketBaseConfig.categoryCollection,
+  paymentHistoryCollection: managedPocketBaseConfig.paymentHistoryCollection
 }
 
 const readStoredConnection = () => {
@@ -64,7 +66,10 @@ const normalizePocketBaseConnection = (value) => {
 
   return {
     url: trimValue(pocketbase.url).replace(/\/$/, ''),
-    collection: trimValue(pocketbase.collection) || defaultPocketBaseConnection.collection
+    collection: trimValue(pocketbase.collection) || defaultPocketBaseConnection.collection,
+    categoryCollection: trimValue(pocketbase.categoryCollection) || defaultPocketBaseConnection.categoryCollection,
+    paymentHistoryCollection: trimValue(pocketbase.paymentHistoryCollection) ||
+      defaultPocketBaseConnection.paymentHistoryCollection
   }
 }
 

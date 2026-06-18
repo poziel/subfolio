@@ -1244,19 +1244,20 @@ export function useExpenses() {
   }
 
   const addExpense = async () => {
-    if (saving.value) return
+    if (saving.value) return null
 
     saving.value = true
     const adapter = getWritableAdapter()
-    let saved = false
+    let savedExpense = null
 
     try {
       const payload = await ensurePayloadCategory(adapter, buildPayload())
-      if (!payload.name || !payload.amount || !payload.paymentDate) return
+      if (!payload.name || !payload.amount || !payload.paymentDate) return null
 
       if (adapter) {
         const created = await adapter.create(payload)
         upsertExpense(created)
+        savedExpense = created
       } else {
         const fallbackItem = {
           id: String(Date.now()),
@@ -1264,8 +1265,8 @@ export function useExpenses() {
           ...payload
         }
         expenses.value = [fallbackItem, ...expenses.value]
+        savedExpense = fallbackItem
       }
-      saved = true
       registerCategory(payload.category)
     } catch (error) {
       setOfflineStatus(error)
@@ -1273,28 +1274,30 @@ export function useExpenses() {
       saving.value = false
     }
 
-    if (saved) {
+    if (savedExpense) {
       closeModal()
     }
+
+    return savedExpense
   }
 
   const updateExpense = async () => {
-    if (editingId.value === null) return
-    if (saving.value) return
+    if (editingId.value === null) return null
+    if (saving.value) return null
 
     saving.value = true
     const adapter = getWritableAdapter()
-    let saved = false
+    let savedExpense = null
 
     try {
       const payload = await ensurePayloadCategory(adapter, buildPayload())
-      if (!payload.name || !payload.amount || !payload.paymentDate) return
+      if (!payload.name || !payload.amount || !payload.paymentDate) return null
 
       const updated = adapter
         ? await adapter.update(editingId.value, payload)
         : { id: editingId.value, ...payload }
       expenses.value = expenses.value.map((item) => (item.id === updated.id ? updated : item))
-      saved = true
+      savedExpense = updated
       registerCategory(payload.category)
     } catch (error) {
       setOfflineStatus(error)
@@ -1302,12 +1305,17 @@ export function useExpenses() {
       saving.value = false
     }
 
-    if (saved) {
+    if (savedExpense) {
       closeModal()
     }
+
+    return savedExpense
   }
 
   const deleteExpense = async (id) => {
+    const deletedExpense = expenses.value.find((item) => item.id === id)
+    if (!deletedExpense) return null
+
     const existing = expenses.value
     expenses.value = expenses.value.filter((item) => item.id !== id)
     const adapter = getWritableAdapter()
@@ -1316,9 +1324,12 @@ export function useExpenses() {
       if (adapter) {
         await adapter.delete(id)
       }
+
+      return deletedExpense
     } catch (error) {
       setOfflineStatus(error)
       expenses.value = existing
+      return null
     }
   }
 
@@ -1345,11 +1356,46 @@ export function useExpenses() {
     }
   }
 
+  const updateExpenseAmount = async (id, amount) => {
+    const item = expenses.value.find((e) => String(e.id) === String(id))
+    if (!item) return null
+
+    const nextAmount = Number(amount)
+    if (!Number.isFinite(nextAmount) || nextAmount <= 0) {
+      throw new Error('Enter a valid amount before saving the price change.')
+    }
+
+    const previous = expenses.value
+    const nextExpense = {
+      ...item,
+      amount: nextAmount
+    }
+
+    expenses.value = expenses.value.map((expense) =>
+      String(expense.id) === String(id) ? nextExpense : expense
+    )
+
+    try {
+      const adapter = getWritableAdapter()
+      if (!adapter) return nextExpense
+
+      const updated = await adapter.update(id, nextExpense)
+      expenses.value = expenses.value.map((expense) =>
+        String(expense.id) === String(id) ? updated : expense
+      )
+      return updated
+    } catch (error) {
+      setOfflineStatus(error)
+      expenses.value = previous
+      throw error
+    }
+  }
+
   const saveExpense = async () => {
     if (editingId.value !== null) {
-      await updateExpense()
+      return updateExpense()
     } else {
-      await addExpense()
+      return addExpense()
     }
   }
 
@@ -1401,6 +1447,7 @@ export function useExpenses() {
     fetchExpenses,
     addExpense,
     updateExpense,
+    updateExpenseAmount,
     deleteExpense,
     toggleExpenseActive,
     saveExpense,

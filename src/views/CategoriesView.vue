@@ -82,14 +82,14 @@ onMounted(fetchExpenses)
           {{ t('categories.empty') }}
         </Message>
 
-        <div v-else class="subfolio-table-wrap">
-          <DataTable
-            v-model:expanded-rows="expandedRows"
-            :value="categoriesWithStats"
-            data-key="name"
-            class="subfolio-datatable"
-            table-style="min-width: 58rem"
-          >
+        <DataTable
+          v-else
+          v-model:expanded-rows="expandedRows"
+          :value="categoriesWithStats"
+          data-key="name"
+          class="subfolio-datatable"
+          table-style="min-width: 58rem"
+        >
             <Column expander style="width: 3rem" />
             <Column field="name" :header="t('table.category')" sortable>
               <template #body="{ data }">
@@ -168,8 +168,7 @@ onMounted(fetchExpenses)
                 <ExpenseTable :expenses="data.items" :show-category="false" />
               </div>
             </template>
-          </DataTable>
-        </div>
+        </DataTable>
       </template>
     </Card>
 </template>

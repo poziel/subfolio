@@ -44,6 +44,24 @@ export const pocketBaseCategoryFields = [
   'updated'
 ]
 
+export const pocketBasePaymentHistoryFields = [
+  'id',
+  'user',
+  'expense',
+  'scheduledDate',
+  'paidDate',
+  'amount',
+  'currency',
+  'status',
+  'source',
+  'changeType',
+  'details',
+  'createdAt',
+  'updatedAt',
+  'created',
+  'updated'
+]
+
 const getResponseMessage = (error) =>
   error?.response?.message || error?.message || 'PocketBase schema validation failed.'
 
@@ -56,7 +74,12 @@ export class PocketBaseSchemaError extends Error {
   }
 }
 
-export const ensurePocketBaseSchema = async (client, collection, categoryCollection = 'categories') => {
+export const ensurePocketBaseSchema = async (
+  client,
+  collection,
+  categoryCollection = 'categories',
+  paymentHistoryCollection = 'expensePaymentHistory'
+) => {
   try {
     await client.health.check()
     await client.collection(collection).getList(1, 1, {
@@ -67,12 +90,16 @@ export const ensurePocketBaseSchema = async (client, collection, categoryCollect
       fields: pocketBaseCategoryFields.join(','),
       requestKey: null
     })
+    await client.collection(paymentHistoryCollection).getList(1, 1, {
+      fields: pocketBasePaymentHistoryFields.join(','),
+      requestKey: null
+    })
   } catch (error) {
     const status = error?.status
 
     if (status === 404) {
       throw new PocketBaseSchemaError(
-        `PocketBase collection "${collection}" or "${categoryCollection}" is missing. Run the Subfolio PocketBase migrations before using this connection.`,
+        `PocketBase collection "${collection}", "${categoryCollection}", or "${paymentHistoryCollection}" is missing. Run the Subfolio PocketBase migrations before using this connection.`,
         { cause: error, status }
       )
     }

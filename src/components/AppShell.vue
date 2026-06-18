@@ -2,9 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Menu from 'primevue/menu'
-import Tag from 'primevue/tag'
 import { useAuth } from '../composables/useAuth'
-import { useDatabaseConnection } from '../composables/useDatabaseConnection'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
@@ -16,7 +14,6 @@ import ThemeLanguageControls from './ThemeLanguageControls.vue'
 const route = useRoute()
 const router = useRouter()
 const { currentUser, logout } = useAuth()
-const { providerLabel } = useDatabaseConnection()
 const { openAddModal } = useExpenses()
 const { t } = useI18n()
 const { contentLayoutMode } = useSettings()
@@ -38,7 +35,10 @@ const navItems = [
   { to: '/app/settings', labelKey: 'appNav.settings', icon: 'pi pi-cog' }
 ]
 
-const isActive = (path) => route.path === path
+const isActive = (path) => (
+  route.path === path ||
+  (path !== '/app' && route.path.startsWith(`${path}/`))
+)
 const wordmarkSrc = computed(() =>
   activeTheme.value === 'dark'
     ? '/images/subfolio-light-name.svg'
@@ -87,9 +87,6 @@ watch(sidebarCollapsed, (collapsed) => {
       <div class="app-shell__mobile-row">
         <RouterLink to="/app" class="app-shell__brand p-0">
           <img :src="wordmarkSrc" alt="Subfolio" class="app-shell__wordmark app-shell__wordmark--mobile" />
-          <span class="min-w-0">
-            <Tag :value="providerLabel" severity="info" rounded class="max-w-36" />
-          </span>
         </RouterLink>
 
         <div class="flex shrink-0 items-center gap-2">
