@@ -98,10 +98,17 @@ const classes = computed(() => [
 }
 
 .subfolio-icon-tile__icon {
-  display: inline-flex;
+  display: inline-grid;
+  width: 100%;
+  height: 100%;
   align-items: center;
   justify-content: center;
+  place-items: center;
   font-size: 1.05rem;
+  line-height: 1;
+}
+
+.subfolio-icon-tile__icon::before {
   line-height: 1;
 }
 

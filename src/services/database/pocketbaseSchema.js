@@ -2,6 +2,8 @@ export const pocketBaseExpenseFields = [
   'id',
   'user',
   'name',
+  'presetId',
+  'categoryId',
   'category',
   'amount',
   'currency',
@@ -9,12 +11,33 @@ export const pocketBaseExpenseFields = [
   'icon',
   'note',
   'includesTax',
+  'taxRateId',
   'taxRate',
+  'scheduleType',
+  'paymentDate',
+  'repeatInterval',
+  'repeatUnit',
+  'repeatPattern',
+  'recurrenceSummary',
   'frequency',
   'customTimesPerYear',
   'startDate',
+  'startTime',
+  'paymentTimezone',
   'datePattern',
+  'recurrenceSchedule',
   'active',
+  'createdAt',
+  'updatedAt',
+  'created',
+  'updated'
+]
+
+export const pocketBaseCategoryFields = [
+  'id',
+  'user',
+  'name',
+  'normalizedName',
   'createdAt',
   'updatedAt',
   'created',
@@ -33,11 +56,15 @@ export class PocketBaseSchemaError extends Error {
   }
 }
 
-export const ensurePocketBaseSchema = async (client, collection) => {
+export const ensurePocketBaseSchema = async (client, collection, categoryCollection = 'categories') => {
   try {
     await client.health.check()
     await client.collection(collection).getList(1, 1, {
       fields: pocketBaseExpenseFields.join(','),
+      requestKey: null
+    })
+    await client.collection(categoryCollection).getList(1, 1, {
+      fields: pocketBaseCategoryFields.join(','),
       requestKey: null
     })
   } catch (error) {
@@ -45,7 +72,7 @@ export const ensurePocketBaseSchema = async (client, collection) => {
 
     if (status === 404) {
       throw new PocketBaseSchemaError(
-        `PocketBase collection "${collection}" is missing. Run the Subfolio PocketBase migrations before using this connection.`,
+        `PocketBase collection "${collection}" or "${categoryCollection}" is missing. Run the Subfolio PocketBase migrations before using this connection.`,
         { cause: error, status }
       )
     }

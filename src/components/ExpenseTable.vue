@@ -37,7 +37,6 @@ const {
   openEditModal,
   deleteExpense,
   toggleExpenseActive,
-  frequencyOptions,
   getNextOccurrence
 } = useExpenses()
 
@@ -46,21 +45,14 @@ const { t, locale } = useI18n()
 
 const paginatorEnabled = computed(() => props.showPagination && props.expenses.length > 10)
 
-const formatFrequency = (expense) => {
-  if (expense.frequency === 'custom') {
-    return t('frequencies.timesPerYear', { count: expense.customTimesPerYear })
-  }
-
-  const freq = frequencyOptions.find((f) => f.value === expense.frequency)
-  return freq ? t(`frequencies.${freq.value}`) : expense.frequency
-}
-
 const formatDate = (value) => {
   if (!value) return '-'
-  return new Date(value).toLocaleDateString(locale.value === 'fr' ? 'fr-CA' : 'en-US', {
+  const options = {
     month: 'short',
     day: '2-digit'
-  })
+  }
+
+  return new Date(value).toLocaleDateString(locale.value === 'fr' ? 'fr-CA' : 'en-US', options)
 }
 
 const nextOccurrence = (expense) => {
@@ -97,7 +89,7 @@ const initials = (name) =>
       :rows="10"
       :rows-per-page-options="[5, 10, 20]"
       striped-rows
-      table-style="min-width: 58rem"
+      table-style="min-width: 48rem"
     >
       <template #empty>
         <div class="py-10 text-center muted-copy">
@@ -137,12 +129,6 @@ const initials = (name) =>
       <Column v-if="showCategory" field="category" :header="t('table.category')" sortable>
         <template #body="{ data }">
           <Tag :value="data.category" severity="secondary" rounded />
-        </template>
-      </Column>
-
-      <Column :header="t('table.frequency')" sortable sort-field="frequency">
-        <template #body="{ data }">
-          {{ formatFrequency(data) }}
         </template>
       </Column>
 

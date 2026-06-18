@@ -14,6 +14,7 @@ sign-in.
 ```bash
 VITE_POCKETBASE_URL=http://127.0.0.1:8090
 VITE_POCKETBASE_EXPENSES_COLLECTION=expenses
+VITE_POCKETBASE_CATEGORIES_COLLECTION=categories
 VITE_POCKETBASE_AUTH_COLLECTION=users
 ```
 
@@ -88,10 +89,11 @@ npm run db -- serve --dry-run
 
 The first Subfolio migration creates the `expenses` collection with the fields
 required by the frontend adapter. Later migrations add optional metadata fields,
-a required `user` relation, and username support for the `users` auth
-collection. The final expense collection rules require
-`@request.auth.id` and restrict list, view, create, update, and delete access to
-the authenticated owner.
+a required `user` relation, username support for the `users` auth collection,
+recurrence schedule metadata, and a user-owned `categories` collection. The
+final expense and category collection rules require `@request.auth.id` and
+restrict list, view, create, update, and delete access to the authenticated
+owner.
 
 ## Seed data
 
