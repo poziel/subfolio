@@ -1,7 +1,6 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import Card from 'primevue/card'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import DatePicker from 'primevue/datepicker'
@@ -10,6 +9,8 @@ import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import SelectButton from 'primevue/selectbutton'
 import Tag from 'primevue/tag'
+import AppPage from '../components/AppPage.vue'
+import AppSectionSurface from '../components/AppSectionSurface.vue'
 import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
 import SubfolioButton from '../components/SubfolioButton.vue'
 import { useExpenses } from '../composables/useExpenses'
@@ -204,61 +205,65 @@ onMounted(fetchExpenses)
 </script>
 
 <template>
-  <header class="app-page__header">
-    <div class="expense-detail-heading">
-      <SubfolioIconTile
-        v-if="expense && getExpenseIcon(expense)"
-        :icon="getExpenseIcon(expense)"
-        tone="neutral"
-      />
-      <span v-else-if="expense" class="subfolio-avatar">{{ expense.name.slice(0, 2).toUpperCase() }}</span>
-      <div class="min-w-0">
-        <h1 class="font-serif text-4xl text-ink">{{ expense?.name || t('expenseDetail.title') }}</h1>
-        <div v-if="expense" class="expense-detail-meta">
-          <Tag :value="expense.category" severity="secondary" rounded />
-          <Tag :value="activeStatusLabel" :severity="activeStatusSeverity" rounded />
+  <AppPage>
+    <template #header>
+      <header class="app-page__header">
+        <div class="expense-detail-heading">
+          <SubfolioIconTile
+            v-if="expense && getExpenseIcon(expense)"
+            :icon="getExpenseIcon(expense)"
+            tone="neutral"
+          />
+          <span v-else-if="expense" class="subfolio-avatar">{{ expense.name.slice(0, 2).toUpperCase() }}</span>
+          <div class="min-w-0">
+            <h1 class="font-serif text-4xl text-ink">{{ expense?.name || t('expenseDetail.title') }}</h1>
+            <div v-if="expense" class="expense-detail-meta">
+              <Tag :value="expense.category" severity="secondary" rounded />
+              <Tag :value="activeStatusLabel" :severity="activeStatusSeverity" rounded />
+            </div>
+            <p v-else class="muted-copy">{{ t('expenseDetail.intro') }}</p>
+          </div>
         </div>
-        <p v-else class="muted-copy">{{ t('expenseDetail.intro') }}</p>
-      </div>
-    </div>
 
-    <div v-if="expense" class="expense-detail-header-actions">
-      <SubfolioButton
-        type="button"
-        icon="pi pi-pencil"
-        :title="t('table.edit')"
-        :aria-label="t('table.edit')"
-        variant="tertiary"
-        theme="secondary"
-        data-test-id="expense-detail-edit"
-        @click="openEditModal(expense)"
-      />
-      <SubfolioButton
-        type="button"
-        icon="pi pi-times"
-        :title="t('expenseDetail.close')"
-        :aria-label="t('expenseDetail.close')"
-        variant="tertiary"
-        theme="secondary"
-        data-test-id="expense-detail-back"
-        @click="router.push({ name: 'expenses' })"
-      />
-    </div>
-  </header>
+        <div v-if="expense" class="expense-detail-header-actions">
+          <SubfolioButton
+            type="button"
+            icon="pi pi-pencil"
+            :title="t('table.edit')"
+            :aria-label="t('table.edit')"
+            variant="tertiary"
+            theme="secondary"
+            data-test-id="expense-detail-edit"
+            @click="openEditModal(expense)"
+          />
+          <SubfolioButton
+            type="button"
+            icon="pi pi-times"
+            :title="t('expenseDetail.close')"
+            :aria-label="t('expenseDetail.close')"
+            variant="tertiary"
+            theme="secondary"
+            data-test-id="expense-detail-back"
+            @click="router.push({ name: 'expenses' })"
+          />
+        </div>
+      </header>
+    </template>
 
-  <Message v-if="status === 'error' && statusError" severity="warn" :closable="false">
-    {{ statusError }}
-  </Message>
+    <Message v-if="status === 'error' && statusError" severity="warn" :closable="false">
+      {{ statusError }}
+    </Message>
 
-  <Message v-if="!expense && expenses.length" severity="warn" :closable="false">
-    {{ t('expenseDetail.notFound') }}
-  </Message>
+    <Message v-if="!expense && expenses.length" severity="warn" :closable="false">
+      {{ t('expenseDetail.notFound') }}
+    </Message>
 
-  <template v-else-if="expense">
-    <Card>
-      <template #title>{{ t('expenseDetail.coreInfo') }}</template>
-      <template #subtitle>{{ recurrenceSummary }}</template>
-      <template #content>
+    <template v-else-if="expense">
+      <AppSectionSurface
+        :title="t('expenseDetail.coreInfo')"
+        :subtitle="recurrenceSummary"
+        surface-class="app-section-surface"
+      >
         <dl class="expense-detail-facts">
           <div>
             <dt>{{ t('expenseDetail.currentPrice') }}</dt>
@@ -297,15 +302,13 @@ onMounted(fetchExpenses)
         </dl>
 
         <p v-if="expense.note" class="mt-4 muted-copy">{{ expense.note }}</p>
-      </template>
-    </Card>
+      </AppSectionSurface>
 
-    <Card>
-      <template #title>{{ t('expenseDetail.historyTitle') }}</template>
-      <template #subtitle>
-        {{ t('expenseDetail.historySubtitle', { date: formatDate(startedPayingDate, { long: true }) }) }}
-      </template>
-      <template #content>
+      <AppSectionSurface
+        :title="t('expenseDetail.historyTitle')"
+        :subtitle="t('expenseDetail.historySubtitle', { date: formatDate(startedPayingDate, { long: true }) })"
+        surface-class="app-section-surface app-section-surface--table"
+      >
         <Message v-if="status === 'loading'" severity="info" :closable="false">
           {{ t('expenseDetail.loadingHistory') }}
         </Message>
@@ -370,75 +373,75 @@ onMounted(fetchExpenses)
             </template>
           </Column>
         </DataTable>
-      </template>
-    </Card>
-  </template>
+      </AppSectionSurface>
+    </template>
 
-  <Dialog
-    :visible="paymentEditorOpen"
-    modal
-    :header="t('expenseDetail.editPaymentTitle')"
-    class="w-[min(94vw,32rem)]"
-    @update:visible="(visible) => { if (!visible) closePaymentEditor() }"
-  >
-    <form v-if="editingRecord" class="expense-detail-price-form" @submit.prevent="savePaymentEdit">
-      <p class="muted-copy">
-        {{ t('expenseDetail.editPaymentSubtitle', { date: formatDate(editingRecord.scheduledDate, { long: true }) }) }}
-      </p>
+    <Dialog
+      :visible="paymentEditorOpen"
+      modal
+      :header="t('expenseDetail.editPaymentTitle')"
+      class="w-[min(94vw,32rem)]"
+      @update:visible="(visible) => { if (!visible) closePaymentEditor() }"
+    >
+      <form v-if="editingRecord" class="expense-detail-price-form" @submit.prevent="savePaymentEdit">
+        <p class="muted-copy">
+          {{ t('expenseDetail.editPaymentSubtitle', { date: formatDate(editingRecord.scheduledDate, { long: true }) }) }}
+        </p>
 
-      <label class="grid gap-2" for="payment-edit-scope">
-        <span class="text-sm font-extrabold text-ink">{{ t('expenseDetail.applyTo') }}</span>
-        <SelectButton
-          v-model="editScope"
-          :options="editScopeOptions"
-          option-label="label"
-          option-value="value"
-          data-test-id="payment-edit-scope"
-        />
-      </label>
+        <label class="grid gap-2" for="payment-edit-scope">
+          <span class="text-sm font-extrabold text-ink">{{ t('expenseDetail.applyTo') }}</span>
+          <SelectButton
+            v-model="editScope"
+            :options="editScopeOptions"
+            option-label="label"
+            option-value="value"
+            data-test-id="payment-edit-scope"
+          />
+        </label>
 
-      <label v-if="editScope === 'single'" class="grid gap-2" for="payment-edit-paid-date">
-        <span class="text-sm font-extrabold text-ink">{{ t('expenseDetail.paidDate') }}</span>
-        <DatePicker
-          v-model="editPaidDate"
-          input-id="payment-edit-paid-date"
-          date-format="yy-mm-dd"
-          show-icon
-          fluid
-          data-test-id="payment-edit-paid-date"
-        />
-      </label>
+        <label v-if="editScope === 'single'" class="grid gap-2" for="payment-edit-paid-date">
+          <span class="text-sm font-extrabold text-ink">{{ t('expenseDetail.paidDate') }}</span>
+          <DatePicker
+            v-model="editPaidDate"
+            input-id="payment-edit-paid-date"
+            date-format="yy-mm-dd"
+            show-icon
+            fluid
+            data-test-id="payment-edit-paid-date"
+          />
+        </label>
 
-      <label class="grid gap-2" for="payment-edit-amount">
-        <span class="text-sm font-extrabold text-ink">{{ t('expenseDetail.amountPaid') }}</span>
-        <InputNumber
-          v-model="editAmount"
-          input-id="payment-edit-amount"
-          mode="decimal"
-          :min="0"
-          :min-fraction-digits="2"
-          :max-fraction-digits="2"
-          fluid
-          data-test-id="payment-edit-amount"
-        />
-      </label>
+        <label class="grid gap-2" for="payment-edit-amount">
+          <span class="text-sm font-extrabold text-ink">{{ t('expenseDetail.amountPaid') }}</span>
+          <InputNumber
+            v-model="editAmount"
+            input-id="payment-edit-amount"
+            mode="decimal"
+            :min="0"
+            :min-fraction-digits="2"
+            :max-fraction-digits="2"
+            fluid
+            data-test-id="payment-edit-amount"
+          />
+        </label>
 
-      <div class="flex flex-wrap justify-end gap-2">
-        <SubfolioButton
-          type="button"
-          :label="t('expenseForm.cancel')"
-          variant="tertiary"
-          theme="secondary"
-          @click="closePaymentEditor"
-        />
-        <SubfolioButton
-          type="submit"
-          icon="pi pi-check"
-          :label="t('expenseDetail.savePayment')"
-          :loading="saving"
-          data-test-id="payment-edit-save"
-        />
-      </div>
-    </form>
-  </Dialog>
+        <div class="flex flex-wrap justify-end gap-2">
+          <SubfolioButton
+            type="button"
+            :label="t('expenseForm.cancel')"
+            variant="tertiary"
+            theme="secondary"
+            @click="closePaymentEditor"
+          />
+          <SubfolioButton
+            type="submit"
+            icon="pi pi-check"
+            :label="t('expenseDetail.savePayment')"
+            :loading="saving"
+            data-test-id="payment-edit-save"
+          />
+        </div>
+      </form>
+    </Dialog>
+  </AppPage>
 </template>

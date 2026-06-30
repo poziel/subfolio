@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import Card from 'primevue/card'
+import SubfolioSurfaceCard from './SubfolioSurfaceCard.vue'
 import SubfolioIconTile from './icons/SubfolioIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
@@ -126,15 +126,13 @@ const visibleMetrics = computed(() =>
     :class="`metric-summary-grid--count-${visibleMetrics.length}`"
     :aria-label="t('summaryMetrics.ariaLabel')"
   >
-    <Card v-for="metric in visibleMetrics" :key="metric.label" class="subfolio-card metric-card">
-      <template #content>
-        <div class="metric-card__top">
-          <p class="metric-card__label">{{ metric.label }}</p>
-          <SubfolioIconTile :icon="metric.icon" :tone="info" />
-        </div>
-        <p class="metric-value">{{ metric.value }}</p>
-        <p class="text-sm muted-copy">{{ metric.detail }}</p>
-      </template>
-    </Card>
+    <SubfolioSurfaceCard v-for="metric in visibleMetrics" :key="metric.label" class="metric-card">
+      <div class="metric-card__top">
+        <p class="metric-card__label">{{ metric.label }}</p>
+        <SubfolioIconTile :icon="metric.icon" tone="info" />
+      </div>
+      <p class="metric-value">{{ metric.value }}</p>
+      <p class="text-sm muted-copy">{{ metric.detail }}</p>
+    </SubfolioSurfaceCard>
   </section>
 </template>

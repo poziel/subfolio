@@ -110,8 +110,8 @@ const messages = {
       useConnectionBody: 'Subfolio can start with Firebase or PocketBase and grow toward more realtime providers without requiring a hosted Subfolio backend.'
     },
     home: {
-      title: 'Welcome to Subfolio',
-      intro: 'Track recurring commitments, understand your average monthly load, and keep the subscription view connected to your own database.',
+      title: 'Home',
+      intro: 'Review recurring totals, next payments, and shortcuts.',
       activeExpenses: 'Active expenses',
       activeExpensesDetail: 'Recurring items currently counted',
       monthlyTotal: 'Monthly total',
@@ -778,8 +778,8 @@ const messages = {
       useConnectionBody: 'Subfolio peut démarrer avec Firebase ou PocketBase et évoluer vers plus de fournisseurs temps réel sans backend Subfolio hébergé.'
     },
     home: {
-      title: 'Bienvenue dans Subfolio',
-      intro: 'Suivez les engagements récurrents, comprenez votre charge mensuelle moyenne et gardez la vue des abonnements connectée à votre propre base de données.',
+      title: 'Accueil',
+      intro: 'Consultez les totaux récurrents, prochains paiements et raccourcis.',
       activeExpenses: 'Dépenses actives',
       activeExpensesDetail: 'Éléments récurrents comptabilisés',
       monthlyTotal: 'Total mensuel',
