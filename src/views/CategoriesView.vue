@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from 'vue'
 import Column from 'primevue/column'
 import DataTable from 'primevue/datatable'
 import Message from 'primevue/message'
-import { getCategoryIcon } from '../data/serviceCatalog'
 import AppPage from '../components/AppPage.vue'
 import AppSectionSurface from '../components/AppSectionSurface.vue'
 import ExpenseTable from '../components/ExpenseTable.vue'
@@ -15,40 +14,71 @@ import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
 
-const { expenses, fetchExpenses, getYearlyAmount, toggleExpenseActive } = useExpenses()
+const {
+  expenses,
+  fetchExpenses,
+  getYearlyAmount,
+  getExpenseCategory,
+  getExpenseCategoryName,
+  getExpenseCategoryIcon,
+  toggleCategoryActive
+} = useExpenses()
 const { formatMoney, convertToDisplayed, displayedCurrency } = useSettings()
 const { t } = useI18n()
 
 const expandedRows = ref({})
 
-const isCategoryActive = (category) => category.activeCount > 0
+const isCategoryActive = (category) => category.status !== 'inactive' && category.active !== false
 
-const toggleCategoryActive = async (category) => {
-  const shouldActivate = !isCategoryActive(category)
-  const itemsToToggle = category.items.filter((item) => (item.active !== false) !== shouldActivate)
-  await Promise.all(itemsToToggle.map((item) => toggleExpenseActive(item.id)))
+const categoryRowClass = (category) => [
+  'subfolio-category-row',
+  isCategoryActive(category) ? '' : 'subfolio-category-row--inactive'
+].filter(Boolean).join(' ')
+
+const toggleExpandedCategory = (event) => {
+  const target = event?.originalEvent?.target
+  if (target?.closest?.('button,a,input,textarea,select,[role="button"],.p-row-toggler')) return
+
+  const id = String(event?.data?.id || '')
+  if (!id) return
+
+  const next = { ...expandedRows.value }
+  if (next[id]) {
+    delete next[id]
+  } else {
+    next[id] = true
+  }
+  expandedRows.value = next
 }
 
 const categoriesWithStats = computed(() => {
   const grouped = new Map()
 
   expenses.value.forEach((item) => {
-    const category = item.category
-    if (!grouped.has(category)) {
-      grouped.set(category, {
-        name: category,
+    const category = getExpenseCategory(item)
+    const name = getExpenseCategoryName(item)
+    const id = category?.id || item.categoryId || `category-${name}`
+
+    if (!grouped.has(id)) {
+      grouped.set(id, {
+        id,
+        name,
+        status: category?.status || item.categoryStatus || 'active',
+        active: category?.active !== false && item.categoryActive !== false,
+        icon: category?.icon || getExpenseCategoryIcon(item),
         items: [],
         activeItems: [],
         yearly: 0
       })
     }
 
-    const group = grouped.get(category)
+    const group = grouped.get(id)
     group.items.push(item)
 
     if (item.active !== false) {
+      const yearly = convertToDisplayed(getYearlyAmount(item), item.currency || displayedCurrency.value)
       group.activeItems.push(item)
-      group.yearly += convertToDisplayed(getYearlyAmount(item), item.currency || displayedCurrency.value)
+      group.yearly += yearly
     }
   })
 
@@ -62,7 +92,7 @@ const categoriesWithStats = computed(() => {
       activeCount: group.activeItems.length,
       totalCount: group.items.length
     }))
-    .sort((a, b) => b.yearly - a.yearly)
+    .sort((a, b) => a.name.localeCompare(b.name))
 })
 
 onMounted(fetchExpenses)
@@ -92,22 +122,32 @@ onMounted(fetchExpenses)
         v-else
         v-model:expanded-rows="expandedRows"
         :value="categoriesWithStats"
-        data-key="name"
+        data-key="id"
         class="subfolio-datatable"
+        :row-class="categoryRowClass"
         table-style="min-width: 58rem"
+        @row-click="toggleExpandedCategory"
       >
         <Column expander style="width: 3rem" />
         <Column field="name" :header="t('table.category')" sortable>
           <template #body="{ data }">
             <div class="flex items-center gap-3">
               <SubfolioIconTile
-                :icon="getCategoryIcon(data.name)"
+                :icon="data.icon"
                 size="sm"
                 tone="neutral"
                 :label="data.name"
               />
               <div>
-                <p class="font-semibold text-ink">{{ data.name }}</p>
+                <div class="flex items-center gap-2">
+                  <span
+                    v-if="!isCategoryActive(data)"
+                    class="subfolio-category-status-marker"
+                    :title="t('categories.excluded')"
+                    :aria-label="t('categories.excluded')"
+                  />
+                  <p class="font-semibold text-ink">{{ data.name }}</p>
+                </div>
                 <p class="text-sm muted-copy">
                   {{ t('categories.activeOfTotal', { active: data.activeCount, total: data.totalCount }) }}
                 </p>
@@ -139,7 +179,7 @@ onMounted(fetchExpenses)
               size="small"
               :title="isCategoryActive(data) ? t('table.deactivate') : t('table.activate')"
               :aria-label="isCategoryActive(data) ? t('table.deactivate') : t('table.activate')"
-              @click="toggleCategoryActive(data)"
+              @click.stop="toggleCategoryActive(data)"
             />
           </template>
         </Column>

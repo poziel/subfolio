@@ -18,6 +18,7 @@ const {
   openAddModal,
   status,
   statusError,
+  getExpenseCategoryName,
   getRecurrenceSummary
 } = useExpenses()
 
@@ -31,7 +32,7 @@ const filteredExpenses = computed(() => {
 
   return expenses.value.filter((item) => (
     item.name.toLowerCase().includes(query) ||
-    item.category.toLowerCase().includes(query) ||
+    getExpenseCategoryName(item).toLowerCase().includes(query) ||
     getRecurrenceSummary(item, locale.value).toLowerCase().includes(query) ||
     (item.frequency && item.frequency.toLowerCase().includes(query)) ||
     (item.currency && item.currency.toLowerCase().includes(query))

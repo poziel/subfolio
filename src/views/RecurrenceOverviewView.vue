@@ -10,12 +10,19 @@ import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
 
-const { expenses, fetchExpenses, getYearlyAmount, getRecurrenceSummary } = useExpenses()
+const {
+  expenses,
+  fetchExpenses,
+  getYearlyAmount,
+  getRecurrenceSummary,
+  getExpenseCategoryName,
+  isExpenseCounted
+} = useExpenses()
 const { formatMoney, getConversionTooltip, convertToDisplayed, displayedCurrency } = useSettings()
 const { t, locale } = useI18n()
 
 const summaryTotals = computed(() => {
-  const activeExpenses = expenses.value.filter((item) => item.active !== false)
+  const activeExpenses = expenses.value.filter((item) => isExpenseCounted(item))
   const yearly = activeExpenses.reduce(
     (total, item) => total + convertToDisplayed(getYearlyAmount(item), item.currency || displayedCurrency.value),
     0
@@ -45,7 +52,7 @@ const summaryTotals = computed(() => {
 
 const projectedRows = computed(() =>
   expenses.value
-    .filter((item) => item.active !== false)
+    .filter((item) => isExpenseCounted(item))
     .map((item) => {
       const yearly = getYearlyAmount(item)
       return {
@@ -112,7 +119,7 @@ onMounted(fetchExpenses)
         </Column>
         <Column field="category" :header="t('table.category')" sortable>
           <template #body="{ data }">
-            <Tag :value="data.category" severity="secondary" rounded />
+            <Tag :value="getExpenseCategoryName(data)" severity="secondary" rounded />
           </template>
         </Column>
         <Column :header="t('table.frequency')" sortable sort-field="recurrenceSummary">

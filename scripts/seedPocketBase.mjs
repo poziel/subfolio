@@ -6,6 +6,11 @@ import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { faker } from '@faker-js/faker'
 import { serviceIconOptions } from '../src/data/serviceCatalog.js'
+import {
+  buildRecurrenceSchedule,
+  deriveLegacyDatePattern,
+  deriveLegacyFrequency
+} from '../src/data/recurrenceRules.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const defaultRuntimeRoot = process.platform === 'win32'
@@ -51,6 +56,7 @@ const currency = argValue('--currency', process.env.POCKETBASE_SEED_CURRENCY || 
 const seed = Number.parseInt(argValue('--seed', process.env.POCKETBASE_SEED_RANDOM || String(Date.now())), 10)
 const legacyDataset = argValue('--dataset')
 const reset = args.has('--reset')
+const resetOnly = args.has('--reset-only')
 const dryRun = args.has('--dry-run')
 const listUsers = args.has('--list-users')
 const help = args.has('--help') || args.has('-h')
@@ -66,6 +72,7 @@ Options:
   --categories=<number>    Number of generated categories (default 12)
   --currency=<code>        Currency code for generated expenses (default CAD)
   --reset                  Delete existing expenses for the selected user first
+  --reset-only             Delete app data for the selected user without seeding
   --seed=<number>          Deterministic Faker seed
   --dir=<path>             PocketBase pb_data directory
   --runtime-root=<path>    PocketBase runtime root containing pb_data
@@ -99,21 +106,32 @@ const titleCase = (value) =>
 
 const toIsoDate = (date) => date.toISOString().slice(0, 10)
 
-const createCategories = (total) => {
-  const categories = new Set()
+const createCategories = (total, usedIds) => {
+  const categoryNames = new Set()
   let attempts = 0
 
-  while (categories.size < total && attempts < total * 20) {
+  while (categoryNames.size < total && attempts < total * 20) {
     const category = titleCase(faker.commerce.department().replace(/,/g, ''))
-    if (category) categories.add(category)
+    if (category) categoryNames.add(category)
     attempts += 1
   }
 
-  while (categories.size < total) {
-    categories.add(`Category ${categories.size + 1}`)
+  while (categoryNames.size < total) {
+    categoryNames.add(`Category ${categoryNames.size + 1}`)
   }
 
-  return [...categories]
+  const now = new Date().toISOString()
+  const icons = serviceIconOptions.map((item) => item.value)
+
+  return [...categoryNames].map((name) => ({
+    id: createPocketBaseId(usedIds),
+    name,
+    normalizedName: name.trim().toLowerCase(),
+    status: 'active',
+    icon: faker.helpers.arrayElement(icons),
+    createdAt: now,
+    updatedAt: now
+  }))
 }
 
 const createPocketBaseId = (usedIds) => {
@@ -128,34 +146,50 @@ const createPocketBaseId = (usedIds) => {
   return id
 }
 
-const createDatePattern = (frequency) => {
-  const dayOfMonth = faker.number.int({ min: 1, max: 28 })
-  const dayOfWeek = faker.number.int({ min: 0, max: 6 })
-  const nthWeek = faker.number.int({ min: 1, max: 4 })
-  const month = faker.number.int({ min: 0, max: 11 })
-
-  if (frequency === 'weekly' || frequency === 'bi-weekly') {
-    return { type: 'day-of-week', dayOfWeek }
+const createRecurrenceFields = (frequency, paymentDate) => {
+  const defaults = {
+    once: { scheduleType: 'one-time', repeatInterval: null, repeatUnit: null },
+    yearly: { scheduleType: 'recurring', repeatInterval: 1, repeatUnit: 'year' },
+    monthly: { scheduleType: 'recurring', repeatInterval: 1, repeatUnit: 'month' },
+    weekly: { scheduleType: 'recurring', repeatInterval: 1, repeatUnit: 'week' },
+    'bi-weekly': { scheduleType: 'recurring', repeatInterval: 2, repeatUnit: 'week' },
+    daily: { scheduleType: 'recurring', repeatInterval: 1, repeatUnit: 'day' },
+    quarterly: { scheduleType: 'recurring', repeatInterval: 3, repeatUnit: 'month' },
+    'semi-annually': { scheduleType: 'recurring', repeatInterval: 6, repeatUnit: 'month' }
   }
-
-  if (frequency === 'yearly') {
-    return faker.datatype.boolean()
-      ? { type: 'day-of-year', month, dayOfMonth }
-      : { type: 'nth-weekday-year', month, nthWeek, dayOfWeek }
+  const customSchedules = [
+    { repeatInterval: faker.number.int({ min: 2, max: 30 }), repeatUnit: 'day' },
+    { repeatInterval: faker.number.int({ min: 3, max: 8 }), repeatUnit: 'week' },
+    { repeatInterval: faker.helpers.arrayElement([2, 4, 5, 7, 8, 9, 10, 11]), repeatUnit: 'month' },
+    { repeatInterval: faker.number.int({ min: 2, max: 5 }), repeatUnit: 'year' }
+  ]
+  const base = frequency === 'custom'
+    ? { scheduleType: 'recurring', ...faker.helpers.arrayElement(customSchedules) }
+    : defaults[frequency] || defaults.monthly
+  const supportsPattern = ['month', 'year'].includes(base.repeatUnit)
+  const recurrenceSource = {
+    ...base,
+    paymentDate,
+    repeatPattern: supportsPattern
+      ? faker.helpers.arrayElement(['same-calendar-day', 'same-relative-weekday'])
+      : null
   }
+  const recurrenceSchedule = buildRecurrenceSchedule(recurrenceSource)
 
-  if (frequency === 'custom') {
-    return faker.helpers.arrayElement([
-      { type: 'day-of-month', dayOfMonth },
-      { type: 'day-of-year', month, dayOfMonth },
-      { type: 'nth-weekday', nthWeek, dayOfWeek },
-      { type: 'interval', intervalDays: faker.number.int({ min: 10, max: 90 }) }
-    ])
+  return {
+    scheduleType: recurrenceSchedule.scheduleType,
+    paymentDate,
+    repeatInterval: recurrenceSchedule.repeat?.interval || null,
+    repeatUnit: recurrenceSchedule.repeat?.unit || null,
+    repeatPattern: recurrenceSchedule.repeatPattern || null,
+    recurrenceSummary: recurrenceSchedule.summary,
+    frequency: deriveLegacyFrequency(recurrenceSource),
+    startDate: paymentDate,
+    startTime: null,
+    paymentTimezone: null,
+    datePattern: deriveLegacyDatePattern(recurrenceSource),
+    recurrenceSchedule
   }
-
-  return faker.datatype.boolean()
-    ? { type: 'day-of-month', dayOfMonth }
-    : { type: 'nth-weekday', nthWeek, dayOfWeek }
 }
 
 const amountRangeFor = (frequency) => {
@@ -179,21 +213,25 @@ const createExpenseName = () => {
 const createExpenses = () => {
   faker.seed(seed)
 
-  const categories = createCategories(categoryCount)
-  const icons = serviceIconOptions.map((item) => item.value)
   const usedIds = new Set()
+  const categories = createCategories(categoryCount, usedIds)
+  const icons = serviceIconOptions.map((item) => item.value)
 
-  return Array.from({ length: count }, () => {
+  const expenses = Array.from({ length: count }, () => {
     const frequency = faker.helpers.arrayElement(weightedFrequencies)
     const amountRange = amountRangeFor(frequency)
     const taxRate = faker.helpers.arrayElement([0, 0, 0, 5, 9.975, 13, 15])
     const startDate = faker.date.between({ from: '2023-01-01T00:00:00.000Z', to: new Date() })
+    const paymentDate = toIsoDate(startDate)
     const createdAt = faker.date.between({ from: startDate, to: new Date() }).toISOString()
+    const category = faker.helpers.arrayElement(categories)
+    const recurrence = createRecurrenceFields(frequency, paymentDate)
 
     return {
       id: createPocketBaseId(usedIds),
       name: createExpenseName(),
-      category: faker.helpers.arrayElement(categories),
+      categoryId: category.id,
+      category: category.name,
       amount: Number(faker.number.float(amountRange).toFixed(2)),
       currency,
       url: faker.datatype.boolean({ probability: 0.45 }) ? `https://${faker.internet.domainName()}` : '',
@@ -201,25 +239,28 @@ const createExpenses = () => {
       note: faker.datatype.boolean({ probability: 0.25 }) ? faker.lorem.sentence() : '',
       includesTax: faker.datatype.boolean({ probability: 0.72 }),
       taxRate,
-      frequency,
-      customTimesPerYear: frequency === 'custom' ? faker.number.int({ min: 3, max: 36 }) : null,
-      startDate: toIsoDate(startDate),
-      datePattern: createDatePattern(frequency),
+      ...recurrence,
       active: faker.datatype.boolean({ probability: 0.92 }),
       createdAt,
       updatedAt: new Date().toISOString()
     }
   })
+
+  return { categories, expenses }
 }
 
-const createMigrationSource = (records) => {
+const createMigrationSource = (records, categoryRecords) => {
   const recordIds = records.map((record) => record.id)
+  const categoryIds = categoryRecords.map((record) => record.id)
 
   return `migrate((app) => {
   const identity = ${JSON.stringify(identity)}
   const collectionName = ${JSON.stringify(collection)}
+  const categoryCollectionName = 'categories'
+  const paymentHistoryCollectionName = 'expensePaymentHistory'
   const authCollectionName = ${JSON.stringify(authCollection)}
   const expenses = ${JSON.stringify(records, null, 2)}
+  const categories = ${JSON.stringify(categoryRecords, null, 2)}
 
   if (!identity) {
     throw new Error('Seed user identity is required.')
@@ -256,13 +297,33 @@ const createMigrationSource = (records) => {
     )
   }
 
-  const collection = app.findCollectionByNameOrId(collectionName)
+  const deleteOwnedRecords = (targetCollection) => {
+    try {
+      app.findCollectionByNameOrId(targetCollection)
+    } catch {
+      // Collection is optional for older local databases.
+      return
+    }
 
-  if (${JSON.stringify(reset)}) {
-    const existing = app.findRecordsByFilter(collectionName, 'user = {:user}', '', 100000, 0, { user: user.id })
+    const existing = app.findRecordsByFilter(targetCollection, 'user = {:user}', '', 100000, 0, { user: user.id })
     for (const record of existing) {
       app.delete(record)
     }
+  }
+
+  if (${JSON.stringify(reset || resetOnly)}) {
+    deleteOwnedRecords(paymentHistoryCollectionName)
+    deleteOwnedRecords(collectionName)
+    deleteOwnedRecords(categoryCollectionName)
+  }
+
+  if (${JSON.stringify(resetOnly)}) return
+
+  const collection = app.findCollectionByNameOrId(collectionName)
+  const categoryCollection = app.findCollectionByNameOrId(categoryCollectionName)
+
+  for (const category of categories) {
+    app.save(new Record(categoryCollection, { ...category, user: user.id }))
   }
 
   for (const expense of expenses) {
@@ -270,11 +331,22 @@ const createMigrationSource = (records) => {
   }
 }, (app) => {
   const collectionName = ${JSON.stringify(collection)}
+  const categoryCollectionName = 'categories'
   const recordIds = ${JSON.stringify(recordIds, null, 2)}
+  const categoryIds = ${JSON.stringify(categoryIds, null, 2)}
 
   for (const id of recordIds) {
     try {
       app.delete(app.findRecordById(collectionName, id))
+    } catch {
+      // Already removed.
+    }
+  }
+
+
+  for (const id of categoryIds) {
+    try {
+      app.delete(app.findRecordById(categoryCollectionName, id))
     } catch {
       // Already removed.
     }
@@ -357,19 +429,30 @@ const main = async () => {
     throw new Error('--currency must be a three-letter currency code.')
   }
 
-  const records = createExpenses()
-  const categories = new Set(records.map((record) => record.category))
+  const generated = resetOnly ? { expenses: [], categories: [] } : createExpenses()
+  const records = generated.expenses
+  const categoryRecords = generated.categories
 
   if (dryRun) {
-    console.log(`Would seed ${records.length} generated expenses across ${categories.size} categories for ${identity}.`)
+    if (resetOnly) {
+      console.log(`Would remove expenses, payment history, and categories for ${identity}.`)
+      return
+    }
+
+    console.log(`Would seed ${records.length} generated expenses across ${categoryRecords.length} categories for ${identity}.`)
     console.log(JSON.stringify(records.slice(0, 3), null, 2))
     return
   }
 
   await ensureReady()
-  await runTemporaryMigration(createMigrationSource(records))
+  await runTemporaryMigration(createMigrationSource(records, categoryRecords))
 
-  console.log(`Seeded ${records.length} generated expenses across ${categories.size} categories for ${identity}.`)
+  if (resetOnly) {
+    console.log(`Removed expenses, payment history, and categories for ${identity}.`)
+    return
+  }
+
+  console.log(`Seeded ${records.length} generated expenses across ${categoryRecords.length} categories for ${identity}.`)
 }
 
 main().catch((error) => {

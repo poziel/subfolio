@@ -30,6 +30,8 @@ const {
   expenses,
   fetchExpenses,
   getRecurrenceSummary,
+  getExpenseCategoryName,
+  isExpenseCounted,
   openEditModal
 } = useExpenses()
 const {
@@ -115,10 +117,10 @@ const recurrenceSummary = computed(() =>
 const taxRate = computed(() => Math.max(0, Number(expense.value?.taxRate) || 0))
 const hasTaxColumn = computed(() => taxRate.value > 0)
 const activeStatusLabel = computed(() =>
-  expense.value?.active === false ? t('expenseDetail.inactive') : t('metrics.active')
+  isExpenseCounted(expense.value || {}) ? t('metrics.active') : t('expenseDetail.inactive')
 )
 const activeStatusSeverity = computed(() =>
-  expense.value?.active === false ? 'danger' : 'success'
+  isExpenseCounted(expense.value || {}) ? 'success' : 'danger'
 )
 
 const taxAmountFor = (record) => {
@@ -218,7 +220,7 @@ onMounted(fetchExpenses)
           <div class="min-w-0">
             <h1 class="font-serif text-4xl text-ink">{{ expense?.name || t('expenseDetail.title') }}</h1>
             <div v-if="expense" class="expense-detail-meta">
-              <Tag :value="expense.category" severity="secondary" rounded />
+              <Tag :value="getExpenseCategoryName(expense)" severity="secondary" rounded />
               <Tag :value="activeStatusLabel" :severity="activeStatusSeverity" rounded />
             </div>
             <p v-else class="muted-copy">{{ t('expenseDetail.intro') }}</p>

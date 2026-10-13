@@ -19,7 +19,8 @@ export const defaultFirebaseConnection = {
   projectId: '',
   appId: '',
   databaseURL: '',
-  path: 'subfolio/expenses'
+  path: 'subfolio/expenses',
+  categoryPath: 'subfolio/categories'
 }
 
 export const defaultPocketBaseConnection = {
@@ -54,7 +55,8 @@ const normalizeFirebaseConnection = (value) => {
     projectId: trimValue(firebase.projectId),
     appId: trimValue(firebase.appId),
     databaseURL: trimValue(firebase.databaseURL || firebase.databaseUrl),
-    path: trimValue(firebase.path) || defaultFirebaseConnection.path
+    path: trimValue(firebase.path) || defaultFirebaseConnection.path,
+    categoryPath: trimValue(firebase.categoryPath) || defaultFirebaseConnection.categoryPath
   }
 }
 

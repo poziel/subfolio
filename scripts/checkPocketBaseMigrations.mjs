@@ -27,8 +27,7 @@ const expectedExpenseFields = new Map([
   ['repeatUnit', 'text'],
   ['repeatPattern', 'text'],
   ['recurrenceSummary', 'text'],
-  ['frequency', 'text'],
-  ['customTimesPerYear', 'number'],
+  ['frequency', 'select'],
   ['startDate', 'text'],
   ['startTime', 'text'],
   ['paymentTimezone', 'text'],
@@ -43,6 +42,8 @@ const expectedCategoryFields = new Map([
   ['user', 'relation'],
   ['name', 'text'],
   ['normalizedName', 'text'],
+  ['status', 'text'],
+  ['icon', 'text'],
   ['createdAt', 'text'],
   ['updatedAt', 'text']
 ])
@@ -91,9 +92,23 @@ class JsonField {
 
 const createFieldsList = (fields = []) => {
   const list = [...fields]
-  list.add = (field) => {
-    list.push(field)
-    return field
+  list.add = (...newFields) => {
+    for (const field of newFields) {
+      const existingIndex = list.findIndex((item) => (
+        (field.id && item.id === field.id) || item.name === field.name
+      ))
+
+      if (existingIndex >= 0) {
+        list.splice(existingIndex, 1, field)
+      } else {
+        list.push(field)
+      }
+    }
+  }
+  list.getByName = (name) => list.find((field) => field.name === name)
+  list.removeByName = (name) => {
+    const index = list.findIndex((field) => field.name === name)
+    if (index >= 0) list.splice(index, 1)
   }
   list.addMarshaledJSON = (rawJSON) => {
     const parsed = JSON.parse(rawJSON)
@@ -178,6 +193,18 @@ const assertCategorySchema = (app) => {
   assertCategoryCollection(collection)
 }
 
+class NumberField {
+  constructor(model = {}) {
+    Object.assign(this, { type: 'number' }, model)
+  }
+}
+
+class SelectField {
+  constructor(model = {}) {
+    Object.assign(this, { type: 'select' }, model)
+  }
+}
+
 const assertPaymentHistorySchema = (app) => {
   const collection = app.findCollectionByNameOrId('expensePaymentHistory')
   assertPaymentHistoryCollection(collection)
@@ -191,7 +218,9 @@ const loadMigration = async (filePath) => {
     Collection,
     JSONField: JsonField,
     JsonField,
+    NumberField,
     RelationField,
+    SelectField,
     TextField,
     console,
     migrate(up, down) {
@@ -241,6 +270,33 @@ const assertExpenseCollection = (collection) => {
       throw new Error(`Expected expenses.${name} to be type "${type}".`)
     }
   }
+
+  if (actualFields.has('customTimesPerYear')) {
+    throw new Error('Expenses collection must not contain customTimesPerYear.')
+  }
+
+  const frequencyField = collection.fields.find((field) => field.name === 'frequency')
+  const expectedFrequencyValues = [
+    'once',
+    'yearly',
+    'monthly',
+    'weekly',
+    'bi-weekly',
+    'daily',
+    'quarterly',
+    'semi-annually',
+    'custom'
+  ]
+
+  if (frequencyField?.maxSelect !== 1 || frequencyField?.required !== true) {
+    throw new Error(
+      `Expenses frequency must be a required single-select field: ${JSON.stringify(frequencyField)}.`
+    )
+  }
+
+  if (JSON.stringify(frequencyField?.values) !== JSON.stringify(expectedFrequencyValues)) {
+    throw new Error('Expenses frequency select values do not match the supported app frequencies.')
+  }
 }
 
 const assertCategoryCollection = (collection) => {
@@ -277,6 +333,7 @@ const assertCategoryCollection = (collection) => {
   if (!collection.indexes?.some((index) => index.includes('idx_categories_user_normalized_name'))) {
     throw new Error('Categories collection must enforce unique normalized names per user.')
   }
+
 }
 
 const assertPaymentHistoryCollection = (collection) => {

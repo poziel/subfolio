@@ -41,7 +41,8 @@ const {
   openEditModal,
   deleteExpense,
   toggleExpenseActive,
-  getNextOccurrence
+  getNextOccurrence,
+  getExpenseCategoryName
 } = useExpenses()
 
 const { formatMoney, getConversionTooltip, convertToDisplayed, displayedCurrency } = useSettings()
@@ -81,7 +82,7 @@ const originalAmount = (expense) =>
 
 const rowClass = (item) => [
   'subfolio-expense-row',
-  item.active === false ? 'opacity-60' : ''
+  item.active === false || item.categoryActive === false ? 'opacity-60' : ''
 ].filter(Boolean).join(' ')
 
 const expenseDetailRoute = (expense) => ({
@@ -211,7 +212,6 @@ const initials = (name) =>
               {{ data.name }}
             </RouterLink>
             <span class="block text-xs muted-copy">{{ originalAmount(data) }}</span>
-            <span v-if="data.note" class="subfolio-expense-note">{{ data.note }}</span>
           </span>
         </div>
       </template>
@@ -219,7 +219,7 @@ const initials = (name) =>
 
     <Column v-if="showCategory" field="category" :header="t('table.category')" sortable>
       <template #body="{ data }">
-        <Tag :value="data.category" severity="secondary" rounded />
+        <Tag :value="getExpenseCategoryName(data)" severity="secondary" rounded />
       </template>
     </Column>
 

@@ -24,6 +24,7 @@ const {
   showAddModal,
   editingId,
   form,
+  categories,
   baseCategories,
   extraCategories,
   expenses,
@@ -37,6 +38,7 @@ const {
   repeatUnitSupportsPattern,
   getTaxRateOptions,
   getSelectedTaxRateOption,
+  getExpenseCategoryName,
   applyPreset
 } = useExpenses()
 const { t, locale } = useI18n()
@@ -46,10 +48,11 @@ const isEditing = computed(() => editingId.value !== null)
 const categorySuggestions = ref([])
 
 const categoryOptions = computed(() => {
-  const categories = new Set(baseCategories)
-  extraCategories.value.forEach((item) => categories.add(item))
-  expenses.value.forEach((item) => categories.add(item.category))
-  return Array.from(categories).sort()
+  const names = new Set(baseCategories)
+  extraCategories.value.forEach((item) => names.add(item))
+  categories.value.forEach((item) => names.add(item.name))
+  expenses.value.forEach((item) => names.add(getExpenseCategoryName(item)))
+  return Array.from(names).filter(Boolean).sort()
 })
 
 const modalTitle = computed(() => (isEditing.value ? t('expenseForm.editTitle') : t('expenseForm.addTitle')))

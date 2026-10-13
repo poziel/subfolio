@@ -13,7 +13,9 @@ import { useSettings } from '../composables/useSettings'
 const {
   expenses,
   fetchExpenses,
-  getYearlyAmount
+  getYearlyAmount,
+  getExpenseCategoryName,
+  isExpenseCounted
 } = useExpenses()
 const {
   formatMoney,
@@ -41,14 +43,14 @@ const remainingIncomeColor = '#243834'
 const hoveredSegmentId = ref('')
 
 const activeExpenses = computed(() =>
-  expenses.value.filter((expense) => expense.active !== false)
+  expenses.value.filter((expense) => isExpenseCounted(expense))
 )
 
 const categoryTotals = computed(() => {
   const grouped = new Map()
 
   activeExpenses.value.forEach((expense) => {
-    const name = expense.category || t('dashboard.uncategorized')
+    const name = getExpenseCategoryName(expense) || t('dashboard.uncategorized')
     const yearly = convertToDisplayed(getYearlyAmount(expense), expense.currency)
     const current = grouped.get(name) || {
       name,

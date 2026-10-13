@@ -18,6 +18,8 @@ const {
   getEffectiveAmount,
   getNextOccurrence,
   getRecurrenceSummary,
+  getExpenseCategoryName,
+  isExpenseCounted,
   openAddModal
 } = useExpenses()
 const { formatMoney, displayedCurrency, convertToDisplayed } = useSettings()
@@ -25,7 +27,7 @@ const { t, locale } = useI18n()
 const router = useRouter()
 
 const activeExpenses = computed(() =>
-  expenses.value.filter((expense) => expense.active !== false)
+  expenses.value.filter((expense) => isExpenseCounted(expense))
 )
 
 const upcomingExpenses = computed(() =>
@@ -181,13 +183,13 @@ onMounted(fetchExpenses)
                   <div class="min-w-0">
                     <p class="truncate font-extrabold text-ink">{{ expense.name }}</p>
                     <p class="truncate text-sm muted-copy">
-                      {{ expense.category }} / {{ formatFrequency(expense) }} / {{ formatDate(expense.nextOccurrenceDate) }}
+                      {{ getExpenseCategoryName(expense) }} / {{ formatFrequency(expense) }} / {{ formatDate(expense.nextOccurrenceDate) }}
                     </p>
                   </div>
                 </div>
                 <div class="grid justify-items-end gap-1">
                   <span class="subfolio-amount">{{ nextRecurrenceAmount(expense) }}</span>
-                  <Tag :value="expense.active === false ? t('categories.excluded') : t('metrics.active')" severity="info" rounded />
+                  <Tag :value="isExpenseCounted(expense) ? t('metrics.active') : t('categories.excluded')" severity="info" rounded />
                 </div>
               </RouterLink>
             </SubfolioSurfaceCard>

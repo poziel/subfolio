@@ -305,7 +305,6 @@
       "name": "Coffee Beans",
       "category": "Groceries",
       "frequency": "custom",
-      "customTimesPerYear": 18,
       "amount": 28,
       "currency": "CAD",
       "url": "",

@@ -17,12 +17,12 @@ const props = defineProps({
   }
 })
 
-const { getEffectiveAmount, getYearlyAmount, getNextOccurrence } = useExpenses()
+const { getEffectiveAmount, getYearlyAmount, getNextOccurrence, isExpenseCounted } = useExpenses()
 const { formatMoney, convertToDisplayed, displayedCurrency, selectedMetricIds } = useSettings()
 const { t, locale } = useI18n()
 
 const activeExpenses = computed(() =>
-  props.expenses.filter((expense) => expense.active !== false)
+  props.expenses.filter((expense) => isExpenseCounted(expense))
 )
 
 const yearlyTotal = computed(() =>
