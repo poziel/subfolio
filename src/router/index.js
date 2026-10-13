@@ -11,6 +11,7 @@ import LoginView from '../views/LoginView.vue'
 import HomeView from '../views/HomeView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import TrackerView from '../views/TrackerView.vue'
+import ExpenseDetailView from '../views/ExpenseDetailView.vue'
 import CategoriesView from '../views/CategoriesView.vue'
 import SettingsView from '../views/SettingsView.vue'
 import { useAuth } from '../composables/useAuth'
@@ -101,6 +102,12 @@ const routes = [
     path: '/app/expenses',
     name: 'expenses',
     component: TrackerView,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/app/expenses/:id',
+    name: 'expense-detail',
+    component: ExpenseDetailView,
     meta: { requiresAuth: true }
   },
   {

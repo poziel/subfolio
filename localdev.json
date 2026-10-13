@@ -1,0 +1,12 @@
+{
+  "plugins": {
+    "caddy": {},
+    "pocketbase": {
+      "http": "127.0.0.1:8090",
+      "migrations-dir": "pocketbase/pb_migrations",
+      "name": "subfolio",
+      "runtime-root": "pocketbase"
+    }
+  },
+  "version": 1
+}

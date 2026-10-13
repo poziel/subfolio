@@ -93,7 +93,9 @@ a required `user` relation, username support for the `users` auth collection,
 recurrence schedule metadata, and a user-owned `categories` collection. The
 final expense and category collection rules require `@request.auth.id` and
 restrict list, view, create, update, and delete access to the authenticated
-owner.
+owner. Expense frequency is stored as a required single-select value, while
+custom recurrence intervals are represented by the normalized repeat and date
+pattern fields.
 
 ## Seed data
 
@@ -116,6 +118,7 @@ Useful options:
 ```bash
 npm run seed:pocketbase -- --email=user@example.com --count=1000 --categories=25
 npm run seed:pocketbase -- --username=poziel --count=10000 --categories=60 --reset
+npm run seed:pocketbase -- --user=poziel --reset-only
 npm run seed:pocketbase -- --list-users
 npm run seed:pocketbase -- --user=poziel --count=50 --categories=8 --seed=223 --dry-run
 npm run seed:pocketbase -- --user=poziel --currency=USD --runtime-root=D:\Dev\6-miscellaneous\pocketbase\subfolio

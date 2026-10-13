@@ -1,14 +1,13 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, markRaw, provide, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Menu from 'primevue/menu'
-import Tag from 'primevue/tag'
 import { useAuth } from '../composables/useAuth'
-import { useDatabaseConnection } from '../composables/useDatabaseConnection'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
 import { useTheme } from '../composables/useTheme'
+import { appShellLayoutKey } from './appShellLayout'
 import ExpenseFormModal from './ExpenseFormModal.vue'
 import SubfolioButton from './SubfolioButton.vue'
 import ThemeLanguageControls from './ThemeLanguageControls.vue'
@@ -16,7 +15,6 @@ import ThemeLanguageControls from './ThemeLanguageControls.vue'
 const route = useRoute()
 const router = useRouter()
 const { currentUser, logout } = useAuth()
-const { providerLabel } = useDatabaseConnection()
 const { openAddModal } = useExpenses()
 const { t } = useI18n()
 const { contentLayoutMode } = useSettings()
@@ -29,6 +27,8 @@ const readSidebarCollapsed = () => {
 const sidebarCollapsed = ref(readSidebarCollapsed())
 const profileMenu = ref()
 const profileMenuOpen = ref(false)
+const pageHeaderOwner = ref(null)
+const pageHeaderSlot = shallowRef(null)
 
 const navItems = [
   { to: '/app', labelKey: 'appNav.home', icon: 'pi pi-home' },
@@ -38,7 +38,10 @@ const navItems = [
   { to: '/app/settings', labelKey: 'appNav.settings', icon: 'pi pi-cog' }
 ]
 
-const isActive = (path) => route.path === path
+const isActive = (path) => (
+  route.path === path ||
+  (path !== '/app' && route.path.startsWith(`${path}/`))
+)
 const wordmarkSrc = computed(() =>
   activeTheme.value === 'dark'
     ? '/images/subfolio-light-name.svg'
@@ -48,6 +51,14 @@ const mainClass = computed(() => ({
   'app-shell__main--layout-fluid': contentLayoutMode.value === 'fluid',
   'app-shell__main--layout-focused': contentLayoutMode.value === 'focused'
 }))
+const pageHeaderComponent = computed(() => {
+  const headerSlot = pageHeaderSlot.value
+  return headerSlot
+    ? markRaw({
+        render: () => headerSlot()
+      })
+    : null
+})
 const accountLabel = computed(() =>
   currentUser.value?.name ||
   currentUser.value?.username ||
@@ -75,6 +86,18 @@ const toggleProfileMenu = (event) => {
   profileMenu.value.toggle(event)
 }
 
+provide(appShellLayoutKey, {
+  setHeader(owner, slot) {
+    pageHeaderOwner.value = owner
+    pageHeaderSlot.value = slot || null
+  },
+  clearHeader(owner) {
+    if (pageHeaderOwner.value !== owner) return
+    pageHeaderOwner.value = null
+    pageHeaderSlot.value = null
+  }
+})
+
 watch(sidebarCollapsed, (collapsed) => {
   if (typeof localStorage === 'undefined') return
   localStorage.setItem(sidebarStorageKey, collapsed ? 'true' : 'false')
@@ -87,9 +110,6 @@ watch(sidebarCollapsed, (collapsed) => {
       <div class="app-shell__mobile-row">
         <RouterLink to="/app" class="app-shell__brand p-0">
           <img :src="wordmarkSrc" alt="Subfolio" class="app-shell__wordmark app-shell__wordmark--mobile" />
-          <span class="min-w-0">
-            <Tag :value="providerLabel" severity="info" rounded class="max-w-36" />
-          </span>
         </RouterLink>
 
         <div class="flex shrink-0 items-center gap-2">
@@ -197,7 +217,13 @@ watch(sidebarCollapsed, (collapsed) => {
       </aside>
 
       <main class="app-shell__main" :class="mainClass">
-        <slot />
+        <header v-if="$slots.header || pageHeaderComponent" class="app-shell__main-header">
+          <slot v-if="$slots.header" name="header" />
+          <component :is="pageHeaderComponent" v-else-if="pageHeaderComponent" />
+        </header>
+        <div class="app-shell__main-content">
+          <slot />
+        </div>
       </main>
     </div>
 

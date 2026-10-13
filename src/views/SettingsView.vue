@@ -1,11 +1,12 @@
 <script setup>
 import { computed } from 'vue'
-import Card from 'primevue/card'
 import InputNumber from 'primevue/inputnumber'
 import Message from 'primevue/message'
 import MultiSelect from 'primevue/multiselect'
 import Select from 'primevue/select'
 import Tag from 'primevue/tag'
+import AppPage from '../components/AppPage.vue'
+import AppSectionSurface from '../components/AppSectionSurface.vue'
 import { useSettings } from '../composables/useSettings'
 import { useI18n } from '../composables/useI18n'
 
@@ -166,178 +167,198 @@ const weeksPerYearModel = computed({
 </script>
 
 <template>
-    <header class="grid gap-2">
-      <h1 class="font-serif text-4xl text-ink">{{ t('settings.title') }}</h1>
-      <p class="muted-copy">{{ t('settings.intro') }}</p>
-      <p class="text-sm muted-copy">{{ t('settings.local') }}</p>
-    </header>
+  <AppPage>
+    <template #header>
+      <header class="grid gap-1">
+        <h1 class="font-serif text-4xl text-ink">{{ t('settings.title') }}</h1>
+        <p class="muted-copy">{{ t('settings.intro') }}</p>
+        <p class="text-sm muted-copy">{{ t('settings.local') }}</p>
+      </header>
+    </template>
 
-    <Card>
-      <template #title>{{ t('settings.currencyTitle') }}</template>
-      <template #subtitle>{{ t('settings.currencySubtitle') }}</template>
-      <template #content>
-        <div class="grid gap-5">
-          <div class="settings-panel-row">
-            <div>
-              <p class="font-semibold text-ink">{{ t('settings.displayedCurrency') }}</p>
-              <p class="text-sm muted-copy">{{ t('settings.displayedCurrencyDetail') }}</p>
-            </div>
-            <Select
-              v-model="displayedModel"
-              :options="currencyOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('settings.currencyPlaceholder')"
-              class="w-full"
-            />
-          </div>
-
-          <div class="settings-panel-row lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
-            <div>
-              <div class="mb-2 flex items-center gap-2">
-                <p class="font-semibold text-ink">{{ t('settings.availableCurrencies') }}</p>
-                <Tag :value="statusLabel" :severity="statusSeverity" rounded />
-              </div>
-              <p class="text-sm muted-copy">{{ t('settings.availableCurrenciesDetail') }}</p>
-            </div>
-            <MultiSelect
-              v-model="availableModel"
-              :options="currencyOptions"
-              option-label="label"
-              option-value="value"
-              filter
-              :placeholder="t('settings.selectCurrencies')"
-              display="chip"
-              class="subfolio-currency-select w-full"
-            />
-          </div>
-        </div>
-      </template>
-    </Card>
-
-    <Card>
-      <template #title>{{ t('settings.layoutTitle') }}</template>
-      <template #subtitle>{{ t('settings.layoutSubtitle') }}</template>
-      <template #content>
+    <AppSectionSurface
+      :title="t('settings.currencyTitle')"
+      :subtitle="t('settings.currencySubtitle')"
+      surface-class="app-section-surface"
+    >
+      <div class="grid gap-5">
         <div class="settings-panel-row">
           <div>
-            <p class="font-semibold text-ink">{{ t('settings.contentLayout') }}</p>
-            <p class="text-sm muted-copy">{{ t('settings.contentLayoutDetail') }}</p>
+            <p class="font-semibold text-ink">{{ t('settings.displayedCurrency') }}</p>
+            <p class="text-sm muted-copy">{{ t('settings.displayedCurrencyDetail') }}</p>
           </div>
           <Select
-            v-model="contentLayoutModel"
-            data-test-id="settings-content-layout"
-            :options="contentLayoutOptions"
+            v-model="displayedModel"
+            :options="currencyOptions"
+            option-label="label"
+            option-value="value"
+            :placeholder="t('settings.currencyPlaceholder')"
+            class="w-full"
+          />
+        </div>
+
+        <div class="settings-panel-row lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)]">
+          <div>
+            <div class="mb-2 flex items-center gap-2">
+              <p class="font-semibold text-ink">{{ t('settings.availableCurrencies') }}</p>
+              <Tag :value="statusLabel" :severity="statusSeverity" rounded />
+            </div>
+            <p class="text-sm muted-copy">{{ t('settings.availableCurrenciesDetail') }}</p>
+          </div>
+          <MultiSelect
+            v-model="availableModel"
+            :options="currencyOptions"
+            option-label="label"
+            option-value="value"
+            filter
+            :placeholder="t('settings.selectCurrencies')"
+            display="chip"
+            class="subfolio-currency-select w-full"
+          />
+        </div>
+      </div>
+    </AppSectionSurface>
+
+    <AppSectionSurface
+      :title="t('settings.layoutTitle')"
+      :subtitle="t('settings.layoutSubtitle')"
+      surface-class="app-section-surface"
+    >
+      <div class="settings-panel-row">
+        <div>
+          <p class="font-semibold text-ink">{{ t('settings.contentLayout') }}</p>
+          <p class="text-sm muted-copy">{{ t('settings.contentLayoutDetail') }}</p>
+        </div>
+        <Select
+          v-model="contentLayoutModel"
+          data-test-id="settings-content-layout"
+          :options="contentLayoutOptions"
+          option-label="label"
+          option-value="value"
+          class="w-full"
+        />
+      </div>
+    </AppSectionSurface>
+
+    <AppSectionSurface
+      :title="t('settings.orderingTitle')"
+      :subtitle="t('settings.orderingSubtitle')"
+      surface-class="app-section-surface"
+    >
+      <div class="grid gap-5">
+        <div class="settings-panel-row">
+          <div>
+            <p class="font-semibold text-ink">{{ t('settings.defaultOrdering') }}</p>
+            <p class="text-sm muted-copy">{{ t('settings.defaultOrderingDetail') }}</p>
+          </div>
+          <Select
+            v-model="orderingModel"
+            :options="orderingOptions"
+            option-label="label"
+            option-value="value"
+            :placeholder="t('settings.orderingPlaceholder')"
+            class="w-full"
+          />
+        </div>
+
+        <Message v-if="defaultOrdering === 'manual'" severity="info" :closable="false">
+          {{ t('settings.manualNotice') }}
+        </Message>
+      </div>
+    </AppSectionSurface>
+
+    <AppSectionSurface
+      :title="t('settings.metricCardsTitle')"
+      :subtitle="t('settings.metricCardsSubtitle')"
+      surface-class="app-section-surface"
+    >
+      <div class="grid gap-5">
+        <div>
+          <p class="font-semibold text-ink">{{ t('settings.metricCards') }}</p>
+          <p class="text-sm muted-copy">{{ t('settings.metricCardsDetail') }}</p>
+        </div>
+        <div class="settings-metric-slots">
+          <label
+            v-for="index in metricSlotIndexes"
+            :key="index"
+            class="settings-metric-slot"
+          >
+            <span class="settings-metric-slot__label">
+              {{ t('settings.metricSlotLabel', { number: index + 1 }) }}
+            </span>
+            <Select
+              :model-value="selectedMetricSlots[index] || ''"
+              :data-test-id="`settings-summary-metric-${index + 1}`"
+              :options="metricOptions"
+              option-label="label"
+              option-value="value"
+              :placeholder="t('settings.metricCardsPlaceholder')"
+              class="w-full"
+              @update:model-value="setMetricSlot(index, $event)"
+            />
+          </label>
+        </div>
+      </div>
+    </AppSectionSurface>
+
+    <AppSectionSurface
+      :title="t('settings.incomeTitle')"
+      :subtitle="t('settings.incomeSubtitle')"
+      surface-class="app-section-surface"
+    >
+      <div class="grid gap-5">
+        <div class="settings-panel-row">
+          <div>
+            <p class="font-semibold text-ink">{{ t('settings.incomeType') }}</p>
+            <p class="text-sm muted-copy">{{ t('settings.incomeTypeDetail') }}</p>
+          </div>
+          <Select
+            v-model="incomeTypeModel"
+            :options="incomeTypeOptions"
             option-label="label"
             option-value="value"
             class="w-full"
           />
         </div>
-      </template>
-    </Card>
 
-    <Card>
-      <template #title>{{ t('settings.orderingTitle') }}</template>
-      <template #subtitle>{{ t('settings.orderingSubtitle') }}</template>
-      <template #content>
-        <div class="grid gap-5">
-          <div class="settings-panel-row">
-            <div>
-              <p class="font-semibold text-ink">{{ t('settings.defaultOrdering') }}</p>
-              <p class="text-sm muted-copy">{{ t('settings.defaultOrderingDetail') }}</p>
-            </div>
-            <Select
-              v-model="orderingModel"
-              :options="orderingOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('settings.orderingPlaceholder')"
-              class="w-full"
-            />
-          </div>
-
-          <Message v-if="defaultOrdering === 'manual'" severity="info" :closable="false">
-            {{ t('settings.manualNotice') }}
-          </Message>
-        </div>
-      </template>
-    </Card>
-
-    <Card>
-      <template #title>{{ t('settings.metricCardsTitle') }}</template>
-      <template #subtitle>{{ t('settings.metricCardsSubtitle') }}</template>
-      <template #content>
-        <div class="grid gap-5">
+        <div class="settings-panel-row">
           <div>
-            <p class="font-semibold text-ink">{{ t('settings.metricCards') }}</p>
-            <p class="text-sm muted-copy">{{ t('settings.metricCardsDetail') }}</p>
+            <p class="font-semibold text-ink">{{ t('settings.salaryCurrency') }}</p>
+            <p class="text-sm muted-copy">{{ t('settings.salaryCurrencyDetail') }}</p>
           </div>
-          <div class="settings-metric-slots">
-            <label
-              v-for="index in metricSlotIndexes"
-              :key="index"
-              class="settings-metric-slot"
-            >
-              <span class="settings-metric-slot__label">
-                {{ t('settings.metricSlotLabel', { number: index + 1 }) }}
-              </span>
-              <Select
-                :model-value="selectedMetricSlots[index] || ''"
-                :data-test-id="`settings-summary-metric-${index + 1}`"
-                :options="metricOptions"
-                option-label="label"
-                option-value="value"
-                :placeholder="t('settings.metricCardsPlaceholder')"
-                class="w-full"
-                @update:model-value="setMetricSlot(index, $event)"
-              />
-            </label>
-          </div>
+          <Select
+            v-model="salaryCurrencyModel"
+            :options="currencyOptions"
+            option-label="label"
+            option-value="value"
+            :placeholder="t('settings.currencyPlaceholder')"
+            class="w-full"
+          />
         </div>
-      </template>
-    </Card>
 
-    <Card>
-      <template #title>{{ t('settings.incomeTitle') }}</template>
-      <template #subtitle>{{ t('settings.incomeSubtitle') }}</template>
-      <template #content>
-        <div class="grid gap-5">
+        <div v-if="incomeType === 'annual'" class="settings-panel-row">
+          <div>
+            <p class="font-semibold text-ink">{{ t('settings.annualSalary') }}</p>
+            <p class="text-sm muted-copy">{{ t('settings.annualSalaryDetail') }}</p>
+          </div>
+          <InputNumber
+            v-model="annualSalaryModel"
+            mode="currency"
+            :currency="salaryCurrency"
+            locale="en-CA"
+            :min="0"
+            class="w-full"
+          />
+        </div>
+
+        <div v-else class="grid gap-5">
           <div class="settings-panel-row">
             <div>
-              <p class="font-semibold text-ink">{{ t('settings.incomeType') }}</p>
-              <p class="text-sm muted-copy">{{ t('settings.incomeTypeDetail') }}</p>
-            </div>
-            <Select
-              v-model="incomeTypeModel"
-              :options="incomeTypeOptions"
-              option-label="label"
-              option-value="value"
-              class="w-full"
-            />
-          </div>
-
-          <div class="settings-panel-row">
-            <div>
-              <p class="font-semibold text-ink">{{ t('settings.salaryCurrency') }}</p>
-              <p class="text-sm muted-copy">{{ t('settings.salaryCurrencyDetail') }}</p>
-            </div>
-            <Select
-              v-model="salaryCurrencyModel"
-              :options="currencyOptions"
-              option-label="label"
-              option-value="value"
-              :placeholder="t('settings.currencyPlaceholder')"
-              class="w-full"
-            />
-          </div>
-
-          <div v-if="incomeType === 'annual'" class="settings-panel-row">
-            <div>
-              <p class="font-semibold text-ink">{{ t('settings.annualSalary') }}</p>
-              <p class="text-sm muted-copy">{{ t('settings.annualSalaryDetail') }}</p>
+              <p class="font-semibold text-ink">{{ t('settings.hourlyRate') }}</p>
+              <p class="text-sm muted-copy">{{ t('settings.hourlyRateDetail') }}</p>
             </div>
             <InputNumber
-              v-model="annualSalaryModel"
+              v-model="hourlyRateModel"
               mode="currency"
               :currency="salaryCurrency"
               locale="en-CA"
@@ -346,52 +367,36 @@ const weeksPerYearModel = computed({
             />
           </div>
 
-          <div v-else class="grid gap-5">
-            <div class="settings-panel-row">
-              <div>
-                <p class="font-semibold text-ink">{{ t('settings.hourlyRate') }}</p>
-                <p class="text-sm muted-copy">{{ t('settings.hourlyRateDetail') }}</p>
-              </div>
-              <InputNumber
-                v-model="hourlyRateModel"
-                mode="currency"
-                :currency="salaryCurrency"
-                locale="en-CA"
-                :min="0"
-                class="w-full"
-              />
+          <div class="settings-panel-row lg:grid-cols-[minmax(0,1fr)_minmax(0,15rem)_minmax(0,15rem)]">
+            <div>
+              <p class="font-semibold text-ink">{{ t('settings.workSchedule') }}</p>
+              <p class="text-sm muted-copy">{{ t('settings.workScheduleDetail') }}</p>
             </div>
-
-            <div class="settings-panel-row lg:grid-cols-[minmax(0,1fr)_minmax(0,15rem)_minmax(0,15rem)]">
-              <div>
-                <p class="font-semibold text-ink">{{ t('settings.workSchedule') }}</p>
-                <p class="text-sm muted-copy">{{ t('settings.workScheduleDetail') }}</p>
-              </div>
-              <InputNumber
-                v-model="hoursPerWeekModel"
-                :min="1"
-                :max="168"
-                :suffix="` ${t('settings.hoursPerWeekSuffix')}`"
-                class="w-full"
-              />
-              <InputNumber
-                v-model="weeksPerYearModel"
-                :min="1"
-                :max="52"
-                :suffix="` ${t('settings.weeksPerYearSuffix')}`"
-                class="w-full"
-              />
-            </div>
+            <InputNumber
+              v-model="hoursPerWeekModel"
+              :min="1"
+              :max="168"
+              :suffix="` ${t('settings.hoursPerWeekSuffix')}`"
+              class="w-full"
+            />
+            <InputNumber
+              v-model="weeksPerYearModel"
+              :min="1"
+              :max="52"
+              :suffix="` ${t('settings.weeksPerYearSuffix')}`"
+              class="w-full"
+            />
           </div>
-
-          <Message severity="info" :closable="false">
-            {{ t('settings.annualIncomePreview') }}:
-            {{ formatMoney(annualIncomeDisplayed, displayedCurrency) }}
-            <span v-if="salaryCurrency !== displayedCurrency" class="muted-copy">
-              ({{ formatMoney(annualIncome, salaryCurrency, { withCode: true }) }})
-            </span>
-          </Message>
         </div>
-      </template>
-    </Card>
+
+        <Message severity="info" :closable="false">
+          {{ t('settings.annualIncomePreview') }}:
+          {{ formatMoney(annualIncomeDisplayed, displayedCurrency) }}
+          <span v-if="salaryCurrency !== displayedCurrency" class="muted-copy">
+            ({{ formatMoney(annualIncome, salaryCurrency, { withCode: true }) }})
+          </span>
+        </Message>
+      </div>
+    </AppSectionSurface>
+  </AppPage>
 </template>

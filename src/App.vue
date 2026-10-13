@@ -1,6 +1,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import ConfirmDialog from 'primevue/confirmdialog'
+import Toast from 'primevue/toast'
 import AppShell from './components/AppShell.vue'
 import { useI18n } from './composables/useI18n'
 import { useTheme } from './composables/useTheme'
@@ -17,4 +19,6 @@ const isAppRoute = computed(() => route.path.startsWith('/app'))
     <RouterView />
   </AppShell>
   <RouterView v-else />
+  <Toast position="bottom-right" />
+  <ConfirmDialog :draggable="false" />
 </template>

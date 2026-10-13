@@ -25,7 +25,7 @@ import {
   repeatUnitSupportsPattern,
   scheduleTypes
 } from '../data/recurrenceRules'
-import { findKnownService, findKnownServiceById } from '../data/serviceCatalog'
+import { findKnownService, findKnownServiceById, getCategoryIcon } from '../data/serviceCatalog'
 import { createExpenseConnection } from '../services/database/expenseConnections'
 
 const { displayedCurrency, availableCurrencies, allCurrencies } = useSettings()
@@ -94,6 +94,7 @@ const months = [
 
 // Shared state
 const expenses = ref([])
+const categories = ref([])
 const status = ref('idle')
 const statusError = ref('')
 const saving = ref(false)
@@ -152,7 +153,6 @@ const getDefaultForm = () => ({
   repeatUnit: 'month',
   repeatPattern: 'same-calendar-day',
   frequency: 'monthly',
-  customTimesPerYear: 4,
   startDate: new Date().toISOString().slice(0, 10),
   startTime: null,
   datePattern: {
@@ -893,16 +893,14 @@ const getTimesPerYear = (expense) => {
     return getTimesPerYearFromRepeat(expense)
   }
 
-  if (expense.frequency === 'custom') {
-    return Math.max(0.01, Number(expense.customTimesPerYear) || 1)
-  }
-
   if (expense.frequency === 'hourly') {
     return getTimesPerYearFromRepeat(expense)
   }
 
   const freq = frequencyOptions.find(f => f.value === expense.frequency)
-  return freq ? freq.timesPerYear : getTimesPerYearFromRepeat(expense)
+  return Number.isFinite(freq?.timesPerYear)
+    ? freq.timesPerYear
+    : getTimesPerYearFromRepeat(expense)
 }
 
 // Calculate yearly amount for an expense
@@ -1004,6 +1002,19 @@ const getNextOccurrence = (expense, referenceDate = new Date()) => {
 
 export function useExpenses() {
   const normalizeCategory = (value) => String(value || '').trim()
+  const normalizeCategoryKey = (value) => normalizeCategory(value).toLowerCase()
+  const isLocalCategoryId = (id) => String(id || '').startsWith('local-')
+  const localCategoryId = (value) => {
+    const normalized = normalizeCategoryKey(value)
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+
+    return `local-${normalized || 'category'}`
+  }
+
+  const normalizeCategoryStatus = (value) => (
+    value === 'inactive' || value === false ? 'inactive' : 'active'
+  )
 
   const registerCategory = (value) => {
     const normalized = normalizeCategory(value)
@@ -1014,8 +1025,160 @@ export function useExpenses() {
     }
   }
 
+  const normalizeCategoryRecord = (record = {}) => {
+    const name = normalizeCategory(record.name || record.category) || baseCategories[0]
+    const normalizedName = record.normalizedName || normalizeCategoryKey(name)
+    const status = normalizeCategoryStatus(record.status ?? record.active)
+
+    return {
+      id: record.id || localCategoryId(name),
+      user: record.user || '',
+      name,
+      normalizedName,
+      status,
+      active: status !== 'inactive',
+      icon: record.icon || getCategoryIcon(name),
+      createdAt: record.createdAt || null,
+      updatedAt: record.updatedAt || null
+    }
+  }
+
+  const mergeCategoryRecord = (record = {}) => {
+    const category = normalizeCategoryRecord(record)
+    const next = [...categories.value]
+    const index = next.findIndex((item) =>
+      (category.id && item.id === category.id) ||
+      item.normalizedName === category.normalizedName
+    )
+
+    if (index === -1) {
+      next.push(category)
+    } else {
+      next[index] = {
+        ...next[index],
+        ...category,
+        id: isLocalCategoryId(next[index].id) && !isLocalCategoryId(category.id)
+          ? category.id
+          : next[index].id || category.id,
+        icon: category.icon || next[index].icon
+      }
+    }
+
+    categories.value = next.sort((a, b) => a.name.localeCompare(b.name))
+    registerCategory(category.name)
+    return categories.value.find((item) => item.id === category.id) ||
+      categories.value.find((item) => item.normalizedName === category.normalizedName) ||
+      category
+  }
+
+  const setCategoryRecords = (records = []) => {
+    const next = []
+
+    records.forEach((record) => {
+      const category = normalizeCategoryRecord(record)
+      const index = next.findIndex((item) =>
+        (category.id && item.id === category.id) ||
+        item.normalizedName === category.normalizedName
+      )
+
+      if (index === -1) {
+        next.push(category)
+      } else {
+        next[index] = {
+          ...next[index],
+          ...category,
+          icon: category.icon || next[index].icon
+        }
+      }
+
+      registerCategory(category.name)
+    })
+
+    categories.value = next.sort((a, b) => a.name.localeCompare(b.name))
+  }
+
+  const findCategoryById = (id) => {
+    if (!id) return null
+    return categories.value.find((category) => String(category.id) === String(id)) || null
+  }
+
+  const findCategoryByName = (name) => {
+    const normalizedName = normalizeCategoryKey(name)
+    if (!normalizedName) return null
+    return categories.value.find((category) => category.normalizedName === normalizedName) || null
+  }
+
+  const getExpenseCategory = (expense = {}) => {
+    return findCategoryById(expense.categoryId) ||
+      findCategoryByName(expense.category) ||
+      (expense.category
+        ? normalizeCategoryRecord({
+            id: localCategoryId(expense.category),
+            name: expense.category,
+            icon: expense.categoryIcon,
+            status: expense.categoryStatus
+          })
+        : null)
+  }
+
+  const getExpenseCategoryName = (expense = {}) =>
+    getExpenseCategory(expense)?.name || normalizeCategory(expense.category) || baseCategories[0]
+
+  const getExpenseCategoryIcon = (expense = {}) =>
+    getExpenseCategory(expense)?.icon || getCategoryIcon(getExpenseCategoryName(expense))
+
+  const getExpenseCategoryStatus = (expense = {}) =>
+    getExpenseCategory(expense)?.status || expense.categoryStatus || 'active'
+
+  const isExpenseCategoryActive = (expense = {}) =>
+    getExpenseCategoryStatus(expense) !== 'inactive'
+
+  const isExpenseCounted = (expense = {}) =>
+    expense.active !== false && isExpenseCategoryActive(expense)
+
+  const ensureVisibleCategoryRecords = (items = []) => {
+    items.forEach((item) => {
+      if (findCategoryById(item.categoryId) || findCategoryByName(item.category)) return
+      if (!item.category) return
+
+      mergeCategoryRecord({
+        id: localCategoryId(item.category),
+        name: item.category,
+        status: item.categoryStatus || 'active',
+        icon: item.categoryIcon || getCategoryIcon(item.category)
+      })
+    })
+  }
+
+  const applyCategoryMetadata = (items = []) => {
+    ensureVisibleCategoryRecords(items)
+
+    return items.map((item) => {
+      const category = getExpenseCategory(item)
+      const categoryId = category?.id && !isLocalCategoryId(category.id)
+        ? category.id
+        : item.categoryId || category?.id || null
+      const categoryName = category?.name || normalizeCategory(item.category) || baseCategories[0]
+      const categoryStatus = category?.status || 'active'
+
+      return {
+        ...item,
+        categoryId,
+        category: categoryName,
+        categoryStatus,
+        categoryActive: categoryStatus !== 'inactive',
+        categoryIcon: category?.icon || getCategoryIcon(categoryName)
+      }
+    })
+  }
+
+  const refreshExpenseCategoryMetadata = () => {
+    expenses.value = applyCategoryMetadata(expenses.value)
+  }
+
   const registerKnownCategories = (items) => {
-    items.forEach((item) => registerCategory(item.category || ''))
+    items.forEach((item) => registerCategory(getExpenseCategoryName(item)))
+    ensureVisibleCategoryRecords(items)
   }
 
   const getConnectionKey = () => {
@@ -1049,17 +1212,35 @@ export function useExpenses() {
   const registerAdapterCategories = async (adapter) => {
     if (!adapter?.listCategories) return
 
-    const categories = await adapter.listCategories()
-    categories.forEach((category) => registerCategory(category.name || category.category || ''))
+    const adapterCategories = await adapter.listCategories()
+    setCategoryRecords(adapterCategories)
   }
 
   const ensurePayloadCategory = async (adapter, payload) => {
-    if (!adapter?.ensureCategory || !payload.category) return payload
+    if (!payload.category) return payload
 
-    const category = await adapter.ensureCategory(payload.category)
+    if (!adapter?.ensureCategory) {
+      const category = mergeCategoryRecord({
+        name: payload.category,
+        icon: getCategoryIcon(payload.category)
+      })
+
+      return {
+        ...payload,
+        categoryId: category?.id || payload.categoryId || null,
+        category: category?.name || payload.category
+      }
+    }
+
+    const category = await adapter.ensureCategory(payload.category, {
+      icon: getCategoryIcon(payload.category),
+      status: 'active'
+    })
+    const normalizedCategory = mergeCategoryRecord(category)
     return {
       ...payload,
-      categoryId: category?.id || payload.categoryId || null
+      categoryId: normalizedCategory?.id || category?.id || payload.categoryId || null,
+      category: normalizedCategory?.name || payload.category
     }
   }
 
@@ -1068,6 +1249,33 @@ export function useExpenses() {
       expense,
       ...expenses.value.filter((item) => item.id !== expense.id)
     ]
+  }
+
+  const isExpenseInCategory = (expense, category) => {
+    if (!expense || !category) return false
+    if (category.id && String(expense.categoryId) === String(category.id)) return true
+    return normalizeCategoryKey(expense.category) === category.normalizedName
+  }
+
+  const cleanupUnusedCategory = async (adapter, category) => {
+    if (!category) return
+
+    const stillUsed = expenses.value.some((item) => isExpenseInCategory(item, category))
+    if (stillUsed) return
+
+    if (adapter?.deleteCategory && category.id && !isLocalCategoryId(category.id)) {
+      await adapter.deleteCategory(category.id)
+    }
+
+    categories.value = categories.value.filter((item) =>
+      item.id !== category.id && item.normalizedName !== category.normalizedName
+    )
+
+    if (!baseCategories.includes(category.name)) {
+      extraCategories.value = extraCategories.value.filter((item) =>
+        normalizeCategoryKey(item) !== category.normalizedName
+      )
+    }
   }
 
   const resetForm = () => {
@@ -1085,7 +1293,7 @@ export function useExpenses() {
     const preset = findKnownServiceById(item.presetId)
     form.presetId = preset?.id || item.presetId || null
     form.name = item.name || preset?.name || ''
-    form.category = item.category
+    form.category = getExpenseCategoryName(item)
     form.amount = Number(item.amount)
     form.currency = item.currency || displayedCurrency.value || 'CAD'
     form.url = preset?.url || item.url || ''
@@ -1111,7 +1319,6 @@ export function useExpenses() {
     form.startDate = form.paymentDate
     form.startTime = null
     form.frequency = item.frequency || 'monthly'
-    form.customTimesPerYear = item.customTimesPerYear || 4
     form.datePattern = item.datePattern ? { ...getDefaultForm().datePattern, ...item.datePattern } : getDefaultForm().datePattern
     showAddModal.value = true
   }
@@ -1135,7 +1342,8 @@ export function useExpenses() {
   const fetchExpenses = async () => {
     if (!connection.value) {
       stopActiveSubscription()
-      expenses.value = localFallback
+      setCategoryRecords([])
+      expenses.value = applyCategoryMetadata(localFallback)
       registerKnownCategories(expenses.value)
       status.value = 'demo'
       clearStatusError()
@@ -1161,7 +1369,7 @@ export function useExpenses() {
       activeConnectionKey = connectionKey
       activeUnsubscribe = await adapter.subscribe(
         (items) => {
-          expenses.value = items
+          expenses.value = applyCategoryMetadata(items)
           registerKnownCategories(items)
           status.value = 'ready'
           clearStatusError()
@@ -1169,7 +1377,8 @@ export function useExpenses() {
         (error) => {
           setOfflineStatus(error)
           if (!expenses.value.length) {
-            expenses.value = localFallback
+            setCategoryRecords([])
+            expenses.value = applyCategoryMetadata(localFallback)
             registerKnownCategories(expenses.value)
           }
         }
@@ -1177,7 +1386,8 @@ export function useExpenses() {
     } catch (error) {
       activeConnectionKey = null
       activeUnsubscribe = null
-      expenses.value = localFallback
+      setCategoryRecords([])
+      expenses.value = applyCategoryMetadata(localFallback)
       registerKnownCategories(expenses.value)
       setOfflineStatus(error)
     }
@@ -1236,7 +1446,6 @@ export function useExpenses() {
       startDate: paymentDate,
       startTime: null,
       frequency,
-      customTimesPerYear: frequency === 'custom' ? getTimesPerYearFromRepeat(recurrenceSource) : undefined,
       datePattern,
       recurrenceSchedule,
       active: true
@@ -1244,28 +1453,31 @@ export function useExpenses() {
   }
 
   const addExpense = async () => {
-    if (saving.value) return
+    if (saving.value) return null
 
     saving.value = true
     const adapter = getWritableAdapter()
-    let saved = false
+    let savedExpense = null
 
     try {
       const payload = await ensurePayloadCategory(adapter, buildPayload())
-      if (!payload.name || !payload.amount || !payload.paymentDate) return
+      if (!payload.name || !payload.amount || !payload.paymentDate) return null
 
       if (adapter) {
         const created = await adapter.create(payload)
-        upsertExpense(created)
+        const hydrated = applyCategoryMetadata([created])[0]
+        upsertExpense(hydrated)
+        savedExpense = hydrated
       } else {
         const fallbackItem = {
           id: String(Date.now()),
           createdAt: new Date().toISOString(),
           ...payload
         }
-        expenses.value = [fallbackItem, ...expenses.value]
+        const hydrated = applyCategoryMetadata([fallbackItem])[0]
+        expenses.value = [hydrated, ...expenses.value]
+        savedExpense = hydrated
       }
-      saved = true
       registerCategory(payload.category)
     } catch (error) {
       setOfflineStatus(error)
@@ -1273,52 +1485,78 @@ export function useExpenses() {
       saving.value = false
     }
 
-    if (saved) {
+    if (savedExpense) {
       closeModal()
     }
+
+    return savedExpense
   }
 
   const updateExpense = async () => {
-    if (editingId.value === null) return
-    if (saving.value) return
+    if (editingId.value === null) return null
+    if (saving.value) return null
 
     saving.value = true
     const adapter = getWritableAdapter()
-    let saved = false
+    let savedExpense = null
+    const previousExpense = expenses.value.find((item) => item.id === editingId.value)
+    const previousCategory = previousExpense ? getExpenseCategory(previousExpense) : null
 
     try {
-      const payload = await ensurePayloadCategory(adapter, buildPayload())
-      if (!payload.name || !payload.amount || !payload.paymentDate) return
+      const payload = await ensurePayloadCategory(adapter, {
+        ...buildPayload(),
+        active: previousExpense?.active !== false
+      })
+      if (!payload.name || !payload.amount || !payload.paymentDate) return null
 
       const updated = adapter
         ? await adapter.update(editingId.value, payload)
         : { id: editingId.value, ...payload }
-      expenses.value = expenses.value.map((item) => (item.id === updated.id ? updated : item))
-      saved = true
+      const hydrated = applyCategoryMetadata([updated])[0]
+      expenses.value = applyCategoryMetadata(
+        expenses.value.map((item) => (item.id === hydrated.id ? hydrated : item))
+      )
+      savedExpense = hydrated
       registerCategory(payload.category)
+      if (
+        previousCategory &&
+        previousCategory.normalizedName !== normalizeCategoryKey(payload.category)
+      ) {
+        await cleanupUnusedCategory(adapter, previousCategory)
+      }
     } catch (error) {
       setOfflineStatus(error)
     } finally {
       saving.value = false
     }
 
-    if (saved) {
+    if (savedExpense) {
       closeModal()
     }
+
+    return savedExpense
   }
 
   const deleteExpense = async (id) => {
+    const deletedExpense = expenses.value.find((item) => item.id === id)
+    if (!deletedExpense) return null
+
     const existing = expenses.value
     expenses.value = expenses.value.filter((item) => item.id !== id)
     const adapter = getWritableAdapter()
+    const category = getExpenseCategory(deletedExpense)
 
     try {
       if (adapter) {
         await adapter.delete(id)
       }
+
+      await cleanupUnusedCategory(adapter, category)
+      return deletedExpense
     } catch (error) {
       setOfflineStatus(error)
       expenses.value = existing
+      return null
     }
   }
 
@@ -1345,11 +1583,100 @@ export function useExpenses() {
     }
   }
 
+  const toggleCategoryActive = async (categoryInput) => {
+    const input = typeof categoryInput === 'object'
+      ? categoryInput
+      : findCategoryById(categoryInput) || findCategoryByName(categoryInput)
+    if (!input) return null
+
+    let category = getExpenseCategory(input) || findCategoryById(input.id) || findCategoryByName(input.name) || input
+    const adapter = getWritableAdapter()
+    const nextStatus = category.status === 'inactive' || category.active === false ? 'active' : 'inactive'
+    const previousCategories = categories.value
+    const previousExpenses = expenses.value
+
+    try {
+      if (adapter?.ensureCategory && (!category.id || isLocalCategoryId(category.id))) {
+        const persisted = await adapter.ensureCategory(category.name, {
+          icon: category.icon || getCategoryIcon(category.name),
+          status: category.status || 'active'
+        })
+        category = mergeCategoryRecord({
+          ...category,
+          ...persisted,
+          id: persisted.id || category.id
+        })
+      }
+
+      const nextCategory = mergeCategoryRecord({
+        ...category,
+        status: nextStatus,
+        active: nextStatus !== 'inactive'
+      })
+      refreshExpenseCategoryMetadata()
+
+      if (adapter?.updateCategory && nextCategory.id && !isLocalCategoryId(nextCategory.id)) {
+        const updated = await adapter.updateCategory(nextCategory.id, {
+          ...nextCategory,
+          status: nextStatus
+        })
+        mergeCategoryRecord(updated)
+        refreshExpenseCategoryMetadata()
+      }
+
+      return nextCategory
+    } catch (error) {
+      setOfflineStatus(error)
+      categories.value = previousCategories
+      expenses.value = previousExpenses
+      return null
+    }
+  }
+
+  const updateExpenseAmount = async (id, amount) => {
+    const item = expenses.value.find((e) => String(e.id) === String(id))
+    if (!item) return null
+
+    const nextAmount = Number(amount)
+    if (!Number.isFinite(nextAmount) || nextAmount <= 0) {
+      throw new Error('Enter a valid amount before saving the price change.')
+    }
+
+    const previous = expenses.value
+    const nextExpense = {
+      ...item,
+      amount: nextAmount
+    }
+    const hydratedNextExpense = applyCategoryMetadata([nextExpense])[0]
+
+    expenses.value = expenses.value.map((expense) =>
+      String(expense.id) === String(id) ? hydratedNextExpense : expense
+    )
+
+    try {
+      const adapter = getWritableAdapter()
+      if (!adapter) return hydratedNextExpense
+
+      const updated = await adapter.update(id, hydratedNextExpense)
+      const hydrated = applyCategoryMetadata([updated])[0]
+      expenses.value = applyCategoryMetadata(
+        expenses.value.map((expense) =>
+          String(expense.id) === String(id) ? hydrated : expense
+        )
+      )
+      return hydrated
+    } catch (error) {
+      setOfflineStatus(error)
+      expenses.value = previous
+      throw error
+    }
+  }
+
   const saveExpense = async () => {
     if (editingId.value !== null) {
-      await updateExpense()
+      return updateExpense()
     } else {
-      await addExpense()
+      return addExpense()
     }
   }
 
@@ -1361,6 +1688,7 @@ export function useExpenses() {
   return {
     // State
     expenses,
+    categories,
     status,
     statusError,
     saving,
@@ -1395,14 +1723,22 @@ export function useExpenses() {
     getNormalizedRecurrence,
     getRecurrenceSummary,
     getNextOccurrence,
+    getExpenseCategory,
+    getExpenseCategoryName,
+    getExpenseCategoryIcon,
+    getExpenseCategoryStatus,
+    isExpenseCategoryActive,
+    isExpenseCounted,
     repeatUnitSupportsPattern,
 
     // Actions
     fetchExpenses,
     addExpense,
     updateExpense,
+    updateExpenseAmount,
     deleteExpense,
     toggleExpenseActive,
+    toggleCategoryActive,
     saveExpense,
     openAddModal,
     openEditModal,

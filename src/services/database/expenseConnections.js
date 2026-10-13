@@ -1,12 +1,14 @@
 import { initializeApp, getApp, getApps } from 'firebase/app'
-import { getDatabase, onValue, push, ref as firebaseRef, remove, set, update } from 'firebase/database'
+import { get, getDatabase, onValue, push, ref as firebaseRef, remove, set, update } from 'firebase/database'
 import PocketBase from 'pocketbase'
 import { normalizeRecurrenceSchedule } from '../../data/recurrenceRules'
+import { normalizePaymentHistoryRecord } from '../paymentHistory'
 import { getManagedPocketBaseClient, isManagedPocketBaseConnection } from '../pocketbaseClient'
 import { ensurePocketBaseSchema } from './pocketbaseSchema'
 
 const defaultExpensePath = 'subfolio/expenses'
 const defaultCategoryCollection = 'categories'
+const defaultPaymentHistoryCollection = 'expensePaymentHistory'
 
 const cleanPath = (value) =>
   String(value || defaultExpensePath)
@@ -19,6 +21,21 @@ const cleanRecord = (record) =>
   JSON.parse(
     JSON.stringify(record, (_key, value) => (value === undefined ? null : value))
   )
+
+const cleanPartialRecord = (record) =>
+  Object.fromEntries(
+    Object.entries(record).filter(([, value]) => value !== undefined)
+  )
+
+const deriveCategoryPath = (expensePath) => {
+  const cleaned = cleanPath(expensePath)
+  const parts = cleaned.split('/')
+  if (parts.at(-1) === 'expenses') {
+    return [...parts.slice(0, -1), 'categories'].join('/')
+  }
+
+  return `${cleaned}/categories`
+}
 
 export const normalizeExpenseRecord = (record) => {
   const source = record || {}
@@ -38,7 +55,6 @@ export const normalizeExpenseRecord = (record) => {
     repeatUnit: source.repeatUnit,
     repeatPattern: source.repeatPattern,
     frequency: source.frequency,
-    customTimesPerYear: source.customTimesPerYear,
     startDate: source.startDate || source.dueDate || null,
     startTime: source.startTime || null,
     paymentTimezone: source.paymentTimezone || source.timezone || null,
@@ -74,7 +90,6 @@ export const normalizeExpenseRecord = (record) => {
       : source.repeatPattern || normalizedSchedule.repeatPattern || null,
     recurrenceSummary: source.recurrenceSummary || normalizedSchedule.summary || '',
     frequency: source.frequency || 'monthly',
-    customTimesPerYear: source.customTimesPerYear || null,
     startDate: source.startDate || source.dueDate || normalizedSchedule.paymentDate || null,
     startTime: source.startTime || null,
     paymentTimezone: source.paymentTimezone || source.timezone || normalizedSchedule.timezone,
@@ -88,11 +103,16 @@ export const normalizeExpenseRecord = (record) => {
 
 export const normalizeCategoryRecord = (record) => {
   const source = record || {}
+  const status = source.status || (source.active === false ? 'inactive' : 'active')
+  const name = source.name || source.category || ''
   return {
     id: String(source.id || source.key || ''),
     user: source.user || '',
-    name: source.name || source.category || '',
-    normalizedName: source.normalizedName || normalizeCategoryName(source.name || source.category || ''),
+    name,
+    normalizedName: source.normalizedName || normalizeCategoryName(name),
+    status,
+    active: status !== 'inactive',
+    icon: source.icon || '',
     createdAt: source.createdAt || null,
     updatedAt: source.updatedAt || null
   }
@@ -114,7 +134,7 @@ const serializeExpenseRecord = (expense, options = {}) => {
     name: expense.name,
     presetId: expense.presetId || null,
     categoryId: expense.categoryId || null,
-    category: expense.category,
+    category: expense.category || '',
     amount: Number(expense.amount) || 0,
     currency: expense.currency || 'CAD',
     url: expense.url || '',
@@ -130,7 +150,6 @@ const serializeExpenseRecord = (expense, options = {}) => {
     repeatPattern: scheduleType === 'one-time' ? null : expense.repeatPattern || null,
     recurrenceSummary: expense.recurrenceSummary || expense.recurrenceSchedule?.summary || '',
     frequency: expense.frequency || 'monthly',
-    customTimesPerYear: expense.customTimesPerYear || null,
     startDate: expense.startDate || null,
     startTime: expense.startTime || null,
     paymentTimezone: expense.paymentTimezone || null,
@@ -152,7 +171,59 @@ const serializeCategoryRecord = (name, userId, existing = {}) => {
     user: userId,
     name: trimmedName,
     normalizedName: normalizeCategoryName(trimmedName),
+    status: existing.status || (existing.active === false ? 'inactive' : 'active'),
+    icon: existing.icon || '',
     createdAt: existing.createdAt || now,
+    updatedAt: now
+  })
+}
+
+const serializeCategoryPatch = (category = {}) => {
+  const now = new Date().toISOString()
+  const name = category.name === undefined ? undefined : String(category.name || '').trim()
+
+  return cleanPartialRecord({
+    name,
+    normalizedName: name === undefined ? undefined : normalizeCategoryName(name),
+    status: category.status || (
+      category.active === false ? 'inactive' : category.active === true ? 'active' : undefined
+    ),
+    icon: category.icon,
+    updatedAt: now
+  })
+}
+
+const serializePaymentHistoryRecord = (record, options = {}) => {
+  const now = new Date().toISOString()
+
+  return cleanRecord({
+    user: options.userId || record.user || undefined,
+    expense: options.expenseId || record.expense || record.expenseId || undefined,
+    scheduledDate: record.scheduledDate,
+    paidDate: record.paidDate || null,
+    amount: Number(record.amount) || 0,
+    currency: record.currency || 'CAD',
+    status: record.status || 'paid',
+    source: record.source || 'generated',
+    changeType: record.changeType || 'standard',
+    details: record.details || null,
+    createdAt: record.createdAt || now,
+    updatedAt: now
+  })
+}
+
+const serializePaymentHistoryPatch = (record) => {
+  const now = new Date().toISOString()
+
+  return cleanPartialRecord({
+    scheduledDate: record.scheduledDate,
+    paidDate: record.paidDate || null,
+    amount: Number(record.amount) || 0,
+    currency: record.currency || 'CAD',
+    status: record.status || 'paid',
+    source: record.source || 'manual',
+    changeType: record.changeType || 'manual',
+    details: record.details || null,
     updatedAt: now
   })
 }
@@ -189,6 +260,16 @@ const createFirebaseExpenseConnection = (config) => {
   const database = getDatabase(app)
   const path = cleanPath(config.path)
   const collectionRef = firebaseRef(database, path)
+  const categoryPath = cleanPath(config.categoryPath || deriveCategoryPath(path))
+  const categoryRef = firebaseRef(database, categoryPath)
+
+  const listCategories = async () => {
+    const snapshot = await get(categoryRef)
+    const value = snapshot.val() || {}
+    return Object.entries(value).map(([id, record]) =>
+      normalizeCategoryRecord({ id, ...record })
+    )
+  }
 
   return {
     async subscribe(onChange, onError) {
@@ -223,11 +304,30 @@ const createFirebaseExpenseConnection = (config) => {
     },
 
     async listCategories() {
-      return []
+      return listCategories()
     },
 
-    async ensureCategory(name) {
-      return { id: null, name }
+    async ensureCategory(name, details = {}) {
+      const normalizedName = normalizeCategoryName(name)
+      const existing = (await listCategories()).find((category) =>
+        category.normalizedName === normalizedName
+      )
+      if (existing) return existing
+
+      const itemRef = push(categoryRef)
+      const record = serializeCategoryRecord(name, '', details)
+      await set(itemRef, record)
+      return normalizeCategoryRecord({ id: itemRef.key, ...record })
+    },
+
+    async updateCategory(id, category) {
+      const record = serializeCategoryPatch(category)
+      await update(firebaseRef(database, `${categoryPath}/${id}`), record)
+      return normalizeCategoryRecord({ id, ...category, ...record })
+    },
+
+    async deleteCategory(id) {
+      await remove(firebaseRef(database, `${categoryPath}/${id}`))
     }
   }
 }
@@ -238,6 +338,7 @@ const createPocketBaseExpenseConnection = (config) => {
     : new PocketBase(config.url)
   const collection = config.collection
   const categoryCollection = config.categoryCollection || defaultCategoryCollection
+  const paymentHistoryCollection = config.paymentHistoryCollection || defaultPaymentHistoryCollection
   let schemaReady = false
 
   const getAuthUserId = () => client.authStore.record?.id || ''
@@ -254,7 +355,7 @@ const createPocketBaseExpenseConnection = (config) => {
 
   const ensureReady = async () => {
     if (schemaReady) return
-    await ensurePocketBaseSchema(client, collection, categoryCollection)
+    await ensurePocketBaseSchema(client, collection, categoryCollection, paymentHistoryCollection)
     schemaReady = true
   }
 
@@ -295,6 +396,27 @@ const createPocketBaseExpenseConnection = (config) => {
       if (error?.status === 404) return null
       throw error
     }
+  }
+
+  const listPaymentHistory = async (expenseId) => {
+    await ensureReady()
+
+    const userId = getAuthUserId()
+    if (!userId) {
+      throw new Error('Sign in before reading payment history.')
+    }
+
+    const filter = client.filter('user = {:userId} && expense = {:expenseId}', {
+      userId,
+      expenseId
+    })
+    const records = await client.collection(paymentHistoryCollection).getFullList({
+      filter,
+      sort: 'scheduledDate',
+      requestKey: null
+    })
+
+    return records.map(normalizePaymentHistoryRecord)
   }
 
   return {
@@ -341,7 +463,7 @@ const createPocketBaseExpenseConnection = (config) => {
       return listCategories()
     },
 
-    async ensureCategory(name) {
+    async ensureCategory(name, details = {}) {
       await ensureReady()
 
       const userId = getAuthUserId()
@@ -352,8 +474,56 @@ const createPocketBaseExpenseConnection = (config) => {
       const existing = await getCategoryByName(name)
       if (existing) return existing
 
-      const created = await client.collection(categoryCollection).create(serializeCategoryRecord(name, userId))
+      const created = await client.collection(categoryCollection).create(
+        serializeCategoryRecord(name, userId, details)
+      )
       return normalizeCategoryRecord(created)
+    },
+
+    async updateCategory(id, category) {
+      await ensureReady()
+
+      const updated = await client.collection(categoryCollection).update(id, serializeCategoryPatch(category))
+      return normalizeCategoryRecord(updated)
+    },
+
+    async deleteCategory(id) {
+      await ensureReady()
+      await client.collection(categoryCollection).delete(id)
+    },
+
+    async listPaymentHistory(expenseId) {
+      return listPaymentHistory(expenseId)
+    },
+
+    async createPaymentHistoryRecords(expenseId, records) {
+      await ensureReady()
+
+      const userId = getAuthUserId()
+      if (!userId) {
+        throw new Error('Sign in before creating payment history.')
+      }
+
+      const created = []
+      for (const record of records) {
+        const saved = await client.collection(paymentHistoryCollection).create(
+          serializePaymentHistoryRecord(record, { userId, expenseId })
+        )
+        created.push(normalizePaymentHistoryRecord(saved))
+      }
+
+      return created
+    },
+
+    async updatePaymentHistoryRecord(id, record) {
+      await ensureReady()
+
+      const updated = await client.collection(paymentHistoryCollection).update(
+        id,
+        serializePaymentHistoryPatch(record)
+      )
+
+      return normalizePaymentHistoryRecord(updated)
     }
   }
 }

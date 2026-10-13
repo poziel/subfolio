@@ -1,9 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import Card from 'primevue/card'
 import Message from 'primevue/message'
 import { getCategoryIcon } from '../data/serviceCatalog'
 import MetricSummaryCards from '../components/MetricSummaryCards.vue'
+import AppPage from '../components/AppPage.vue'
+import SubfolioSurfaceCard from '../components/SubfolioSurfaceCard.vue'
 import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
@@ -12,7 +13,9 @@ import { useSettings } from '../composables/useSettings'
 const {
   expenses,
   fetchExpenses,
-  getYearlyAmount
+  getYearlyAmount,
+  getExpenseCategoryName,
+  isExpenseCounted
 } = useExpenses()
 const {
   formatMoney,
@@ -40,14 +43,14 @@ const remainingIncomeColor = '#243834'
 const hoveredSegmentId = ref('')
 
 const activeExpenses = computed(() =>
-  expenses.value.filter((expense) => expense.active !== false)
+  expenses.value.filter((expense) => isExpenseCounted(expense))
 )
 
 const categoryTotals = computed(() => {
   const grouped = new Map()
 
   activeExpenses.value.forEach((expense) => {
-    const name = expense.category || t('dashboard.uncategorized')
+    const name = getExpenseCategoryName(expense) || t('dashboard.uncategorized')
     const yearly = convertToDisplayed(getYearlyAmount(expense), expense.currency)
     const current = grouped.get(name) || {
       name,
@@ -251,60 +254,65 @@ onMounted(fetchExpenses)
 </script>
 
 <template>
-    <header class="app-page__header">
-      <div>
+  <AppPage>
+    <template #header>
+      <div class="grid gap-1">
         <h1 class="font-serif text-4xl text-ink">{{ t('dashboard.title') }}</h1>
         <p class="muted-copy">{{ t('dashboard.intro') }}</p>
       </div>
-    </header>
+    </template>
 
     <MetricSummaryCards :expenses="expenses" />
 
-    <Card class="dashboard-income-card">
-      <template #title>{{ t('dashboard.incomeComparisonTitle') }}</template>
-      <template #subtitle>{{ t('dashboard.incomeComparisonSubtitle') }}</template>
-      <template #content>
-        <div v-if="hasIncome" class="dashboard-income-grid">
-          <div class="dashboard-income-metric">
-            <span class="dashboard-income-metric__label">{{ t('dashboard.annualIncome') }}</span>
-            <span class="dashboard-income-metric__value">
-              {{ formatMoney(annualIncomeDisplayed, displayedCurrency) }}
-            </span>
-          </div>
-          <div class="dashboard-income-metric">
-            <span class="dashboard-income-metric__label">{{ t('dashboard.recurringIncomeShare') }}</span>
-            <span class="dashboard-income-metric__value">
-              {{ recurringIncomePercent.toFixed(1) }}%
-            </span>
-          </div>
-          <div class="dashboard-income-metric">
-            <span class="dashboard-income-metric__label">{{ t('dashboard.remainingAfterRecurrences') }}</span>
-            <span class="dashboard-income-metric__value">
-              {{ formatMoney(annualIncomeRemaining, displayedCurrency) }}
-            </span>
-          </div>
-          <div v-if="hoursToCoverRecurrences" class="dashboard-income-metric">
-            <span class="dashboard-income-metric__label">{{ t('dashboard.hoursToCoverRecurrences') }}</span>
-            <span class="dashboard-income-metric__value">
-              {{ hoursToCoverRecurrences.toFixed(1) }}
-            </span>
-          </div>
-        </div>
-        <Message v-else severity="info" :closable="false">
-          {{ t('dashboard.incomeMissing') }}
-        </Message>
-      </template>
-    </Card>
+    <section class="app-section">
+      <div class="app-section-heading">
+        <h2 class="app-section-title">{{ t('dashboard.incomeComparisonTitle') }}</h2>
+        <p class="app-section-subtitle">{{ t('dashboard.incomeComparisonSubtitle') }}</p>
+      </div>
+
+      <div v-if="hasIncome" class="dashboard-income-grid">
+        <SubfolioSurfaceCard class="dashboard-income-metric">
+          <span class="dashboard-income-metric__label">{{ t('dashboard.annualIncome') }}</span>
+          <span class="dashboard-income-metric__value">
+            {{ formatMoney(annualIncomeDisplayed, displayedCurrency) }}
+          </span>
+        </SubfolioSurfaceCard>
+        <SubfolioSurfaceCard class="dashboard-income-metric">
+          <span class="dashboard-income-metric__label">{{ t('dashboard.recurringIncomeShare') }}</span>
+          <span class="dashboard-income-metric__value">
+            {{ recurringIncomePercent.toFixed(1) }}%
+          </span>
+        </SubfolioSurfaceCard>
+        <SubfolioSurfaceCard class="dashboard-income-metric">
+          <span class="dashboard-income-metric__label">{{ t('dashboard.remainingAfterRecurrences') }}</span>
+          <span class="dashboard-income-metric__value">
+            {{ formatMoney(annualIncomeRemaining, displayedCurrency) }}
+          </span>
+        </SubfolioSurfaceCard>
+        <SubfolioSurfaceCard v-if="hoursToCoverRecurrences" class="dashboard-income-metric">
+          <span class="dashboard-income-metric__label">{{ t('dashboard.hoursToCoverRecurrences') }}</span>
+          <span class="dashboard-income-metric__value">
+            {{ hoursToCoverRecurrences.toFixed(1) }}
+          </span>
+        </SubfolioSurfaceCard>
+      </div>
+      <Message v-else severity="info" :closable="false">
+        {{ t('dashboard.incomeMissing') }}
+      </Message>
+    </section>
 
     <Message v-if="!categoryTotals.length" severity="info" :closable="false">
       {{ t('dashboard.empty') }}
     </Message>
 
     <section v-else class="dashboard-grid">
-      <Card class="dashboard-chart-card dashboard-chart-card--wide">
-        <template #title>{{ t('dashboard.categorySplitTitle') }}</template>
-        <template #subtitle>{{ t('dashboard.categorySplitSubtitle') }}</template>
-        <template #content>
+      <section class="app-section dashboard-section--chart">
+        <div class="app-section-heading">
+          <h2 class="app-section-title">{{ t('dashboard.categorySplitTitle') }}</h2>
+          <p class="app-section-subtitle">{{ t('dashboard.categorySplitSubtitle') }}</p>
+        </div>
+
+        <SubfolioSurfaceCard class="dashboard-chart-card dashboard-chart-card--wide">
           <div class="dashboard-pie-layout">
             <figure class="dashboard-pie-figure">
               <svg
@@ -369,28 +377,30 @@ onMounted(fetchExpenses)
               </button>
             </div>
           </div>
-        </template>
-      </Card>
+        </SubfolioSurfaceCard>
+      </section>
 
-      <Card class="dashboard-insights-card">
-        <template #title>{{ t('dashboard.categoryInsightsTitle') }}</template>
-        <template #subtitle>{{ t('dashboard.categoryInsightsSubtitle') }}</template>
-        <template #content>
-          <div class="dashboard-insight-grid">
-            <article
-              v-for="insight in categoryInsightCards"
-              :key="insight.key"
-              class="dashboard-insight-card"
-            >
-              <SubfolioIconTile :icon="insight.icon" tone="neutral" />
-              <div class="min-w-0">
-                <p class="dashboard-insight-card__label">{{ insight.label }}</p>
-                <p class="dashboard-insight-card__value">{{ insight.value }}</p>
-                <p class="text-sm muted-copy">{{ insight.detail }}</p>
-              </div>
-            </article>
-          </div>
-        </template>
-      </Card>
+      <section class="app-section">
+        <div class="app-section-heading">
+          <h2 class="app-section-title">{{ t('dashboard.categoryInsightsTitle') }}</h2>
+          <p class="app-section-subtitle">{{ t('dashboard.categoryInsightsSubtitle') }}</p>
+        </div>
+
+        <div class="dashboard-insight-grid">
+          <SubfolioSurfaceCard
+            v-for="insight in categoryInsightCards"
+            :key="insight.key"
+            class="dashboard-insight-card"
+          >
+            <SubfolioIconTile :icon="insight.icon" tone="neutral" />
+            <div class="min-w-0">
+              <p class="dashboard-insight-card__label">{{ insight.label }}</p>
+              <p class="dashboard-insight-card__value">{{ insight.value }}</p>
+              <p class="text-sm muted-copy">{{ insight.detail }}</p>
+            </div>
+          </SubfolioSurfaceCard>
+        </div>
+      </section>
     </section>
+  </AppPage>
 </template>

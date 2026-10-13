@@ -12,6 +12,7 @@ import Select from 'primevue/select'
 import SelectButton from 'primevue/selectbutton'
 import Textarea from 'primevue/textarea'
 import ToggleSwitch from 'primevue/toggleswitch'
+import { useToast } from 'primevue/usetoast'
 import { buildRecurrenceSummaryParts } from '../data/recurrenceRules'
 import { findKnownServiceById, groupedKnownServices, knownServices, serviceIconOptions } from '../data/serviceCatalog'
 import { useExpenses } from '../composables/useExpenses'
@@ -23,6 +24,7 @@ const {
   showAddModal,
   editingId,
   form,
+  categories,
   baseCategories,
   extraCategories,
   expenses,
@@ -36,18 +38,21 @@ const {
   repeatUnitSupportsPattern,
   getTaxRateOptions,
   getSelectedTaxRateOption,
+  getExpenseCategoryName,
   applyPreset
 } = useExpenses()
 const { t, locale } = useI18n()
+const toast = useToast()
 
 const isEditing = computed(() => editingId.value !== null)
 const categorySuggestions = ref([])
 
 const categoryOptions = computed(() => {
-  const categories = new Set(baseCategories)
-  extraCategories.value.forEach((item) => categories.add(item))
-  expenses.value.forEach((item) => categories.add(item.category))
-  return Array.from(categories).sort()
+  const names = new Set(baseCategories)
+  extraCategories.value.forEach((item) => names.add(item))
+  categories.value.forEach((item) => names.add(item.name))
+  expenses.value.forEach((item) => names.add(getExpenseCategoryName(item)))
+  return Array.from(names).filter(Boolean).sort()
 })
 
 const modalTitle = computed(() => (isEditing.value ? t('expenseForm.editTitle') : t('expenseForm.addTitle')))
@@ -188,6 +193,21 @@ const handleVisibleChange = (visible) => {
   if (!visible) closeModal()
 }
 
+const handleSaveExpense = async () => {
+  const wasEditing = isEditing.value
+  const savedExpense = await saveExpense()
+  if (!savedExpense) return
+
+  toast.add({
+    severity: 'success',
+    summary: wasEditing ? t('toast.expenseUpdated') : t('toast.expenseAdded'),
+    detail: wasEditing
+      ? t('toast.expenseUpdatedDetail', { name: savedExpense.name })
+      : t('toast.expenseAddedDetail', { name: savedExpense.name }),
+    life: 3500
+  })
+}
+
 watch(() => [form.scheduleType, form.repeatUnit], () => {
   if (form.scheduleType === 'recurring' && repeatUnitSupportsPattern(form.repeatUnit)) {
     form.repeatPattern = form.repeatPattern || 'same-calendar-day'
@@ -244,7 +264,7 @@ watch(() => showAddModal.value, (visible) => {
       </div>
     </template>
 
-    <form id="subfolio-expense-form" class="subfolio-expense-form grid gap-5" @submit.prevent="saveExpense">
+    <form id="subfolio-expense-form" class="subfolio-expense-form grid gap-5" @submit.prevent="handleSaveExpense">
       <div class="grid gap-4 sm:grid-cols-2">
         <div class="subfolio-field sm:col-span-2">
           <label for="modal-service-preset">{{ t('expenseForm.preset') }}</label>

@@ -1,10 +1,11 @@
 <script setup>
 import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import { getExpenseIcon } from '../data/serviceCatalog'
+import AppPage from '../components/AppPage.vue'
 import MetricSummaryCards from '../components/MetricSummaryCards.vue'
+import SubfolioSurfaceCard from '../components/SubfolioSurfaceCard.vue'
 import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
@@ -17,6 +18,8 @@ const {
   getEffectiveAmount,
   getNextOccurrence,
   getRecurrenceSummary,
+  getExpenseCategoryName,
+  isExpenseCounted,
   openAddModal
 } = useExpenses()
 const { formatMoney, displayedCurrency, convertToDisplayed } = useSettings()
@@ -24,7 +27,7 @@ const { t, locale } = useI18n()
 const router = useRouter()
 
 const activeExpenses = computed(() =>
-  expenses.value.filter((expense) => expense.active !== false)
+  expenses.value.filter((expense) => isExpenseCounted(expense))
 )
 
 const upcomingExpenses = computed(() =>
@@ -112,24 +115,32 @@ onMounted(fetchExpenses)
 </script>
 
 <template>
-    <section class="grid gap-3">
-      <h1 class="font-serif text-5xl text-ink">{{ t('home.title') }}</h1>
-      <p class="max-w-2xl muted-copy">
-        {{ t('home.intro') }}
-      </p>
-    </section>
+  <AppPage>
+    <template #header>
+      <div class="grid gap-1">
+        <h1 class="font-serif text-4xl text-ink">{{ t('home.title') }}</h1>
+        <p class="max-w-2xl muted-copy">
+          {{ t('home.intro') }}
+        </p>
+      </div>
+    </template>
 
     <MetricSummaryCards :expenses="expenses" />
 
-    <section class="grid items-start gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-      <Card>
-        <template #title>{{ t('home.quickActions') }}</template>
-        <template #subtitle>{{ t('home.quickActionsSubtitle') }}</template>
-        <template #content>
-          <div class="quick-action-grid">
+    <section class="home-overview-grid">
+      <section class="app-section">
+        <div class="app-section-heading">
+          <h2 class="app-section-title">{{ t('home.quickActions') }}</h2>
+          <p class="app-section-subtitle">{{ t('home.quickActionsSubtitle') }}</p>
+        </div>
+
+        <div class="quick-action-list">
+          <SubfolioSurfaceCard
+            v-for="action in actions"
+            :key="action.key"
+            class="quick-action-card"
+          >
             <button
-              v-for="action in actions"
-              :key="action.key"
               type="button"
               class="quick-action"
               @click="runQuickAction(action)"
@@ -140,20 +151,25 @@ onMounted(fetchExpenses)
                 <span class="block text-sm muted-copy">{{ action.detail }}</span>
               </span>
             </button>
-          </div>
-        </template>
-      </Card>
+          </SubfolioSurfaceCard>
+        </div>
+      </section>
 
-      <Card>
-        <template #title>{{ t('home.upcomingRecurrencesTitle') }}</template>
-        <template #subtitle>{{ t('home.upcomingRecurrencesSubtitle') }}</template>
-        <template #content>
-          <div class="recurrence-preview-list">
-            <template v-if="upcomingExpenses.length">
+      <section class="app-section">
+        <div class="app-section-heading">
+          <h2 class="app-section-title">{{ t('home.upcomingRecurrencesTitle') }}</h2>
+          <p class="app-section-subtitle">{{ t('home.upcomingRecurrencesSubtitle') }}</p>
+        </div>
+
+        <div class="recurrence-preview-list">
+          <template v-if="upcomingExpenses.length">
+            <SubfolioSurfaceCard
+              v-for="expense in upcomingExpenses"
+              :key="expense.id"
+              class="recurrence-preview-card"
+            >
               <RouterLink
-                v-for="expense in upcomingExpenses"
-                :key="expense.id"
-                to="/app/expenses"
+                :to="{ name: 'expense-detail', params: { id: expense.id } }"
                 class="recurrence-preview-item"
               >
                 <div class="recurrence-preview-item__main">
@@ -167,21 +183,22 @@ onMounted(fetchExpenses)
                   <div class="min-w-0">
                     <p class="truncate font-extrabold text-ink">{{ expense.name }}</p>
                     <p class="truncate text-sm muted-copy">
-                      {{ expense.category }} / {{ formatFrequency(expense) }} / {{ formatDate(expense.nextOccurrenceDate) }}
+                      {{ getExpenseCategoryName(expense) }} / {{ formatFrequency(expense) }} / {{ formatDate(expense.nextOccurrenceDate) }}
                     </p>
                   </div>
                 </div>
                 <div class="grid justify-items-end gap-1">
                   <span class="subfolio-amount">{{ nextRecurrenceAmount(expense) }}</span>
-                  <Tag :value="expense.active === false ? t('categories.excluded') : t('metrics.active')" severity="info" rounded />
+                  <Tag :value="isExpenseCounted(expense) ? t('metrics.active') : t('categories.excluded')" severity="info" rounded />
                 </div>
               </RouterLink>
-            </template>
-            <p v-else class="py-8 text-sm muted-copy">
-              {{ t('home.noUpcomingRecurrences') }}
-            </p>
-          </div>
-        </template>
-      </Card>
+            </SubfolioSurfaceCard>
+          </template>
+          <p v-else class="py-8 text-sm muted-copy">
+            {{ t('home.noUpcomingRecurrences') }}
+          </p>
+        </div>
+      </section>
     </section>
+  </AppPage>
 </template>

@@ -28,6 +28,7 @@
   - account connection (`/connect`)
   - dashboard (`/app`)
   - expense tracker (`/app/expenses`)
+  - expense detail and payment history (`/app/expenses/:id`)
   - category overview (`/app/categories`)
   - recurrence overview (`/app/recurrences`)
   - settings (`/app/settings`)
@@ -74,6 +75,11 @@
   config objects using either `databaseURL` or Refinimo-style `databaseUrl`.
 - Both adapters expose realtime subscribe, create, update, and delete methods
   for recurring expense records.
+- The managed PocketBase adapter also stores payment history in an
+  `expensePaymentHistory` collection linked to the authenticated user and parent
+  expense. History records keep scheduled date, actual paid date, paid amount,
+  currency, change metadata, and timestamps separate from the recurring expense
+  source record.
 - Managed PocketBase expense records include a `user` relation and collection
   rules restrict reads and writes to `@request.auth.id`.
 - Expense records include amount, currency, tax, category, recurrence,

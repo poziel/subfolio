@@ -19,12 +19,15 @@ export const defaultFirebaseConnection = {
   projectId: '',
   appId: '',
   databaseURL: '',
-  path: 'subfolio/expenses'
+  path: 'subfolio/expenses',
+  categoryPath: 'subfolio/categories'
 }
 
 export const defaultPocketBaseConnection = {
   url: managedPocketBaseConfig.url,
-  collection: managedPocketBaseConfig.collection
+  collection: managedPocketBaseConfig.collection,
+  categoryCollection: managedPocketBaseConfig.categoryCollection,
+  paymentHistoryCollection: managedPocketBaseConfig.paymentHistoryCollection
 }
 
 const readStoredConnection = () => {
@@ -52,7 +55,8 @@ const normalizeFirebaseConnection = (value) => {
     projectId: trimValue(firebase.projectId),
     appId: trimValue(firebase.appId),
     databaseURL: trimValue(firebase.databaseURL || firebase.databaseUrl),
-    path: trimValue(firebase.path) || defaultFirebaseConnection.path
+    path: trimValue(firebase.path) || defaultFirebaseConnection.path,
+    categoryPath: trimValue(firebase.categoryPath) || defaultFirebaseConnection.categoryPath
   }
 }
 
@@ -64,7 +68,10 @@ const normalizePocketBaseConnection = (value) => {
 
   return {
     url: trimValue(pocketbase.url).replace(/\/$/, ''),
-    collection: trimValue(pocketbase.collection) || defaultPocketBaseConnection.collection
+    collection: trimValue(pocketbase.collection) || defaultPocketBaseConnection.collection,
+    categoryCollection: trimValue(pocketbase.categoryCollection) || defaultPocketBaseConnection.categoryCollection,
+    paymentHistoryCollection: trimValue(pocketbase.paymentHistoryCollection) ||
+      defaultPocketBaseConnection.paymentHistoryCollection
   }
 }
 

@@ -1,4 +1,4 @@
-export { getDefaultPaymentTimezone } from './timeZones'
+export { getDefaultPaymentTimezone } from './timeZones.js'
 
 export const scheduleTypes = ['one-time', 'recurring']
 export const repeatUnits = ['year', 'month', 'week', 'day']
@@ -164,7 +164,6 @@ export const normalizeRecurrenceSchedule = (schedule, source = {}) => {
     paymentTimezone: schedule.timezone || source.paymentTimezone,
     startDate: schedule.startsOn || source.startDate,
     frequency: schedule.frequency || source.frequency,
-    customTimesPerYear: schedule.timesPerYear || source.customTimesPerYear,
     datePattern: schedule.pattern || source.datePattern
   })
 }
@@ -277,7 +276,7 @@ export const deriveLegacyFrequency = (source = {}) => {
   if (unit === 'month' && interval === 6) return 'semi-annually'
   if (unit === 'week' && interval === 1) return 'weekly'
   if (unit === 'week' && interval === 2) return 'bi-weekly'
-  if (unit === 'day') return 'daily'
+  if (unit === 'day' && interval === 1) return 'daily'
   return 'custom'
 }
 
@@ -411,11 +410,27 @@ const inferRepeatFromLegacy = (source = {}) => {
   }
 
   if (frequency === 'custom') {
+    if (isRelativeYearly || pattern.type === 'day-of-year') {
+      return {
+        scheduleType: recurringType,
+        repeatInterval: 1,
+        repeatUnit: 'year',
+        repeatPattern: isRelativeYearly ? relativeWeekdayPattern : calendarPattern
+      }
+    }
+
+    if (isRelativeMonthly || pattern.type === 'day-of-month') {
+      return {
+        scheduleType: recurringType,
+        repeatInterval: 1,
+        repeatUnit: 'month',
+        repeatPattern: isRelativeMonthly ? relativeWeekdayPattern : calendarPattern
+      }
+    }
+
     return {
       scheduleType: recurringType,
-      repeatInterval: isIntervalPattern
-        ? Number(pattern.intervalDays) || 1
-        : Math.max(1, Math.round(365 / (Number(source.customTimesPerYear) || 12))),
+      repeatInterval: isIntervalPattern ? Number(pattern.intervalDays) || 1 : 1,
       repeatUnit: 'day',
       repeatPattern: null
     }
@@ -469,7 +484,7 @@ const deriveLegacyFrequencyFromParts = (interval, unit) => {
   if (unit === 'month' && interval === 6) return 'semi-annually'
   if (unit === 'week' && interval === 1) return 'weekly'
   if (unit === 'week' && interval === 2) return 'bi-weekly'
-  if (unit === 'day') return 'daily'
+  if (unit === 'day' && interval === 1) return 'daily'
   return 'custom'
 }
 
