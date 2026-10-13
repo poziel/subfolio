@@ -1,14 +1,14 @@
 <script setup>
+import UpkeepBrand from '../components/UpkeepBrand.vue'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Message from 'primevue/message'
 import Password from 'primevue/password'
-import SubfolioButton from '../components/SubfolioButton.vue'
+import UpkeepButton from '../components/UpkeepButton.vue'
 import { getAuthErrorMessage, useAuth } from '../composables/useAuth'
 import { useI18n } from '../composables/useI18n'
-import { useTheme } from '../composables/useTheme'
 
 const route = useRoute()
 const router = useRouter()
@@ -23,7 +23,6 @@ const {
   restoreSession
 } = useAuth()
 const { t } = useI18n()
-const { activeTheme } = useTheme()
 
 const mode = ref('signIn')
 const errorMessage = ref('')
@@ -157,19 +156,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="subfolio-connection-page flex min-h-dvh justify-center overflow-y-auto px-6 py-8">
+  <div class="upkeep-connection-page flex min-h-dvh justify-center overflow-y-auto px-6 py-8">
     <div class="grid w-full max-w-xl content-start gap-8 pt-8 md:pt-[9vh]">
       <header class="grid justify-items-center gap-3 text-center">
         <RouterLink class="inline-flex justify-center" to="/">
-          <img
-            :src="activeTheme === 'dark' ? '/images/subfolio-light-tagline-1.svg' : '/images/subfolio-dark-tagline-1.svg'"
-            alt="Subfolio"
-            class="h-[100px] w-auto max-w-[30rem]"
-          />
+          <UpkeepBrand tagline class="text-5xl" />
         </RouterLink>
       </header>
 
-      <Card class="subfolio-connection-card w-full">
+      <Card class="upkeep-connection-card w-full">
         <template #content>
           <div class="grid gap-5">
             <div class="connect-mode-switch" role="tablist" :aria-label="t('connect.accountMode')">
@@ -195,7 +190,7 @@ onMounted(async () => {
                 </p>
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="account-identity">{{ t('connect.identity') }}</label>
                 <InputText
                   id="account-identity"
@@ -209,7 +204,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="account-password">{{ t('connect.password') }}</label>
                 <Password
                   v-model="signInForm.password"
@@ -227,7 +222,7 @@ onMounted(async () => {
               <Message v-if="needsVerification" severity="warn" :closable="false">
                 <div class="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
                   <span>{{ t('connect.verificationRequired') }}</span>
-                  <SubfolioButton
+                  <UpkeepButton
                     type="button"
                     data-test-id="verification-resend"
                     :label="t('connect.resendVerification')"
@@ -249,7 +244,7 @@ onMounted(async () => {
 
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <RouterLink v-slot="{ navigate }" to="/" custom>
-                  <SubfolioButton
+                  <UpkeepButton
                     type="button"
                     :label="t('connect.returnOverview')"
                     icon="pi pi-arrow-left"
@@ -258,7 +253,7 @@ onMounted(async () => {
                     @click="navigate"
                   />
                 </RouterLink>
-                <SubfolioButton
+                <UpkeepButton
                   type="submit"
                   data-test-id="login-submit"
                   :label="t('connect.signIn')"
@@ -276,7 +271,7 @@ onMounted(async () => {
                 </p>
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="create-account-name">{{ t('connect.displayName') }}</label>
                 <InputText
                   id="create-account-name"
@@ -288,7 +283,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="create-account-username">{{ t('connect.username') }}</label>
                 <InputText
                   id="create-account-username"
@@ -301,7 +296,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="create-account-email">{{ t('connect.email') }}</label>
                 <InputText
                   id="create-account-email"
@@ -315,7 +310,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="create-account-password">{{ t('connect.password') }}</label>
                 <Password
                   v-model="signUpForm.password"
@@ -330,7 +325,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <div class="subfolio-field">
+              <div class="upkeep-field">
                 <label for="create-account-password-confirm">{{ t('connect.passwordConfirm') }}</label>
                 <Password
                   v-model="signUpForm.passwordConfirm"
@@ -353,7 +348,7 @@ onMounted(async () => {
               </Message>
 
               <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <SubfolioButton
+                <UpkeepButton
                   type="button"
                   :label="t('connect.haveAccount')"
                   icon="pi pi-arrow-left"
@@ -361,7 +356,7 @@ onMounted(async () => {
                   theme="secondary"
                   @click="switchMode('signIn')"
                 />
-                <SubfolioButton
+                <UpkeepButton
                   type="submit"
                   data-test-id="signup-submit"
                   :label="t('connect.createAccount')"

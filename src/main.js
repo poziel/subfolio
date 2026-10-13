@@ -10,7 +10,7 @@ import Aura from '@primeuix/themes/aura'
 import App from './App.vue'
 import router from './router'
 
-const SubfolioPreset = definePreset(Aura, {
+const UpkeepPreset = definePreset(Aura, {
   primitive: {
     borderRadius: {
       none: '0',
@@ -215,9 +215,9 @@ createApp(App)
   .use(PrimeVue, {
     ripple: true,
     theme: {
-      preset: SubfolioPreset,
+      preset: UpkeepPreset,
       options: {
-        darkModeSelector: '.subfolio-dark'
+        darkModeSelector: '.upkeep-dark'
       }
     }
   })

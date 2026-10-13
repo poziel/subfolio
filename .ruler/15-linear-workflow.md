@@ -1,12 +1,12 @@
 # Linear Workflow
 
-Linear is the source of truth for Subfolio issues and tasks. Each session should
+Linear is the source of truth for Upkeep issues and tasks. Each session should
 map to a Linear issue whenever possible.
 
 ## Defaults
 
 - Team: DEV
-- Project: subfolio
+- Project: upkeep
 - New work starts by co-planning the scope in chat before creating or updating
   the Linear issue.
 - If the user references a Linear issue, fetch it and work under that issue.

@@ -81,14 +81,14 @@ const changelogBlocks = computed(() => {
           Product updates over time.
         </h1>
         <p class="max-w-3xl text-lg muted-copy">
-          Subfolio publishes release notes from the project changelog. The release workflow
+          Upkeep publishes release notes from the project changelog. The release workflow
           can append new GitHub release versions to the same file that this page renders.
         </p>
       </section>
 
       <Card>
         <template #content>
-          <article class="subfolio-markdown">
+          <article class="upkeep-markdown">
             <template v-for="(block, index) in changelogBlocks" :key="`${block.type}-${index}`">
               <h1 v-if="block.type === 'h1'">{{ block.text }}</h1>
               <h2 v-else-if="block.type === 'h2'">{{ block.text }}</h2>

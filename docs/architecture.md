@@ -1,7 +1,7 @@
-# Subfolio architecture notes
+# Upkeep architecture notes
 
 ## Current direction
-- Build Subfolio as a frontend-only app shell.
+- Build Upkeep as a frontend-only app shell.
 - Use the managed PocketBase application for user accounts, email verification,
   authenticated sessions, and recurring expense storage.
 - User accounts include a username for preferred sign-in, an email for
@@ -13,7 +13,7 @@
 
 ## Frontend structure
 - Frontend lives at the repo root.
-- UI uses PrimeVue styled mode with an Aura-derived Subfolio preset and
+- UI uses PrimeVue styled mode with an Aura-derived Upkeep preset and
   PrimeIcons. Tailwind remains available for layout, spacing, and responsive
   composition.
 - Vue Router pages:
@@ -57,7 +57,7 @@
   session is available, the route guard sends users to `/connect` for account
   access.
 - The public shell links to the source repository at
-  `https://github.com/poziel/subfolio`.
+  `https://github.com/poziel/upkeep`.
 - Legal pages are footer-only links and are intentionally excluded from the top
   public navigation.
 - `CHANGELOG.md` is the source of truth for release history and is rendered by
@@ -71,7 +71,7 @@
 - Firebase uses Realtime Database paths supplied by the user.
 - PocketBase uses the managed URL and collection names from Vite environment
   variables.
-- URL config links accept native Subfolio connection objects and raw Firebase
+- URL config links accept native Upkeep connection objects and raw Firebase
   config objects using either `databaseURL` or Refinimo-style `databaseUrl`.
 - Both adapters expose realtime subscribe, create, update, and delete methods
   for recurring expense records.

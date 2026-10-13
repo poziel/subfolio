@@ -100,14 +100,14 @@ export const ensurePocketBaseSchema = async (
 
     if (status === 404) {
       throw new PocketBaseSchemaError(
-        `PocketBase collection "${collection}", "${categoryCollection}", or "${paymentHistoryCollection}" is missing. Run the Subfolio PocketBase migrations before using this connection.`,
+        `PocketBase collection "${collection}", "${categoryCollection}", or "${paymentHistoryCollection}" is missing. Run the Upkeep PocketBase migrations before using this connection.`,
         { cause: error, status }
       )
     }
 
     if (status === 403 || status === 401) {
       throw new PocketBaseSchemaError(
-        `PocketBase collection "${collection}" is not readable by this app. Check the collection API rules or run the Subfolio PocketBase migration.`,
+        `PocketBase collection "${collection}" is not readable by this app. Check the collection API rules or run the Upkeep PocketBase migration.`,
         { cause: error, status }
       )
     }

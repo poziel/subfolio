@@ -1,6 +1,6 @@
 <script setup>
 import { computed, useSlots } from 'vue'
-import SubfolioSurfaceCard from './SubfolioSurfaceCard.vue'
+import UpkeepSurfaceCard from './UpkeepSurfaceCard.vue'
 
 defineProps({
   title: {
@@ -34,8 +34,8 @@ const hasActions = computed(() => Boolean(slots.actions))
       </div>
     </div>
 
-    <SubfolioSurfaceCard :class="surfaceClass">
+    <UpkeepSurfaceCard :class="surfaceClass">
       <slot />
-    </SubfolioSurfaceCard>
+    </UpkeepSurfaceCard>
   </section>
 </template>

@@ -1,4 +1,5 @@
 <script setup>
+import UpkeepBrand from './UpkeepBrand.vue'
 import { computed, markRaw, provide, ref, shallowRef, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Menu from 'primevue/menu'
@@ -6,10 +7,9 @@ import { useAuth } from '../composables/useAuth'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
-import { useTheme } from '../composables/useTheme'
 import { appShellLayoutKey } from './appShellLayout'
 import ExpenseFormModal from './ExpenseFormModal.vue'
-import SubfolioButton from './SubfolioButton.vue'
+import UpkeepButton from './UpkeepButton.vue'
 import ThemeLanguageControls from './ThemeLanguageControls.vue'
 
 const route = useRoute()
@@ -18,8 +18,7 @@ const { currentUser, logout } = useAuth()
 const { openAddModal } = useExpenses()
 const { t } = useI18n()
 const { contentLayoutMode } = useSettings()
-const { activeTheme } = useTheme()
-const sidebarStorageKey = 'subfolio-sidebar-collapsed'
+const sidebarStorageKey = 'upkeep-sidebar-collapsed'
 const readSidebarCollapsed = () => {
   if (typeof localStorage === 'undefined') return false
   return localStorage.getItem(sidebarStorageKey) === 'true'
@@ -41,11 +40,6 @@ const navItems = [
 const isActive = (path) => (
   route.path === path ||
   (path !== '/app' && route.path.startsWith(`${path}/`))
-)
-const wordmarkSrc = computed(() =>
-  activeTheme.value === 'dark'
-    ? '/images/subfolio-light-name.svg'
-    : '/images/subfolio-dark-name.svg'
 )
 const mainClass = computed(() => ({
   'app-shell__main--layout-fluid': contentLayoutMode.value === 'fluid',
@@ -109,18 +103,18 @@ watch(sidebarCollapsed, (collapsed) => {
     <header class="app-shell__mobile-header">
       <div class="app-shell__mobile-row">
         <RouterLink to="/app" class="app-shell__brand p-0">
-          <img :src="wordmarkSrc" alt="Subfolio" class="app-shell__wordmark app-shell__wordmark--mobile" />
+          <img :src="wordmarkSrc" alt="Upkeep" class="app-shell__wordmark app-shell__wordmark--mobile" />
         </RouterLink>
 
         <div class="flex shrink-0 items-center gap-2">
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             :label="t('appNav.add')"
             icon="pi pi-plus"
             size="small"
             @click="openAddModal"
           />
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             icon="pi pi-user"
             :aria-label="accountLabel"
@@ -154,17 +148,17 @@ watch(sidebarCollapsed, (collapsed) => {
         <div class="app-shell__brand">
           <RouterLink to="/app" class="app-shell__brand-link">
             <img
-              src="/images/subfolio-original.svg"
+              src="/images/upkeep-original.svg"
               alt=""
               class="app-shell__brand-icon"
               aria-hidden="true"
             />
-            <img :src="wordmarkSrc" alt="Subfolio" class="app-shell__wordmark" />
+            <UpkeepBrand wordmark-only class="app-shell__wordmark" />
           </RouterLink>
         </div>
 
         <div class="app-shell__actions">
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             :label="sidebarCollapsed ? '' : t('appNav.addExpense')"
             icon="pi pi-plus"
@@ -191,7 +185,7 @@ watch(sidebarCollapsed, (collapsed) => {
 
         <div class="app-shell__footer">
           <div class="app-shell__footer-controls">
-            <SubfolioButton
+            <UpkeepButton
               type="button"
               :label="sidebarCollapsed ? '' : accountLabel"
               icon="pi pi-user"
@@ -203,7 +197,7 @@ watch(sidebarCollapsed, (collapsed) => {
               :aria-expanded="profileMenuOpen"
               @click="toggleProfileMenu"
             />
-            <SubfolioButton
+            <UpkeepButton
               type="button"
               :icon="sidebarCollapsed ? 'pi pi-angle-right' : 'pi pi-angle-left'"
               :aria-label="sidebarCollapsed ? t('appNav.expandSidebar') : t('appNav.collapseSidebar')"

@@ -11,8 +11,8 @@ import SelectButton from 'primevue/selectbutton'
 import Tag from 'primevue/tag'
 import AppPage from '../components/AppPage.vue'
 import AppSectionSurface from '../components/AppSectionSurface.vue'
-import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
-import SubfolioButton from '../components/SubfolioButton.vue'
+import UpkeepIconTile from '../components/icons/UpkeepIconTile.vue'
+import UpkeepButton from '../components/UpkeepButton.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { usePaymentHistory } from '../composables/usePaymentHistory'
@@ -211,12 +211,12 @@ onMounted(fetchExpenses)
     <template #header>
       <header class="app-page__header">
         <div class="expense-detail-heading">
-          <SubfolioIconTile
+          <UpkeepIconTile
             v-if="expense && getExpenseIcon(expense)"
             :icon="getExpenseIcon(expense)"
             tone="neutral"
           />
-          <span v-else-if="expense" class="subfolio-avatar">{{ expense.name.slice(0, 2).toUpperCase() }}</span>
+          <span v-else-if="expense" class="upkeep-avatar">{{ expense.name.slice(0, 2).toUpperCase() }}</span>
           <div class="min-w-0">
             <h1 class="font-serif text-4xl text-ink">{{ expense?.name || t('expenseDetail.title') }}</h1>
             <div v-if="expense" class="expense-detail-meta">
@@ -228,7 +228,7 @@ onMounted(fetchExpenses)
         </div>
 
         <div v-if="expense" class="expense-detail-header-actions">
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             icon="pi pi-pencil"
             :title="t('table.edit')"
@@ -238,7 +238,7 @@ onMounted(fetchExpenses)
             data-test-id="expense-detail-edit"
             @click="openEditModal(expense)"
           />
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             icon="pi pi-times"
             :title="t('expenseDetail.close')"
@@ -294,7 +294,7 @@ onMounted(fetchExpenses)
                 :href="expense.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="subfolio-inline-link"
+                class="upkeep-inline-link"
                 data-test-id="expense-detail-open-service"
               >
                 <span>{{ expense.url }}</span>
@@ -323,7 +323,7 @@ onMounted(fetchExpenses)
           v-else
           :value="historyRows"
           data-key="id"
-          class="subfolio-datatable"
+          class="upkeep-datatable"
           table-style="min-width: 48rem"
         >
           <Column :header="t('expenseDetail.paidDate')" field="paidDate" sortable>
@@ -334,7 +334,7 @@ onMounted(fetchExpenses)
 
           <Column :header="t('expenseDetail.amountPaid')" field="amount" body-class="text-right" sortable>
             <template #body="{ data }">
-              <span class="subfolio-amount">{{ formatMoney(data.amount, data.currency, { withCode: true }) }}</span>
+              <span class="upkeep-amount">{{ formatMoney(data.amount, data.currency, { withCode: true }) }}</span>
             </template>
           </Column>
 
@@ -362,7 +362,7 @@ onMounted(fetchExpenses)
 
           <Column :header="t('table.actions')" body-class="text-right">
             <template #body="{ data }">
-              <SubfolioButton
+              <UpkeepButton
                 type="button"
                 icon="pi pi-pencil"
                 variant="tertiary"
@@ -428,14 +428,14 @@ onMounted(fetchExpenses)
         </label>
 
         <div class="flex flex-wrap justify-end gap-2">
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             :label="t('expenseForm.cancel')"
             variant="tertiary"
             theme="secondary"
             @click="closePaymentEditor"
           />
-          <SubfolioButton
+          <UpkeepButton
             type="submit"
             icon="pi pi-check"
             :label="t('expenseDetail.savePayment')"

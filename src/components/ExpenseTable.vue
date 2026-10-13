@@ -11,8 +11,8 @@ import { getExpenseIcon } from '../data/serviceCatalog'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
-import SubfolioIconTile from './icons/SubfolioIconTile.vue'
-import SubfolioButton from './SubfolioButton.vue'
+import UpkeepIconTile from './icons/UpkeepIconTile.vue'
+import UpkeepButton from './UpkeepButton.vue'
 
 const props = defineProps({
   expenses: {
@@ -81,7 +81,7 @@ const originalAmount = (expense) =>
   formatMoney(expense.amount, expense.currency, { withCode: true })
 
 const rowClass = (item) => [
-  'subfolio-expense-row',
+  'upkeep-expense-row',
   item.active === false || item.categoryActive === false ? 'opacity-60' : ''
 ].filter(Boolean).join(' ')
 
@@ -176,7 +176,7 @@ const initials = (name) =>
   <DataTable
     :value="expenses"
     data-key="id"
-    class="subfolio-datatable"
+    class="upkeep-datatable"
     :row-class="rowClass"
     :paginator="paginatorEnabled"
     :rows="10"
@@ -194,17 +194,17 @@ const initials = (name) =>
     <Column field="name" :header="t('table.expense')" sortable>
       <template #body="{ data }">
         <div class="flex items-center gap-3">
-          <SubfolioIconTile
+          <UpkeepIconTile
             v-if="getExpenseIcon(data)"
             :icon="getExpenseIcon(data)"
             size="sm"
             tone="neutral"
           />
-          <span v-else class="subfolio-avatar">{{ initials(data.name) }}</span>
+          <span v-else class="upkeep-avatar">{{ initials(data.name) }}</span>
           <span class="min-w-0">
             <RouterLink
               :to="expenseDetailRoute(data)"
-              class="subfolio-expense-link"
+              class="upkeep-expense-link"
               data-test-id="expense-detail-link"
               :data-expense-id="data.id"
               @click.stop
@@ -231,9 +231,9 @@ const initials = (name) =>
 
     <Column :header="t('table.amount')" body-class="text-right">
       <template #body="{ data }">
-        <span class="subfolio-amount-line">
+        <span class="upkeep-amount-line">
           <span
-            class="subfolio-amount"
+            class="upkeep-amount"
             :title="getConversionTooltip(data.amount, data.currency)"
           >
             {{ displayedAmount(data) }}
@@ -251,7 +251,7 @@ const initials = (name) =>
     <Column v-if="showActions" :header="t('table.actions')" body-class="text-right">
       <template #body="{ data }">
         <div class="flex justify-end gap-1">
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             :icon="data.active !== false ? 'pi pi-power-off' : 'pi pi-play'"
             variant="tertiary"
@@ -261,7 +261,7 @@ const initials = (name) =>
             :data-expense-id="data.id"
             @click.stop="toggleExpenseActive(data.id)"
           />
-          <SubfolioButton
+          <UpkeepButton
             type="button"
             icon="pi pi-ellipsis-v"
             variant="tertiary"

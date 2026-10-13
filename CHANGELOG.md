@@ -23,7 +23,8 @@ Upcoming release notes are copied from merged pull request changelog sections.
 
 ### Modified
 
+- Renamed the app to Upkeep across branding, components, documentation, and repository links, while preserving existing browser preferences and sessions.
 - Changed protected app routes to require a verified PocketBase user session instead of only a saved database connection.
-- Restyled PrimeVue status colors, page tags, card typography, card icons, active navigation, and card/panel surfaces around the Subfolio palette.
+- Restyled PrimeVue status colors, page tags, card typography, card icons, active navigation, and card/panel surfaces around the Upkeep palette.
 
-[Unreleased]: https://github.com/poziel/subfolio/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/poziel/upkeep/compare/v0.0.0...HEAD

@@ -20,5 +20,5 @@
 | `src/views/CategoriesView.vue` | Category breakdown page |
 | `src/views/RecurrenceOverviewView.vue` | Recurring payment overview page |
 | `src/views/SettingsView.vue` | Local user preference settings and connection detail |
-| `src/assets/main.css` | Tailwind import, Subfolio tokens, and app layout helpers |
+| `src/assets/main.css` | Tailwind import, Upkeep tokens, and app layout helpers |
 | `docs/architecture.md` | Current technical plan and provider notes |

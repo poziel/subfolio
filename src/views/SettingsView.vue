@@ -213,7 +213,7 @@ const weeksPerYearModel = computed({
             filter
             :placeholder="t('settings.selectCurrencies')"
             display="chip"
-            class="subfolio-currency-select w-full"
+            class="upkeep-currency-select w-full"
           />
         </div>
       </div>

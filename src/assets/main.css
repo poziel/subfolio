@@ -330,7 +330,7 @@ html[data-theme="dark"] {
     color: var(--color-copy-secondary);
   }
 
-  .subfolio-nav-link {
+  .upkeep-nav-link {
     display: inline-flex;
     flex: 0 0 auto;
     min-height: 2.125rem;
@@ -348,79 +348,79 @@ html[data-theme="dark"] {
       color var(--transition-fast);
   }
 
-  .subfolio-nav-link:hover {
+  .upkeep-nav-link:hover {
     background: rgba(183, 206, 195, 0.32);
     color: var(--brand-teal-dark);
   }
 
-  .subfolio-nav-link--active {
+  .upkeep-nav-link--active {
     background: rgba(183, 206, 195, 0.32);
     box-shadow: inset 0 0 0 1px rgba(0, 165, 148, 0.16);
     color: var(--brand-teal-dark);
   }
 
-.subfolio-landing-hero {
+.upkeep-landing-hero {
   align-content: start;
   padding-block: 2.5rem 2rem;
 }
 
-.subfolio-hero-title {
+.upkeep-hero-title {
   max-width: 12ch;
   line-height: 1.06;
 }
 
-.subfolio-hero-demo.p-card {
+.upkeep-hero-demo.p-card {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
   box-shadow: var(--shadow-md) !important;
 }
 
-.subfolio-hero-demo .p-card-body {
+.upkeep-hero-demo .p-card-body {
   min-width: 0;
   padding: 1rem;
 }
 
-.subfolio-hero-demo .p-card-content {
+.upkeep-hero-demo .p-card-content {
   min-width: 0;
   overflow: hidden;
   padding-top: 1rem;
 }
 
-.subfolio-hero-demo .p-card-title {
+.upkeep-hero-demo .p-card-title {
   font-size: 1.1rem;
 }
 
-.subfolio-hero-demo .p-inputnumber,
-.subfolio-hero-demo .p-inputtext,
-.subfolio-hero-demo .p-select {
+.upkeep-hero-demo .p-inputnumber,
+.upkeep-hero-demo .p-inputtext,
+.upkeep-hero-demo .p-select {
   width: 100%;
   min-width: 0;
 }
 
-.subfolio-hero-demo .p-inputnumber-input {
+.upkeep-hero-demo .p-inputnumber-input {
   width: 100%;
   min-width: 0;
 }
 
 @media (min-width: 640px) {
-  .subfolio-hero-demo .p-card-body {
+  .upkeep-hero-demo .p-card-body {
     padding: 1.35rem;
   }
 }
 
 @media (min-width: 1024px) {
-  .subfolio-landing-hero {
+  .upkeep-landing-hero {
     padding-block: 4rem 3rem;
   }
 }
 
-.subfolio-card {
+.upkeep-card {
   height: 100%;
   min-width: 0;
 }
 
-  .subfolio-card .p-card-body {
+  .upkeep-card .p-card-body {
     height: 100%;
   }
 
@@ -535,13 +535,13 @@ html[data-theme="dark"] {
     color: var(--brand-teal-dark);
   }
 
-  .subfolio-card-icon {
+  .upkeep-card-icon {
     min-height: 2.1rem;
     min-width: 2.1rem;
     justify-content: center;
   }
 
-  .subfolio-card-icon .pi {
+  .upkeep-card-icon .pi {
     font-size: 1.35rem;
   }
 
@@ -608,7 +608,7 @@ html[data-theme="dark"] {
     flex: 1 1 auto;
   }
 
-  .subfolio-expense-dialog {
+  .upkeep-expense-dialog {
     --expense-dialog-rail-bg: #faf6ee;
     --expense-dialog-body-bg: #ffffff;
     --expense-dialog-container-bg: #fbf7f0;
@@ -619,31 +619,31 @@ html[data-theme="dark"] {
     background: var(--expense-dialog-body-bg);
   }
 
-  .subfolio-expense-dialog .p-dialog-header {
+  .upkeep-expense-dialog .p-dialog-header {
     border-bottom: 1px solid var(--expense-dialog-border);
     background: var(--expense-dialog-rail-bg);
     padding: 1.15rem 1.4rem;
   }
 
-  .subfolio-expense-dialog .p-dialog-content {
+  .upkeep-expense-dialog .p-dialog-content {
     background: var(--expense-dialog-body-bg);
     padding: 1.65rem 1.4rem 1.55rem;
     overflow-y: auto;
     scrollbar-gutter: stable;
   }
 
-  .subfolio-expense-dialog .p-dialog-footer {
+  .upkeep-expense-dialog .p-dialog-footer {
     border-top: 1px solid var(--expense-dialog-border);
     background: var(--expense-dialog-rail-bg);
     padding: 1.35rem 1.55rem 1.2rem;
   }
 
-  .subfolio-expense-form {
+  .upkeep-expense-form {
     padding-block-start: 0.8rem;
     row-gap: 1.25rem;
   }
 
-  .subfolio-expense-section {
+  .upkeep-expense-section {
     display: grid;
     gap: 0.9rem;
     border: 1px solid var(--expense-dialog-border) !important;
@@ -652,14 +652,14 @@ html[data-theme="dark"] {
     padding: 0.95rem;
   }
 
-  .subfolio-expense-section__header {
+  .upkeep-expense-section__header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
   }
 
-  .subfolio-expense-section__title {
+  .upkeep-expense-section__title {
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 1.05rem;
@@ -667,8 +667,8 @@ html[data-theme="dark"] {
     line-height: 1.2;
   }
 
-  .subfolio-expense-dialog__header,
-  .subfolio-expense-dialog__footer {
+  .upkeep-expense-dialog__header,
+  .upkeep-expense-dialog__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -676,14 +676,14 @@ html[data-theme="dark"] {
     width: 100%;
   }
 
-  .subfolio-expense-dialog__footer {
+  .upkeep-expense-dialog__footer {
     justify-content: flex-end;
     gap: 0.7rem;
     padding-block-start: 0.85rem;
     padding-inline-end: 0.05rem;
   }
 
-  .subfolio-expense-dialog__title {
+  .upkeep-expense-dialog__title {
     color: var(--color-ink);
     font-family: var(--font-sans);
     font-size: 1.2rem;
@@ -691,13 +691,13 @@ html[data-theme="dark"] {
     line-height: 1.2;
   }
 
-  .subfolio-expense-dialog__subtitle {
+  .upkeep-expense-dialog__subtitle {
     color: var(--color-copy-secondary);
     font-size: 0.875rem;
     line-height: 1.35;
   }
 
-  .subfolio-expense-dialog__close.subfolio-button {
+  .upkeep-expense-dialog__close.upkeep-button {
     width: 2.125rem !important;
     min-width: 2.125rem !important;
     min-height: 2.125rem !important;
@@ -707,13 +707,13 @@ html[data-theme="dark"] {
     color: var(--color-copy-secondary) !important;
   }
 
-  .subfolio-expense-dialog__close.subfolio-button:hover,
-  .subfolio-expense-dialog__close.subfolio-button:focus-visible {
+  .upkeep-expense-dialog__close.upkeep-button:hover,
+  .upkeep-expense-dialog__close.upkeep-button:focus-visible {
     background: color-mix(in srgb, var(--brand-sand) 30%, var(--expense-dialog-rail-bg)) !important;
     color: var(--color-ink) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog {
+  html[data-theme="dark"] .upkeep-expense-dialog {
     --expense-dialog-rail-bg: #1a2825;
     --expense-dialog-body-bg: #101a19;
     --expense-dialog-container-bg: #162421;
@@ -726,96 +726,96 @@ html[data-theme="dark"] {
     color: var(--dark-text);
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-dialog-header,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-dialog-footer {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-dialog-header,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-dialog-footer {
     background: var(--expense-dialog-rail-bg);
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-dialog-content {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-dialog-content {
     background: var(--expense-dialog-body-bg);
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog__title,
-  html[data-theme="dark"] .subfolio-expense-section__title,
-  html[data-theme="dark"] .subfolio-expense-section .text-ink {
+  html[data-theme="dark"] .upkeep-expense-dialog__title,
+  html[data-theme="dark"] .upkeep-expense-section__title,
+  html[data-theme="dark"] .upkeep-expense-section .text-ink {
     color: var(--dark-text) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog__subtitle,
-  html[data-theme="dark"] .subfolio-expense-dialog .subfolio-field label,
-  html[data-theme="dark"] .subfolio-expense-dialog .muted-copy {
+  html[data-theme="dark"] .upkeep-expense-dialog__subtitle,
+  html[data-theme="dark"] .upkeep-expense-dialog .upkeep-field label,
+  html[data-theme="dark"] .upkeep-expense-dialog .muted-copy {
     color: var(--dark-text-secondary) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputtext,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-select,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-autocomplete,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-datepicker,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputnumber,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-datepicker-input,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputnumber-input {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputtext,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-select,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-autocomplete,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-datepicker,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputnumber,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-datepicker-input,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputnumber-input {
     background: var(--expense-dialog-field-bg) !important;
     border-color: var(--expense-dialog-field-border) !important;
     color: var(--dark-text) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputtext:hover,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-select:hover,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-datepicker:hover,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputnumber:hover {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputtext:hover,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-select:hover,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-datepicker:hover,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputnumber:hover {
     border-color: var(--expense-dialog-field-hover) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputtext:focus,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-select.p-focus,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-datepicker-input:focus,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputnumber-input:focus {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputtext:focus,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-select.p-focus,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-datepicker-input:focus,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputnumber-input:focus {
     border-color: var(--success-dark) !important;
     box-shadow: 0 0 0 3px rgba(127, 205, 191, 0.18) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-select-label,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-autocomplete-input,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-datepicker-input,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputnumber-input {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-select-label,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-autocomplete-input,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-datepicker-input,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputnumber-input {
     color: var(--dark-text) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputtext::placeholder,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-autocomplete-input::placeholder,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-inputnumber-input::placeholder {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputtext::placeholder,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-autocomplete-input::placeholder,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-inputnumber-input::placeholder {
     color: var(--dark-text-muted) !important;
     opacity: 1;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog .p-select-dropdown,
-  html[data-theme="dark"] .subfolio-expense-dialog .p-datepicker-dropdown {
+  html[data-theme="dark"] .upkeep-expense-dialog .p-select-dropdown,
+  html[data-theme="dark"] .upkeep-expense-dialog .p-datepicker-dropdown {
     color: var(--dark-text-secondary) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog__close.subfolio-button {
+  html[data-theme="dark"] .upkeep-expense-dialog__close.upkeep-button {
     background: rgba(232, 197, 143, 0.14) !important;
     color: var(--dark-text-secondary) !important;
   }
 
-  html[data-theme="dark"] .subfolio-expense-dialog__close.subfolio-button:hover,
-  html[data-theme="dark"] .subfolio-expense-dialog__close.subfolio-button:focus-visible {
+  html[data-theme="dark"] .upkeep-expense-dialog__close.upkeep-button:hover,
+  html[data-theme="dark"] .upkeep-expense-dialog__close.upkeep-button:focus-visible {
     background: rgba(232, 197, 143, 0.22) !important;
     color: var(--dark-text) !important;
   }
 
-  .subfolio-field {
+  .upkeep-field {
     display: grid;
     gap: 0.45rem;
   }
 
-  .subfolio-field label {
+  .upkeep-field label {
     color: var(--color-copy-secondary);
     font-size: 0.875rem;
     font-weight: 800;
   }
 
-  .subfolio-field__label-row {
+  .upkeep-field__label-row {
     display: flex;
     min-width: 0;
     align-items: baseline;
@@ -823,32 +823,32 @@ html[data-theme="dark"] {
     gap: 1rem;
   }
 
-  .subfolio-preset-select .p-select-label {
+  .upkeep-preset-select .p-select-label {
     display: flex;
     min-width: 0;
     align-items: center;
   }
 
-  .subfolio-preset-panel .p-select-option {
+  .upkeep-preset-panel .p-select-option {
     min-height: 4rem;
   }
 
-  .subfolio-preset-option,
-  .subfolio-preset-value {
+  .upkeep-preset-option,
+  .upkeep-preset-value {
     display: flex;
     min-width: 0;
     align-items: center;
     gap: 0.85rem;
   }
 
-  .subfolio-preset-assist {
+  .upkeep-preset-assist {
     margin-top: -0.45rem;
     color: var(--color-copy-secondary);
     font-size: 0.82rem;
     line-height: 1.45;
   }
 
-  .subfolio-inline-action {
+  .upkeep-inline-action {
     border: 0;
     background: transparent;
     color: var(--brand-teal);
@@ -861,39 +861,39 @@ html[data-theme="dark"] {
     text-underline-offset: 0.18em;
   }
 
-  .subfolio-inline-action:disabled {
+  .upkeep-inline-action:disabled {
     cursor: not-allowed;
     opacity: 0.55;
   }
 
-  .subfolio-inline-action:focus-visible {
+  .upkeep-inline-action:focus-visible {
     outline: 2px solid var(--brand-teal);
     outline-offset: 3px;
   }
 
-  .subfolio-preferred-name-group.p-inputgroup {
+  .upkeep-preferred-name-group.p-inputgroup {
     width: 100%;
   }
 
-  .subfolio-preferred-name-group .p-inputtext {
+  .upkeep-preferred-name-group .p-inputtext {
     min-width: 0;
   }
 
-  .subfolio-preferred-name-addon.p-inputgroupaddon {
+  .upkeep-preferred-name-addon.p-inputgroupaddon {
     padding: 0;
     overflow: hidden;
     background: var(--expense-dialog-field-bg);
     border-color: var(--expense-dialog-field-border);
   }
 
-  .subfolio-preferred-name-remove.p-button {
+  .upkeep-preferred-name-remove.p-button {
     width: 2.75rem;
     height: 100%;
     min-height: 100%;
     border-radius: 0;
   }
 
-  .subfolio-tax-card {
+  .upkeep-tax-card {
     display: grid;
     border: 1px solid var(--expense-dialog-border);
     border-radius: var(--radius-sm);
@@ -902,70 +902,70 @@ html[data-theme="dark"] {
     padding: 0.75rem 0.8rem;
   }
 
-  .subfolio-tax-card__summary {
+  .upkeep-tax-card__summary {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
   }
 
-  .subfolio-tax-card__copy {
+  .upkeep-tax-card__copy {
     display: grid;
     min-width: 0;
     gap: 0.18rem;
   }
 
-  .subfolio-tax-card__copy label {
+  .upkeep-tax-card__copy label {
     color: var(--color-copy-secondary);
     font-size: 0.875rem;
     font-weight: 850;
   }
 
-  .subfolio-tax-card__copy p,
-  .subfolio-tax-card__selected {
+  .upkeep-tax-card__copy p,
+  .upkeep-tax-card__selected {
     color: var(--color-copy-secondary);
     font-size: 0.82rem;
     line-height: 1.35;
     margin: 0;
   }
 
-  .subfolio-tax-card__select {
+  .upkeep-tax-card__select {
     padding-top: 0.1rem;
   }
 
-  .subfolio-frequency-grid {
+  .upkeep-frequency-grid {
     display: grid;
     gap: 1rem;
     grid-template-columns: 1fr;
   }
 
-  .subfolio-repeat-grid {
+  .upkeep-repeat-grid {
     display: grid;
     gap: 1rem;
     grid-template-columns: minmax(8rem, 0.42fr) minmax(10rem, 0.58fr);
   }
 
-  .subfolio-segmented {
+  .upkeep-segmented {
     display: flex;
   }
 
-  .subfolio-segmented .p-button,
-  .subfolio-segmented .p-togglebutton {
+  .upkeep-segmented .p-button,
+  .upkeep-segmented .p-togglebutton {
     flex: 1 1 0;
   }
 
-  .subfolio-frequency-grid--custom {
+  .upkeep-frequency-grid--custom {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   @media (max-width: 640px) {
-    .subfolio-repeat-grid,
-    .subfolio-frequency-grid--custom {
+    .upkeep-repeat-grid,
+    .upkeep-frequency-grid--custom {
       grid-template-columns: 1fr;
     }
   }
 
-  .subfolio-recurrence-summary {
+  .upkeep-recurrence-summary {
     background: color-mix(in srgb, var(--color-accent-primary) 8%, var(--color-surface-muted));
     padding: 0.8rem 0.9rem;
     color: var(--color-copy-secondary);
@@ -974,7 +974,7 @@ html[data-theme="dark"] {
     text-transform: uppercase;
   }
 
-  .subfolio-recurrence-summary__value {
+  .upkeep-recurrence-summary__value {
     color: var(--color-accent-dark);
     display: inline-block;
     font-weight: 900;
@@ -985,92 +985,92 @@ html[data-theme="dark"] {
     text-decoration-thickness: 3px;
   }
 
-  .subfolio-currency-select .p-multiselect-label {
+  .upkeep-currency-select .p-multiselect-label {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
     white-space: normal;
   }
 
-  .subfolio-menu {
+  .upkeep-menu {
     border: 0;
     background: transparent;
   }
 
-  .subfolio-menu .p-menu-list {
+  .upkeep-menu .p-menu-list {
     display: grid;
     gap: 0.25rem;
   }
 
-  .subfolio-menu .p-menu-item-content {
+  .upkeep-menu .p-menu-item-content {
     border-radius: 0.75rem;
   }
 
-  .subfolio-datatable {
+  .upkeep-datatable {
     width: 100%;
   }
 
-  .subfolio-datatable .p-datatable-header,
-  .subfolio-datatable .p-datatable-footer {
+  .upkeep-datatable .p-datatable-header,
+  .upkeep-datatable .p-datatable-footer {
     border: 0;
   }
 
-  .subfolio-datatable .p-datatable-tbody > tr > td {
+  .upkeep-datatable .p-datatable-tbody > tr > td {
     vertical-align: middle;
   }
 
-  .subfolio-amount-line {
+  .upkeep-amount-line {
     display: inline-flex;
     align-items: baseline;
     gap: 0.25rem;
     white-space: nowrap;
   }
 
-  .subfolio-markdown {
+  .upkeep-markdown {
     display: grid;
     gap: 1rem;
     color: var(--color-copy-secondary);
   }
 
-  .subfolio-markdown h1,
-  .subfolio-markdown h2,
-  .subfolio-markdown h3 {
+  .upkeep-markdown h1,
+  .upkeep-markdown h2,
+  .upkeep-markdown h3 {
     color: var(--color-ink);
   }
 
-  .subfolio-markdown h1 {
+  .upkeep-markdown h1 {
     font-size: 2rem;
   }
 
-  .subfolio-markdown h2 {
+  .upkeep-markdown h2 {
     margin-top: 1rem;
     border-top: 1px solid var(--p-surface-200);
     padding-top: 1.5rem;
     font-size: 1.5rem;
   }
 
-  .subfolio-markdown h3 {
+  .upkeep-markdown h3 {
     font-family: var(--font-sans);
     font-size: 1rem;
     font-weight: var(--heading-3-weight);
   }
 
-  .subfolio-markdown ul {
+  .upkeep-markdown ul {
     display: grid;
     gap: 0.5rem;
     padding-left: 1.25rem;
   }
 
-  .subfolio-markdown li {
+  .upkeep-markdown li {
     padding-left: 0.25rem;
   }
 
-  .subfolio-markdown a {
+  .upkeep-markdown a {
     color: var(--p-primary-700);
     font-weight: 600;
   }
 
-  .subfolio-markdown code {
+  .upkeep-markdown code {
     border-radius: 0.375rem;
     background: var(--p-surface-100);
     color: var(--color-ink);
@@ -1080,7 +1080,7 @@ html[data-theme="dark"] {
 }
 
 /* PrimeVue brand overrides */
-.subfolio-nav-link {
+.upkeep-nav-link {
   display: inline-flex;
   flex: 0 0 auto;
   min-height: 2.125rem;
@@ -1098,12 +1098,12 @@ html[data-theme="dark"] {
     color var(--transition-fast);
 }
 
-.subfolio-nav-link:hover {
+.upkeep-nav-link:hover {
   background: color-mix(in srgb, var(--brand-sage) 32%, transparent);
   color: var(--color-ink);
 }
 
-.subfolio-nav-link--active {
+.upkeep-nav-link--active {
   background: color-mix(in srgb, var(--brand-sage) 34%, transparent);
   box-shadow: inset 0 0 0 1px rgba(0, 165, 148, 0.16);
   color: var(--color-ink);
@@ -1129,15 +1129,15 @@ html[data-theme="dark"] {
   color: var(--color-copy-secondary) !important;
 }
 
-.subfolio-surface-card.p-card {
+.upkeep-surface-card.p-card {
   overflow: hidden;
   border: 1px solid var(--color-border) !important;
   background: var(--color-surface-strong) !important;
   box-shadow: none !important;
 }
 
-.subfolio-surface-card .p-card-body,
-.subfolio-surface-card .p-card-content {
+.upkeep-surface-card .p-card-body,
+.upkeep-surface-card .p-card-content {
   height: 100%;
   padding: 0;
 }
@@ -1235,33 +1235,33 @@ html[data-theme="dark"] {
   color: var(--color-ink) !important;
 }
 
-.subfolio-card-icon.p-tag {
+.upkeep-card-icon.p-tag {
   min-height: 2.35rem;
   min-width: 2.35rem;
   justify-content: center;
   padding: 0.45rem;
 }
 
-.subfolio-card-icon .p-tag-icon,
-.subfolio-card-icon .pi {
+.upkeep-card-icon .p-tag-icon,
+.upkeep-card-icon .pi {
   font-size: 1.35rem;
 }
 
-.subfolio-entry-tabs {
+.upkeep-entry-tabs {
   display: flex;
   flex-direction: column;
   max-height: min(42rem, calc(100dvh - 17rem));
   min-height: 28rem;
 }
 
-.subfolio-entry-tabs .p-tablist {
+.upkeep-entry-tabs .p-tablist {
   flex: 0 0 auto;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: rgba(183, 206, 195, 0.16) !important;
 }
 
-.subfolio-entry-tabs .p-tablist-tab-list {
+.upkeep-entry-tabs .p-tablist-tab-list {
   gap: 0.35rem;
   border: 0 !important;
   background: rgba(183, 206, 195, 0.16) !important;
@@ -1270,7 +1270,7 @@ html[data-theme="dark"] {
   overflow: hidden;
 }
 
-.subfolio-entry-tabs .p-tab {
+.upkeep-entry-tabs .p-tab {
   flex: 1 1 0;
   justify-content: center;
   border: 0 !important;
@@ -1279,13 +1279,13 @@ html[data-theme="dark"] {
   font-weight: 700;
 }
 
-.subfolio-entry-tabs .p-tab-active {
+.upkeep-entry-tabs .p-tab-active {
   background: var(--color-surface-strong) !important;
   color: var(--brand-teal-dark) !important;
   box-shadow: var(--shadow-sm);
 }
 
-.subfolio-entry-tabs .p-tabpanels {
+.upkeep-entry-tabs .p-tabpanels {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
@@ -1294,50 +1294,50 @@ html[data-theme="dark"] {
   padding: 1.5rem 0 0;
 }
 
-.subfolio-entry-tabs .p-tablist-active-bar {
+.upkeep-entry-tabs .p-tablist-active-bar {
   display: none;
 }
 
-.subfolio-connection-card .p-card-content {
+.upkeep-connection-card .p-card-content {
   overflow: hidden;
 }
 
-html[data-theme="dark"] .subfolio-entry-tabs .p-tablist,
-html[data-theme="dark"] .subfolio-entry-tabs .p-tablist-tab-list {
+html[data-theme="dark"] .upkeep-entry-tabs .p-tablist,
+html[data-theme="dark"] .upkeep-entry-tabs .p-tablist-tab-list {
   background: rgba(183, 206, 195, 0.12) !important;
 }
 
-html[data-theme="dark"] .subfolio-entry-tabs .p-tab {
+html[data-theme="dark"] .upkeep-entry-tabs .p-tab {
   color: var(--dark-text-secondary) !important;
 }
 
-html[data-theme="dark"] .subfolio-entry-tabs .p-tab-active {
+html[data-theme="dark"] .upkeep-entry-tabs .p-tab-active {
   background: rgba(0, 165, 148, 0.88) !important;
   color: #ffffff !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
 }
 
-html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
+html[data-theme="dark"] .upkeep-entry-tabs .p-tab:not(.p-tab-active):hover {
   background: rgba(183, 206, 195, 0.1) !important;
   color: var(--dark-text) !important;
 }
 
-.subfolio-header-controls {
+.upkeep-header-controls {
   display: flex;
   align-items: center;
   gap: 0.35rem;
 }
 
-.subfolio-header-controls--compact {
+.upkeep-header-controls--compact {
   gap: 0.3rem;
 }
 
-.subfolio-header-controls--compact .subfolio-button {
+.upkeep-header-controls--compact .upkeep-button {
   min-width: 2.25rem;
   height: 2.25rem;
 }
 
-.subfolio-language-button.subfolio-button {
+.upkeep-language-button.upkeep-button {
   min-height: 2.25rem !important;
   min-width: 3.65rem !important;
   gap: 0.25rem !important;
@@ -1349,21 +1349,21 @@ html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
   padding: 0.35rem 0.54rem 0.35rem 0.62rem !important;
 }
 
-.subfolio-language-button.subfolio-button:hover,
-.subfolio-language-button.subfolio-button:focus-visible {
+.upkeep-language-button.upkeep-button:hover,
+.upkeep-language-button.upkeep-button:focus-visible {
   background: color-mix(in srgb, var(--brand-sage) 22%, var(--color-surface-strong)) !important;
   color: var(--color-ink) !important;
 }
 
-.subfolio-language-button .subfolio-button__icon {
+.upkeep-language-button .upkeep-button__icon {
   font-size: 0.68rem;
 }
 
-.subfolio-header-controls--compact .subfolio-language-button.subfolio-button {
+.upkeep-header-controls--compact .upkeep-language-button.upkeep-button {
   min-width: 3.3rem !important;
 }
 
-.subfolio-language-menu.p-menu {
+.upkeep-language-menu.p-menu {
   min-width: 8.5rem;
   border: 1px solid var(--color-border);
   border-radius: 1rem;
@@ -1372,17 +1372,17 @@ html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
   padding: 0.38rem;
 }
 
-.subfolio-language-menu .p-menu-list {
+.upkeep-language-menu .p-menu-list {
   display: grid;
   gap: 0.12rem;
   padding: 0;
 }
 
-.subfolio-language-menu .p-menu-item-content {
+.upkeep-language-menu .p-menu-item-content {
   border-radius: 0.65rem;
 }
 
-.subfolio-language-menu__item {
+.upkeep-language-menu__item {
   display: block;
   width: 100%;
   border-radius: 0.65rem;
@@ -1393,14 +1393,14 @@ html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
   line-height: 1.2;
 }
 
-.subfolio-language-menu__item:hover,
-.subfolio-language-menu__item:focus-visible,
-.subfolio-language-menu__item--active {
+.upkeep-language-menu__item:hover,
+.upkeep-language-menu__item:focus-visible,
+.upkeep-language-menu__item--active {
   background: color-mix(in srgb, var(--brand-sage) 36%, transparent);
   color: var(--color-ink);
 }
 
-.subfolio-theme-toggle {
+.upkeep-theme-toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.12rem;
@@ -1410,7 +1410,7 @@ html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
   padding: 0.18rem;
 }
 
-.subfolio-theme-toggle__button.subfolio-button {
+.upkeep-theme-toggle__button.upkeep-button {
   width: 1.9rem !important;
   min-width: 1.9rem !important;
   min-height: 1.9rem !important;
@@ -1422,65 +1422,65 @@ html[data-theme="dark"] .subfolio-entry-tabs .p-tab:not(.p-tab-active):hover {
   transform: none !important;
 }
 
-.subfolio-theme-toggle__button.subfolio-button:hover,
-.subfolio-theme-toggle__button.subfolio-button:focus-visible {
+.upkeep-theme-toggle__button.upkeep-button:hover,
+.upkeep-theme-toggle__button.upkeep-button:focus-visible {
   background: rgba(255, 255, 255, 0.48) !important;
   color: var(--color-ink) !important;
 }
 
-.subfolio-theme-toggle__button--active.subfolio-button,
-.subfolio-theme-toggle__button--active.subfolio-button:hover,
-.subfolio-theme-toggle__button--active.subfolio-button:focus-visible {
+.upkeep-theme-toggle__button--active.upkeep-button,
+.upkeep-theme-toggle__button--active.upkeep-button:hover,
+.upkeep-theme-toggle__button--active.upkeep-button:focus-visible {
   background: var(--color-surface-strong) !important;
   box-shadow: var(--shadow-sm) !important;
   color: var(--brand-teal) !important;
 }
 
-html[data-theme="dark"] .subfolio-language-button.subfolio-button {
+html[data-theme="dark"] .upkeep-language-button.upkeep-button {
   background: var(--dark-surface-2) !important;
   box-shadow: none !important;
   color: var(--dark-text) !important;
 }
 
-html[data-theme="dark"] .subfolio-language-button.subfolio-button:hover,
-html[data-theme="dark"] .subfolio-language-button.subfolio-button:focus-visible {
+html[data-theme="dark"] .upkeep-language-button.upkeep-button:hover,
+html[data-theme="dark"] .upkeep-language-button.upkeep-button:focus-visible {
   background: rgba(183, 206, 195, 0.16) !important;
   color: var(--dark-text) !important;
 }
 
-html[data-theme="dark"] .subfolio-language-menu.p-menu {
+html[data-theme="dark"] .upkeep-language-menu.p-menu {
   border-color: var(--border-dark);
   background: var(--dark-surface-2);
 }
 
-html[data-theme="dark"] .subfolio-language-menu__item {
+html[data-theme="dark"] .upkeep-language-menu__item {
   color: var(--dark-text-secondary);
 }
 
-html[data-theme="dark"] .subfolio-language-menu__item:hover,
-html[data-theme="dark"] .subfolio-language-menu__item:focus-visible,
-html[data-theme="dark"] .subfolio-language-menu__item--active {
+html[data-theme="dark"] .upkeep-language-menu__item:hover,
+html[data-theme="dark"] .upkeep-language-menu__item:focus-visible,
+html[data-theme="dark"] .upkeep-language-menu__item--active {
   background: rgba(183, 206, 195, 0.14);
   color: var(--dark-text);
 }
 
-html[data-theme="dark"] .subfolio-theme-toggle {
+html[data-theme="dark"] .upkeep-theme-toggle {
   background: rgba(183, 206, 195, 0.12);
 }
 
-html[data-theme="dark"] .subfolio-theme-toggle__button.subfolio-button {
+html[data-theme="dark"] .upkeep-theme-toggle__button.upkeep-button {
   color: var(--dark-text-secondary) !important;
 }
 
-html[data-theme="dark"] .subfolio-theme-toggle__button.subfolio-button:hover,
-html[data-theme="dark"] .subfolio-theme-toggle__button.subfolio-button:focus-visible {
+html[data-theme="dark"] .upkeep-theme-toggle__button.upkeep-button:hover,
+html[data-theme="dark"] .upkeep-theme-toggle__button.upkeep-button:focus-visible {
   background: rgba(183, 206, 195, 0.12) !important;
   color: var(--dark-text) !important;
 }
 
-html[data-theme="dark"] .subfolio-theme-toggle__button--active.subfolio-button,
-html[data-theme="dark"] .subfolio-theme-toggle__button--active.subfolio-button:hover,
-html[data-theme="dark"] .subfolio-theme-toggle__button--active.subfolio-button:focus-visible {
+html[data-theme="dark"] .upkeep-theme-toggle__button--active.upkeep-button,
+html[data-theme="dark"] .upkeep-theme-toggle__button--active.upkeep-button:hover,
+html[data-theme="dark"] .upkeep-theme-toggle__button--active.upkeep-button:focus-visible {
   background: var(--dark-surface) !important;
   color: var(--success-dark) !important;
 }
@@ -1581,6 +1581,7 @@ html[data-theme="dark"] .public-shell__header {
 }
 
 .public-shell__logo {
+  font-size: 1.8rem;
   width: 9rem;
   max-width: 40vw;
 }
@@ -1627,7 +1628,7 @@ html[data-theme="dark"] .public-shell__header {
   color: var(--static-surface-text);
 }
 
-.public-shell__footer .subfolio-made-with-love-credit {
+.public-shell__footer .upkeep-made-with-love-credit {
   --made-with-love-color: var(--static-surface-text-muted);
   --made-with-love-emphasis-color: var(--static-surface-text);
   --made-with-love-hover-color: var(--static-surface-text);
@@ -1636,9 +1637,9 @@ html[data-theme="dark"] .public-shell__header {
   line-height: inherit;
 }
 
-.public-shell__footer .subfolio-made-with-love-credit .made-with-love-credit__swap,
-.public-shell__footer .subfolio-made-with-love-credit .made-with-love-credit__swap-label,
-.public-shell__footer .subfolio-made-with-love-credit .made-with-love-credit__maker {
+.public-shell__footer .upkeep-made-with-love-credit .made-with-love-credit__swap,
+.public-shell__footer .upkeep-made-with-love-credit .made-with-love-credit__swap-label,
+.public-shell__footer .upkeep-made-with-love-credit .made-with-love-credit__maker {
   color: var(--static-surface-text);
 }
 
@@ -1792,7 +1793,7 @@ html[data-theme="dark"] .public-shell__header {
   gap: 0.75rem;
 }
 
-.subfolio-avatar {
+.upkeep-avatar {
   display: grid;
   width: 2.25rem;
   height: 2.25rem;
@@ -1805,18 +1806,18 @@ html[data-theme="dark"] .public-shell__header {
   font-weight: 800;
 }
 
-html[data-theme="dark"] .subfolio-avatar {
+html[data-theme="dark"] .upkeep-avatar {
   color: var(--dark-text);
 }
 
-.subfolio-amount {
+.upkeep-amount {
   color: var(--color-accent-dark);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.subfolio-expense-link {
+.upkeep-expense-link {
   display: block;
   overflow: hidden;
   color: var(--color-ink);
@@ -1825,8 +1826,8 @@ html[data-theme="dark"] .subfolio-avatar {
   white-space: nowrap;
 }
 
-.subfolio-expense-link:hover,
-.subfolio-expense-link:focus-visible {
+.upkeep-expense-link:hover,
+.upkeep-expense-link:focus-visible {
   color: var(--color-accent-dark);
   text-decoration: underline;
   text-decoration-thickness: 2px;
@@ -1834,14 +1835,14 @@ html[data-theme="dark"] .subfolio-avatar {
   outline: 0;
 }
 
-.subfolio-icon-select-value {
+.upkeep-icon-select-value {
   display: inline-flex;
   min-width: 0;
   align-items: center;
   gap: 0.55rem;
 }
 
-.subfolio-icon-select-value .pi {
+.upkeep-icon-select-value .pi {
   display: inline-grid;
   width: 1.45rem;
   height: 1.45rem;
@@ -2048,6 +2049,7 @@ html[data-theme="dark"] .subfolio-avatar {
 }
 
 .app-shell__wordmark {
+  font-size: 1.9rem;
   width: 7.6rem;
   max-width: 100%;
   height: auto;
@@ -2067,7 +2069,7 @@ html[data-theme="dark"] .subfolio-avatar {
   flex: 0 0 auto;
 }
 
-.app-shell__sidebar-toggle.subfolio-button {
+.app-shell__sidebar-toggle.upkeep-button {
   width: 2.65rem !important;
   min-width: 2.65rem !important;
   min-height: 2.65rem !important;
@@ -2082,7 +2084,7 @@ html[data-theme="dark"] .subfolio-avatar {
   padding: 0 1rem 0.875rem;
 }
 
-.app-shell__add-button.subfolio-button {
+.app-shell__add-button.upkeep-button {
   min-width: 0;
 }
 
@@ -2145,14 +2147,14 @@ html[data-theme="dark"] .subfolio-avatar {
   gap: 0.55rem;
 }
 
-.app-shell__profile-button.subfolio-button {
+.app-shell__profile-button.upkeep-button {
   min-width: 0;
   min-height: 2.65rem !important;
   padding-block: 0.35rem !important;
   padding-inline-start: 0.35rem !important;
 }
 
-.app-shell__profile-button .subfolio-button__icon {
+.app-shell__profile-button .upkeep-button__icon {
   width: 1.95rem;
   height: 1.95rem;
   border-radius: 50%;
@@ -2188,9 +2190,9 @@ html[data-theme="dark"] .subfolio-avatar {
   padding-inline: 0.65rem;
 }
 
-.app-shell__sidebar--collapsed .app-shell__add-button.subfolio-button,
-.app-shell__sidebar--collapsed .app-shell__profile-button.subfolio-button,
-.app-shell__sidebar--collapsed .app-shell__sidebar-toggle.subfolio-button {
+.app-shell__sidebar--collapsed .app-shell__add-button.upkeep-button,
+.app-shell__sidebar--collapsed .app-shell__profile-button.upkeep-button,
+.app-shell__sidebar--collapsed .app-shell__sidebar-toggle.upkeep-button {
   width: 2.75rem !important;
   min-width: 2.75rem !important;
   min-height: 2.75rem !important;
@@ -2221,7 +2223,7 @@ html[data-theme="dark"] .subfolio-avatar {
   gap: 0.55rem;
 }
 
-.app-shell__sidebar--collapsed .app-shell__profile-button .subfolio-button__icon {
+.app-shell__sidebar--collapsed .app-shell__profile-button .upkeep-button__icon {
   width: auto;
   height: auto;
   background: transparent;
@@ -2448,19 +2450,19 @@ html[data-theme="dark"] .app-shell__profile-menu-action:focus-visible {
   margin: 1.15rem;
 }
 
-.subfolio-expense-row {
+.upkeep-expense-row {
   cursor: pointer;
 }
 
-.subfolio-category-row {
+.upkeep-category-row {
   cursor: pointer;
 }
 
-.subfolio-category-row--inactive > td:first-child {
+.upkeep-category-row--inactive > td:first-child {
   box-shadow: inset 3px 0 0 var(--danger);
 }
 
-.subfolio-category-status-marker {
+.upkeep-category-status-marker {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 999px;
@@ -2469,19 +2471,19 @@ html[data-theme="dark"] .app-shell__profile-menu-action:focus-visible {
   flex: 0 0 auto;
 }
 
-.subfolio-expense-row:focus-within {
+.upkeep-expense-row:focus-within {
   outline: 2px solid var(--brand-teal);
   outline-offset: -2px;
 }
 
-.subfolio-inline-link {
+.upkeep-inline-link {
   color: var(--color-primary);
   font-weight: 850;
   text-decoration: none;
 }
 
-.subfolio-inline-link:hover,
-.subfolio-inline-link:focus-visible {
+.upkeep-inline-link:hover,
+.upkeep-inline-link:focus-visible {
   color: var(--color-primary-hover);
   text-decoration: underline;
   text-decoration-thickness: 2px;
@@ -2499,7 +2501,7 @@ html[data-theme="dark"] .app-shell__profile-menu-action:focus-visible {
   gap: 0.875rem;
 }
 
-.expense-detail-heading .subfolio-avatar {
+.expense-detail-heading .upkeep-avatar {
   width: 2.75rem;
   min-width: 2.75rem;
   height: 2.75rem;
@@ -3085,7 +3087,7 @@ html[data-theme="dark"] .app-shell__profile-menu-action:focus-visible {
     gap: 0.5rem;
   }
 
-  .public-shell__actions > .subfolio-button:not(.subfolio-language-button) {
+  .public-shell__actions > .upkeep-button:not(.upkeep-language-button) {
     flex: 1 1 auto;
   }
 
@@ -3093,7 +3095,7 @@ html[data-theme="dark"] .app-shell__profile-menu-action:focus-visible {
     overflow: visible;
   }
 
-  .subfolio-nav-link {
+  .upkeep-nav-link {
     padding-inline: 0.55rem;
     font-size: 0.78rem;
   }
@@ -3110,7 +3112,7 @@ html[data-theme="dark"] .app-shell__profile-menu-action:focus-visible {
     font-size: 2.4rem;
   }
 
-  .landing-hero__actions .subfolio-button {
+  .landing-hero__actions .upkeep-button {
     flex: 1 1 10rem;
   }
 

@@ -25,7 +25,7 @@ const freeFeatures = computed(() => tm('pageData.pricingFeatures'))
       </section>
 
       <section class="grid gap-6 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
-        <Card class="subfolio-card">
+        <Card class="upkeep-card">
           <template #title>
             <div class="flex items-center justify-between gap-3">
               <span>{{ t('pages.free') }}</span>

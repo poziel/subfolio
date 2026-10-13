@@ -3,7 +3,7 @@ import { computed, ref } from 'vue'
 import Menu from 'primevue/menu'
 import { useI18n } from '../composables/useI18n'
 import { useTheme } from '../composables/useTheme'
-import SubfolioButton from './SubfolioButton.vue'
+import UpkeepButton from './UpkeepButton.vue'
 
 defineProps({
   compact: {
@@ -42,8 +42,8 @@ const toggleLanguageMenu = (event) => {
 </script>
 
 <template>
-  <div class="subfolio-header-controls" :class="{ 'subfolio-header-controls--compact': compact }">
-    <SubfolioButton
+  <div class="upkeep-header-controls" :class="{ 'upkeep-header-controls--compact': compact }">
+    <UpkeepButton
       v-if="showLanguage"
       type="button"
       :label="selectedLanguageCode"
@@ -51,7 +51,7 @@ const toggleLanguageMenu = (event) => {
       icon-pos="right"
       variant="tertiary"
       theme="secondary"
-      class="subfolio-language-button"
+      class="upkeep-language-button"
       :aria-label="t('common.language')"
       aria-haspopup="true"
       :aria-expanded="languageMenuOpen"
@@ -62,42 +62,42 @@ const toggleLanguageMenu = (event) => {
       ref="languageMenu"
       :model="languageMenuItems"
       popup
-      class="subfolio-language-menu"
+      class="upkeep-language-menu"
       @show="languageMenuOpen = true"
       @hide="languageMenuOpen = false"
     >
       <template #item="{ item, props }">
         <a
           v-bind="props.action"
-          class="subfolio-language-menu__item"
-          :class="{ 'subfolio-language-menu__item--active': item.active }"
+          class="upkeep-language-menu__item"
+          :class="{ 'upkeep-language-menu__item--active': item.active }"
         >
           {{ item.label }}
         </a>
       </template>
     </Menu>
 
-    <div v-if="showTheme" class="subfolio-theme-toggle" :aria-label="t('common.theme')" role="group">
-      <SubfolioButton
+    <div v-if="showTheme" class="upkeep-theme-toggle" :aria-label="t('common.theme')" role="group">
+      <UpkeepButton
         type="button"
         icon="pi pi-sun"
         :aria-label="t('common.light')"
         :aria-pressed="activeTheme === 'light'"
         variant="tertiary"
         theme="secondary"
-        class="subfolio-theme-toggle__button"
-        :class="{ 'subfolio-theme-toggle__button--active': activeTheme === 'light' }"
+        class="upkeep-theme-toggle__button"
+        :class="{ 'upkeep-theme-toggle__button--active': activeTheme === 'light' }"
         @click="setThemePreference('light')"
       />
-      <SubfolioButton
+      <UpkeepButton
         type="button"
         icon="pi pi-moon"
         :aria-label="t('common.dark')"
         :aria-pressed="activeTheme === 'dark'"
         variant="tertiary"
         theme="secondary"
-        class="subfolio-theme-toggle__button"
-        :class="{ 'subfolio-theme-toggle__button--active': activeTheme === 'dark' }"
+        class="upkeep-theme-toggle__button"
+        :class="{ 'upkeep-theme-toggle__button--active': activeTheme === 'dark' }"
         @click="setThemePreference('dark')"
       />
     </div>

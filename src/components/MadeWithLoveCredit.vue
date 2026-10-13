@@ -156,7 +156,7 @@ a.made-with-love-credit__maker:hover {
   text-underline-offset: 0.16em;
 }
 
-.subfolio-made-with-love-credit {
+.upkeep-made-with-love-credit {
   --made-with-love-color: var(--color-copy-secondary);
   --made-with-love-emphasis-color: var(--color-ink);
   --made-with-love-hover-color: var(--color-ink);
@@ -165,17 +165,17 @@ a.made-with-love-credit__maker:hover {
   font-family: var(--font-sans);
 }
 
-.subfolio-made-with-love-credit .made-with-love-credit__swap,
-.subfolio-made-with-love-credit .made-with-love-credit__swap-label {
+.upkeep-made-with-love-credit .made-with-love-credit__swap,
+.upkeep-made-with-love-credit .made-with-love-credit__swap-label {
   color: var(--made-with-love-emphasis-color);
 }
 
-.subfolio-made-with-love-credit .made-with-love-credit__maker {
+.upkeep-made-with-love-credit .made-with-love-credit__maker {
   color: var(--made-with-love-emphasis-color);
   font-family: var(--font-sans);
 }
 
-.subfolio-made-with-love-credit a.made-with-love-credit__maker:hover {
+.upkeep-made-with-love-credit a.made-with-love-credit__maker:hover {
   color: var(--made-with-love-hover-color);
 }
 </style>

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { getPocketBaseRuntimeRoot } from './pocketBaseRuntime.mjs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -13,9 +14,7 @@ import {
 } from '../src/data/recurrenceRules.js'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const defaultRuntimeRoot = process.platform === 'win32'
-  ? 'D:\\Dev\\6-miscellaneous\\pocketbase\\subfolio'
-  : path.join(root, '.pocketbase')
+const defaultRuntimeRoot = getPocketBaseRuntimeRoot(root)
 
 const rawArgs = process.argv.slice(2)
 const args = new Set(rawArgs)
@@ -35,7 +34,7 @@ const parsePositiveInt = (name, fallback, { min = 1, max = Number.MAX_SAFE_INTEG
   return value
 }
 
-const runtimeRoot = path.resolve(argValue('--runtime-root', process.env.SUBFOLIO_POCKETBASE_ROOT || defaultRuntimeRoot))
+const runtimeRoot = path.resolve(argValue('--runtime-root', process.env.UPKEEP_POCKETBASE_ROOT || defaultRuntimeRoot))
 const dataDir = path.resolve(argValue('--dir', process.env.POCKETBASE_DATA_DIR || path.join(runtimeRoot, 'pb_data')))
 const migrationsDir = path.join(root, 'pocketbase', 'pb_migrations')
 const pocketBaseBin = argValue('--pocketbase-bin', process.env.POCKETBASE_BIN || 'pocketbase')
@@ -394,7 +393,7 @@ const ensureReady = async () => {
 }
 
 const runTemporaryMigration = async (source) => {
-  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'subfolio-pocketbase-seed-'))
+  const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'upkeep-pocketbase-seed-'))
   const migrationPath = path.join(tempDir, `${Date.now()}_seed_generated_expenses.js`)
 
   try {

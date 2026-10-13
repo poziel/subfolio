@@ -7,9 +7,9 @@ import AppPage from '../components/AppPage.vue'
 import AppSectionSurface from '../components/AppSectionSurface.vue'
 import ExpenseTable from '../components/ExpenseTable.vue'
 import MetricSummaryCards from '../components/MetricSummaryCards.vue'
-import SubfolioButton from '../components/SubfolioButton.vue'
-import SubfolioSurfaceCard from '../components/SubfolioSurfaceCard.vue'
-import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
+import UpkeepButton from '../components/UpkeepButton.vue'
+import UpkeepSurfaceCard from '../components/UpkeepSurfaceCard.vue'
+import UpkeepIconTile from '../components/icons/UpkeepIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
@@ -31,8 +31,8 @@ const expandedRows = ref({})
 const isCategoryActive = (category) => category.status !== 'inactive' && category.active !== false
 
 const categoryRowClass = (category) => [
-  'subfolio-category-row',
-  isCategoryActive(category) ? '' : 'subfolio-category-row--inactive'
+  'upkeep-category-row',
+  isCategoryActive(category) ? '' : 'upkeep-category-row--inactive'
 ].filter(Boolean).join(' ')
 
 const toggleExpandedCategory = (event) => {
@@ -123,7 +123,7 @@ onMounted(fetchExpenses)
         v-model:expanded-rows="expandedRows"
         :value="categoriesWithStats"
         data-key="id"
-        class="subfolio-datatable"
+        class="upkeep-datatable"
         :row-class="categoryRowClass"
         table-style="min-width: 58rem"
         @row-click="toggleExpandedCategory"
@@ -132,7 +132,7 @@ onMounted(fetchExpenses)
         <Column field="name" :header="t('table.category')" sortable>
           <template #body="{ data }">
             <div class="flex items-center gap-3">
-              <SubfolioIconTile
+              <UpkeepIconTile
                 :icon="data.icon"
                 size="sm"
                 tone="neutral"
@@ -142,7 +142,7 @@ onMounted(fetchExpenses)
                 <div class="flex items-center gap-2">
                   <span
                     v-if="!isCategoryActive(data)"
-                    class="subfolio-category-status-marker"
+                    class="upkeep-category-status-marker"
                     :title="t('categories.excluded')"
                     :aria-label="t('categories.excluded')"
                   />
@@ -171,7 +171,7 @@ onMounted(fetchExpenses)
         </Column>
         <Column :header="t('table.actions')" body-class="text-right">
           <template #body="{ data }">
-            <SubfolioButton
+            <UpkeepButton
               type="button"
               :icon="isCategoryActive(data) ? 'pi pi-power-off' : 'pi pi-play'"
               variant="tertiary"
@@ -187,7 +187,7 @@ onMounted(fetchExpenses)
         <template #expansion="{ data }">
           <div class="grid gap-4 p-4">
             <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
-              <SubfolioSurfaceCard
+              <UpkeepSurfaceCard
                 v-for="metric in [
                   [t('metrics.daily'), data.daily],
                   [t('metrics.weekly'), data.weekly],
@@ -202,11 +202,11 @@ onMounted(fetchExpenses)
                 <p class="font-semibold text-accent-dark">
                   {{ formatMoney(metric[1], displayedCurrency) }}
                 </p>
-              </SubfolioSurfaceCard>
-              <SubfolioSurfaceCard class="category-metric-card">
+              </UpkeepSurfaceCard>
+              <UpkeepSurfaceCard class="category-metric-card">
                 <p class="text-sm muted-copy">{{ t('metrics.active') }}</p>
                 <p class="font-semibold text-ink">{{ data.activeCount }}</p>
-              </SubfolioSurfaceCard>
+              </UpkeepSurfaceCard>
             </div>
             <ExpenseTable :expenses="data.items" :show-category="false" />
           </div>

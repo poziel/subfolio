@@ -4,8 +4,8 @@ import Message from 'primevue/message'
 import { getCategoryIcon } from '../data/serviceCatalog'
 import MetricSummaryCards from '../components/MetricSummaryCards.vue'
 import AppPage from '../components/AppPage.vue'
-import SubfolioSurfaceCard from '../components/SubfolioSurfaceCard.vue'
-import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
+import UpkeepSurfaceCard from '../components/UpkeepSurfaceCard.vue'
+import UpkeepIconTile from '../components/icons/UpkeepIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
@@ -271,30 +271,30 @@ onMounted(fetchExpenses)
       </div>
 
       <div v-if="hasIncome" class="dashboard-income-grid">
-        <SubfolioSurfaceCard class="dashboard-income-metric">
+        <UpkeepSurfaceCard class="dashboard-income-metric">
           <span class="dashboard-income-metric__label">{{ t('dashboard.annualIncome') }}</span>
           <span class="dashboard-income-metric__value">
             {{ formatMoney(annualIncomeDisplayed, displayedCurrency) }}
           </span>
-        </SubfolioSurfaceCard>
-        <SubfolioSurfaceCard class="dashboard-income-metric">
+        </UpkeepSurfaceCard>
+        <UpkeepSurfaceCard class="dashboard-income-metric">
           <span class="dashboard-income-metric__label">{{ t('dashboard.recurringIncomeShare') }}</span>
           <span class="dashboard-income-metric__value">
             {{ recurringIncomePercent.toFixed(1) }}%
           </span>
-        </SubfolioSurfaceCard>
-        <SubfolioSurfaceCard class="dashboard-income-metric">
+        </UpkeepSurfaceCard>
+        <UpkeepSurfaceCard class="dashboard-income-metric">
           <span class="dashboard-income-metric__label">{{ t('dashboard.remainingAfterRecurrences') }}</span>
           <span class="dashboard-income-metric__value">
             {{ formatMoney(annualIncomeRemaining, displayedCurrency) }}
           </span>
-        </SubfolioSurfaceCard>
-        <SubfolioSurfaceCard v-if="hoursToCoverRecurrences" class="dashboard-income-metric">
+        </UpkeepSurfaceCard>
+        <UpkeepSurfaceCard v-if="hoursToCoverRecurrences" class="dashboard-income-metric">
           <span class="dashboard-income-metric__label">{{ t('dashboard.hoursToCoverRecurrences') }}</span>
           <span class="dashboard-income-metric__value">
             {{ hoursToCoverRecurrences.toFixed(1) }}
           </span>
-        </SubfolioSurfaceCard>
+        </UpkeepSurfaceCard>
       </div>
       <Message v-else severity="info" :closable="false">
         {{ t('dashboard.incomeMissing') }}
@@ -312,7 +312,7 @@ onMounted(fetchExpenses)
           <p class="app-section-subtitle">{{ t('dashboard.categorySplitSubtitle') }}</p>
         </div>
 
-        <SubfolioSurfaceCard class="dashboard-chart-card dashboard-chart-card--wide">
+        <UpkeepSurfaceCard class="dashboard-chart-card dashboard-chart-card--wide">
           <div class="dashboard-pie-layout">
             <figure class="dashboard-pie-figure">
               <svg
@@ -377,7 +377,7 @@ onMounted(fetchExpenses)
               </button>
             </div>
           </div>
-        </SubfolioSurfaceCard>
+        </UpkeepSurfaceCard>
       </section>
 
       <section class="app-section">
@@ -387,18 +387,18 @@ onMounted(fetchExpenses)
         </div>
 
         <div class="dashboard-insight-grid">
-          <SubfolioSurfaceCard
+          <UpkeepSurfaceCard
             v-for="insight in categoryInsightCards"
             :key="insight.key"
             class="dashboard-insight-card"
           >
-            <SubfolioIconTile :icon="insight.icon" tone="neutral" />
+            <UpkeepIconTile :icon="insight.icon" tone="neutral" />
             <div class="min-w-0">
               <p class="dashboard-insight-card__label">{{ insight.label }}</p>
               <p class="dashboard-insight-card__value">{{ insight.value }}</p>
               <p class="text-sm muted-copy">{{ insight.detail }}</p>
             </div>
-          </SubfolioSurfaceCard>
+          </UpkeepSurfaceCard>
         </div>
       </section>
     </section>

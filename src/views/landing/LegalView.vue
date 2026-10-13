@@ -30,7 +30,7 @@ const content = computed(() => tm(`legalPages.${props.page}`) ?? tm('legalPages.
       </Message>
 
       <section class="grid gap-5 md:grid-cols-3">
-        <Card v-for="section in content.sections" :key="section.title" class="subfolio-card">
+        <Card v-for="section in content.sections" :key="section.title" class="upkeep-card">
           <template #title>{{ section.title }}</template>
           <template #content>
             <p class="muted-copy">{{ section.body }}</p>

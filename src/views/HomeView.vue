@@ -5,8 +5,8 @@ import Tag from 'primevue/tag'
 import { getExpenseIcon } from '../data/serviceCatalog'
 import AppPage from '../components/AppPage.vue'
 import MetricSummaryCards from '../components/MetricSummaryCards.vue'
-import SubfolioSurfaceCard from '../components/SubfolioSurfaceCard.vue'
-import SubfolioIconTile from '../components/icons/SubfolioIconTile.vue'
+import UpkeepSurfaceCard from '../components/UpkeepSurfaceCard.vue'
+import UpkeepIconTile from '../components/icons/UpkeepIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
@@ -135,7 +135,7 @@ onMounted(fetchExpenses)
         </div>
 
         <div class="quick-action-list">
-          <SubfolioSurfaceCard
+          <UpkeepSurfaceCard
             v-for="action in actions"
             :key="action.key"
             class="quick-action-card"
@@ -145,13 +145,13 @@ onMounted(fetchExpenses)
               class="quick-action"
               @click="runQuickAction(action)"
             >
-              <SubfolioIconTile :icon="action.icon" />
+              <UpkeepIconTile :icon="action.icon" />
               <span class="min-w-0">
                 <span class="block font-extrabold text-ink">{{ action.label }}</span>
                 <span class="block text-sm muted-copy">{{ action.detail }}</span>
               </span>
             </button>
-          </SubfolioSurfaceCard>
+          </UpkeepSurfaceCard>
         </div>
       </section>
 
@@ -163,7 +163,7 @@ onMounted(fetchExpenses)
 
         <div class="recurrence-preview-list">
           <template v-if="upcomingExpenses.length">
-            <SubfolioSurfaceCard
+            <UpkeepSurfaceCard
               v-for="expense in upcomingExpenses"
               :key="expense.id"
               class="recurrence-preview-card"
@@ -173,13 +173,13 @@ onMounted(fetchExpenses)
                 class="recurrence-preview-item"
               >
                 <div class="recurrence-preview-item__main">
-                  <SubfolioIconTile
+                  <UpkeepIconTile
                     v-if="getExpenseIcon(expense)"
                     :icon="getExpenseIcon(expense)"
                     size="sm"
                     tone="neutral"
                   />
-                  <span v-else class="subfolio-avatar">{{ initials(expense.name) }}</span>
+                  <span v-else class="upkeep-avatar">{{ initials(expense.name) }}</span>
                   <div class="min-w-0">
                     <p class="truncate font-extrabold text-ink">{{ expense.name }}</p>
                     <p class="truncate text-sm muted-copy">
@@ -188,11 +188,11 @@ onMounted(fetchExpenses)
                   </div>
                 </div>
                 <div class="grid justify-items-end gap-1">
-                  <span class="subfolio-amount">{{ nextRecurrenceAmount(expense) }}</span>
+                  <span class="upkeep-amount">{{ nextRecurrenceAmount(expense) }}</span>
                   <Tag :value="isExpenseCounted(expense) ? t('metrics.active') : t('categories.excluded')" severity="info" rounded />
                 </div>
               </RouterLink>
-            </SubfolioSurfaceCard>
+            </UpkeepSurfaceCard>
           </template>
           <p v-else class="py-8 text-sm muted-copy">
             {{ t('home.noUpcomingRecurrences') }}

@@ -4,7 +4,7 @@ import Card from 'primevue/card'
 import Panel from 'primevue/panel'
 import Tag from 'primevue/tag'
 import PublicSiteShell from '../../components/PublicSiteShell.vue'
-import SubfolioButton from '../../components/SubfolioButton.vue'
+import UpkeepButton from '../../components/UpkeepButton.vue'
 import { useI18n } from '../../composables/useI18n'
 
 const { t, tm } = useI18n()
@@ -41,10 +41,10 @@ const workflow = computed(() => tm('pageData.workflow'))
       </section>
 
       <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <Card v-for="feature in features" :key="feature.title" class="subfolio-card">
+        <Card v-for="feature in features" :key="feature.title" class="upkeep-card">
           <template #content>
             <div class="grid gap-4">
-              <Tag severity="secondary" rounded class="subfolio-card-icon w-fit">
+              <Tag severity="secondary" rounded class="upkeep-card-icon w-fit">
                 <span :class="feature.icon" />
               </Tag>
               <div class="grid gap-2">
@@ -82,10 +82,10 @@ const workflow = computed(() => tm('pageData.workflow'))
           <template #footer>
             <div class="flex flex-col gap-3 sm:flex-row">
               <RouterLink v-slot="{ navigate }" to="/app" custom>
-                <SubfolioButton :label="t('common.openApp')" @click="navigate" />
+                <UpkeepButton :label="t('common.openApp')" @click="navigate" />
               </RouterLink>
               <RouterLink v-slot="{ navigate }" to="/byodb" custom>
-                <SubfolioButton :label="t('pages.learnByodb')" icon="pi pi-arrow-right" icon-pos="right" variant="secondary" theme="secondary" @click="navigate" />
+                <UpkeepButton :label="t('pages.learnByodb')" icon="pi pi-arrow-right" icon-pos="right" variant="secondary" theme="secondary" @click="navigate" />
               </RouterLink>
             </div>
           </template>

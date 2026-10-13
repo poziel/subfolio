@@ -56,7 +56,7 @@ const restoreSession = async () => {
 
   isRestoring.value = true
   restorePromise = authCollection()
-    .authRefresh({ requestKey: 'subfolio-auth-refresh' })
+    .authRefresh({ requestKey: 'upkeep-auth-refresh' })
     .then(({ record }) => {
       syncAuthState()
       return record?.verified === true
@@ -106,7 +106,7 @@ const signIn = async ({ identity, password }) => {
   }
 
   const result = await authCollection().authWithPassword(normalizedIdentity, password, {
-    requestKey: 'subfolio-auth-sign-in'
+    requestKey: 'upkeep-auth-sign-in'
   })
   syncAuthState()
   return result.record
@@ -120,7 +120,7 @@ const resendVerification = async (email) => {
   }
 
   await authCollection().requestVerification(normalizedEmail, {
-    requestKey: 'subfolio-auth-verification'
+    requestKey: 'upkeep-auth-verification'
   })
 
   return normalizedEmail
@@ -134,7 +134,7 @@ const confirmVerification = async (token) => {
   }
 
   await authCollection().confirmVerification(normalizedToken, {
-    requestKey: 'subfolio-auth-confirm-verification'
+    requestKey: 'upkeep-auth-confirm-verification'
   })
 
   if (client.authStore.isValid) {

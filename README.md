@@ -1,6 +1,6 @@
-# Subfolio
+# Upkeep
 
-Subfolio is a forward-looking finance app for tracking subscriptions and
+Upkeep is a forward-looking finance app for tracking subscriptions and
 recurring expenses, projecting upcoming costs, and giving users a clearer view
 of where money goes over time.
 
@@ -31,7 +31,7 @@ Public routes include `/`, `/features`, `/about`, `/byodb`, `/pricing`,
 `/privacy`, `/terms`, `/refund-policy`, and `/license`.
 
 The public shell links to the project repository at
-`https://github.com/poziel/subfolio`.
+`https://github.com/poziel/upkeep`.
 
 ## Setup
 
@@ -41,7 +41,7 @@ Install dependencies:
 npm install
 ```
 
-The UI is built with PrimeVue styled mode, an Aura-derived Subfolio theme preset,
+The UI is built with PrimeVue styled mode, an Aura-derived Upkeep theme preset,
 and PrimeIcons.
 
 Local PocketBase configuration is read from Vite environment variables:
@@ -81,3 +81,10 @@ the project collaboration guide.
 
 Edit `.ruler/` source files first, then run `npm run ruler` to regenerate
 agent-specific instruction outputs such as `AGENTS.md`.
+
+## Rename compatibility
+
+Upkeep migrates existing browser settings, theme, language, sidebar state,
+database connection and PocketBase session keys on the same origin. Saved
+connection payloads and database paths are preserved. Moving to a different
+web origin requires signing in and setting preferences there again.

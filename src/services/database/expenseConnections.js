@@ -6,7 +6,7 @@ import { normalizePaymentHistoryRecord } from '../paymentHistory'
 import { getManagedPocketBaseClient, isManagedPocketBaseConnection } from '../pocketbaseClient'
 import { ensurePocketBaseSchema } from './pocketbaseSchema'
 
-const defaultExpensePath = 'subfolio/expenses'
+const defaultExpensePath = 'upkeep/expenses'
 const defaultCategoryCollection = 'categories'
 const defaultPaymentHistoryCollection = 'expensePaymentHistory'
 
@@ -235,7 +235,7 @@ const sortExpenses = (items) =>
     return bTime - aTime
   })
 
-const firebaseAppName = (config) => `subfolio-${btoa(config.databaseURL).replace(/[^a-z0-9]/gi, '')}`
+const firebaseAppName = (config) => `upkeep-${btoa(config.databaseURL).replace(/[^a-z0-9]/gi, '')}`
 
 const getFirebaseApp = (config) => {
   const name = firebaseAppName(config)

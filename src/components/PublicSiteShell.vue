@@ -1,19 +1,18 @@
 <script setup>
+import UpkeepBrand from './UpkeepBrand.vue'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import MadeWithLoveCredit from './MadeWithLoveCredit.vue'
-import SubfolioButton from './SubfolioButton.vue'
+import UpkeepButton from './UpkeepButton.vue'
 import ThemeLanguageControls from './ThemeLanguageControls.vue'
 import { useI18n } from '../composables/useI18n'
-import { useTheme } from '../composables/useTheme'
 
-const repositoryUrl = 'https://github.com/poziel/subfolio'
+const repositoryUrl = 'https://github.com/poziel/upkeep'
 const sourceCodeUrl = `${repositoryUrl}/tree/main/src`
 const architectureUrl = `${repositoryUrl}/blob/main/docs/architecture.md`
 
 const route = useRoute()
 const { t } = useI18n()
-const { activeTheme } = useTheme()
 
 const navItems = [
   { to: '/', labelKey: 'nav.overview', exact: true },
@@ -59,11 +58,7 @@ const year = computed(() => new Date().getFullYear())
     <header class="public-shell__header">
       <div class="public-shell__header-inner">
         <RouterLink class="flex min-w-0 items-center gap-3" to="/">
-          <img
-            :src="activeTheme === 'dark' ? '/images/subfolio-light-horizontal-equal.svg' : '/images/subfolio-dark-horizontal-equal.svg'"
-            alt="Subfolio"
-            class="public-shell__logo h-auto"
-          />
+          <UpkeepBrand class="public-shell__logo" />
         </RouterLink>
 
         <nav class="public-shell__nav" aria-label="Public navigation">
@@ -71,8 +66,8 @@ const year = computed(() => new Date().getFullYear())
             v-for="item in navItems"
             :key="item.to"
             :to="item.to"
-            class="subfolio-nav-link"
-            :class="{ 'subfolio-nav-link--active': isActive(item) }"
+            class="upkeep-nav-link"
+            :class="{ 'upkeep-nav-link--active': isActive(item) }"
           >
             {{ t(item.labelKey) }}
           </RouterLink>
@@ -80,7 +75,7 @@ const year = computed(() => new Date().getFullYear())
 
         <div class="public-shell__actions">
           <ThemeLanguageControls />
-          <SubfolioButton
+          <UpkeepButton
             as="a"
             :href="repositoryUrl"
             target="_blank"
@@ -92,7 +87,7 @@ const year = computed(() => new Date().getFullYear())
             size="small"
           />
           <RouterLink v-slot="{ navigate }" to="/app" custom>
-            <SubfolioButton
+            <UpkeepButton
               :label="t('common.openApp')"
               size="small"
               @click="navigate"
@@ -110,16 +105,12 @@ const year = computed(() => new Date().getFullYear())
       <div class="public-shell__footer-inner">
         <div class="grid gap-3">
           <RouterLink class="w-fit" to="/">
-            <img
-              src="/images/subfolio-light-horizontal-equal.svg"
-              alt="Subfolio"
-              class="h-10 w-auto max-w-44"
-            />
+            <UpkeepBrand class="text-3xl" />
           </RouterLink>
           <p class="max-w-md">
             {{ t('footer.tagline') }}
           </p>
-          <MadeWithLoveCredit class="subfolio-made-with-love-credit" />
+          <MadeWithLoveCredit class="upkeep-made-with-love-credit" />
         </div>
 
         <nav class="public-shell__footer-links" aria-label="Footer product navigation">

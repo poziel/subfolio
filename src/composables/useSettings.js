@@ -1,6 +1,7 @@
+import '../services/brandStorageMigration.js'
 import { computed, reactive, ref, watch } from 'vue'
 
-const storageKey = 'subfolio-settings'
+const storageKey = 'upkeep-settings'
 
 const defaultSettings = {
   displayedCurrency: 'CAD',

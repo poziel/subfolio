@@ -1,10 +1,11 @@
+import '../services/brandStorageMigration.js'
 import { computed, ref } from 'vue'
 import {
   createManagedPocketBaseConnection,
   managedPocketBaseConfig
 } from '../config/pocketbase'
 
-const storageKey = 'subfolio-database-connection'
+const storageKey = 'upkeep-database-connection'
 
 export const databaseProviders = [
   {
@@ -19,8 +20,8 @@ export const defaultFirebaseConnection = {
   projectId: '',
   appId: '',
   databaseURL: '',
-  path: 'subfolio/expenses',
-  categoryPath: 'subfolio/categories'
+  path: 'upkeep/expenses',
+  categoryPath: 'upkeep/categories'
 }
 
 export const defaultPocketBaseConnection = {

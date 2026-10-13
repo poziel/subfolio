@@ -12,7 +12,7 @@ const cardAttrs = computed(() => {
   delete rest.class
   return rest
 })
-const cardClass = computed(() => ['subfolio-surface-card', attrs.class])
+const cardClass = computed(() => ['upkeep-surface-card', attrs.class])
 </script>
 
 <template>

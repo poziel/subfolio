@@ -5,7 +5,7 @@ import DataTable from 'primevue/datatable'
 import Tag from 'primevue/tag'
 import AppPage from '../components/AppPage.vue'
 import AppSectionSurface from '../components/AppSectionSurface.vue'
-import SubfolioSurfaceCard from '../components/SubfolioSurfaceCard.vue'
+import UpkeepSurfaceCard from '../components/UpkeepSurfaceCard.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
@@ -83,7 +83,7 @@ onMounted(fetchExpenses)
     </template>
 
     <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <SubfolioSurfaceCard
+      <UpkeepSurfaceCard
         v-for="(item, index) in summaryTotals"
         :key="item.label"
         class="metric-card"
@@ -94,7 +94,7 @@ onMounted(fetchExpenses)
           <p class="metric-value">{{ item.value }}</p>
           <p class="text-sm muted-copy">{{ item.detail }}</p>
         </div>
-      </SubfolioSurfaceCard>
+      </UpkeepSurfaceCard>
     </section>
 
     <AppSectionSurface
@@ -104,7 +104,7 @@ onMounted(fetchExpenses)
     >
       <DataTable
         :value="projectedRows"
-        class="subfolio-datatable"
+        class="upkeep-datatable"
         data-key="id"
         striped-rows
         table-style="min-width: 58rem"

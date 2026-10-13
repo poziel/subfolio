@@ -1,3 +1,4 @@
+import './brandStorageMigration.js'
 import PocketBase, { LocalAuthStore } from 'pocketbase'
 import { managedPocketBaseConfig } from '../config/pocketbase'
 

@@ -1,6 +1,6 @@
 # PocketBase setup
 
-Subfolio stays frontend-only, so PocketBase schema changes are managed by
+Upkeep stays frontend-only, so PocketBase schema changes are managed by
 PocketBase itself. The browser app performs a lightweight schema preflight when
 it connects, but the actual migration files must be present beside the
 PocketBase executable.
@@ -26,19 +26,19 @@ The PocketBase verification email should point back to the frontend route that
 handles verification tokens, such as:
 
 ```text
-https://your-subfolio-app.example/connect?token=<verification-token>
+https://your-upkeep-app.example/connect?token=<verification-token>
 ```
 
 The app also accepts `/login?token=...` for backward-compatible links because
 `/login` redirects to `/connect` with the query string preserved.
 
 The `users` auth collection must keep password auth enabled with both
-`username` and `email` as identity fields. Subfolio also expects a unique
+`username` and `email` as identity fields. Upkeep also expects a unique
 `username` text field and the standard `name` text field for display names.
 
 ## Migrations
 
-Subfolio includes a PocketBase command wrapper for local development. It uses a
+Upkeep includes a PocketBase command wrapper for local development. It uses a
 global `pocketbase` executable and keeps runtime data outside the repository.
 
 ```bash
@@ -58,10 +58,12 @@ The wrapper injects these defaults for `serve`:
 On Windows, the default runtime folder is:
 
 ```text
-D:\Dev\6-miscellaneous\pocketbase\subfolio
+D:\Dev\6-miscellaneous\pocketbase\upkeep
 ```
 
-Override it with `SUBFOLIO_POCKETBASE_ROOT` when needed.
+Override it with `UPKEEP_POCKETBASE_ROOT` when needed. Existing installations
+fall back to the previous runtime folder and `SUBFOLIO_POCKETBASE_ROOT` if no
+Upkeep runtime or override exists; database files are not moved automatically.
 
 You can pass PocketBase arguments after the command:
 
@@ -75,7 +77,7 @@ Apply migrations explicitly with:
 npm run db -- migrate up
 ```
 
-Other PocketBase commands pass through without Subfolio runtime flags:
+Other PocketBase commands pass through without Upkeep runtime flags:
 
 ```bash
 npm run db -- update
@@ -87,7 +89,7 @@ Preview the generated command without running PocketBase:
 npm run db -- serve --dry-run
 ```
 
-The first Subfolio migration creates the `expenses` collection with the fields
+The first Upkeep migration creates the `expenses` collection with the fields
 required by the frontend adapter. Later migrations add optional metadata fields,
 a required `user` relation, username support for the `users` auth collection,
 recurrence schedule metadata, and a user-owned `categories` collection. The
@@ -121,7 +123,7 @@ npm run seed:pocketbase -- --username=poziel --count=10000 --categories=60 --res
 npm run seed:pocketbase -- --user=poziel --reset-only
 npm run seed:pocketbase -- --list-users
 npm run seed:pocketbase -- --user=poziel --count=50 --categories=8 --seed=223 --dry-run
-npm run seed:pocketbase -- --user=poziel --currency=USD --runtime-root=D:\Dev\6-miscellaneous\pocketbase\subfolio
+npm run seed:pocketbase -- --user=poziel --currency=USD --runtime-root=D:\Dev\6-miscellaneous\pocketbase\upkeep
 ```
 
 If seeding says no user was found, run `--list-users` and seed with one of the

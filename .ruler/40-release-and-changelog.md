@@ -1,6 +1,6 @@
 # Release And Changelog Conventions
 
-Subfolio uses a Refinimo-style GitHub release workflow under `.github/` to
+Upkeep uses a Refinimo-style GitHub release workflow under `.github/` to
 publish versioned release notes and keep `CHANGELOG.md` current.
 
 ## Changelog
@@ -25,7 +25,7 @@ publish versioned release notes and keep `CHANGELOG.md` current.
 - Keep PR titles specific enough to make sense outside the code diff.
 - Avoid vague titles such as `update stuff`, `misc fixes`, or only an issue number.
 - Use `.github/PULL_REQUEST_TEMPLATE.md` for the required PR body structure.
-- Target pull requests for this repository to the Subfolio repository.
+- Target pull requests for this repository to the Upkeep repository.
 - Do not open PRs against an upstream repository or unrelated fork target.
 - Put context, testing notes, screenshots, and migration details in the PR body outside the `## Changelog` section.
 - Add a `## Changelog` section to release-included PRs.

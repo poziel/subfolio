@@ -3,7 +3,7 @@ Source: .ruler\10-project-overview.md
 ---
 # Project Overview
 
-Subfolio is a smart, forward-looking finance app. The current product focus is
+Upkeep is a smart, forward-looking finance app. The current product focus is
 tracking subscriptions and recurring expenses, then using that recurring
 schedule to forecast future cash flow and show where money goes over time.
 
@@ -11,7 +11,7 @@ schedule to forecast future cash flow and show where money goes over time.
 
 - Vue 3 with Composition API and `<script setup>`
 - JavaScript application code
-- PrimeVue styled mode with an Aura-derived Subfolio preset
+- PrimeVue styled mode with an Aura-derived Upkeep preset
 - PrimeIcons for UI iconography
 - Tailwind CSS 4 theme tokens in `src/assets/main.css`
 - Vue Router 4 for navigation and route guards
@@ -29,7 +29,7 @@ schedule to forecast future cash flow and show where money goes over time.
 - Treat saved database connection state as the current app entry condition.
 - Treat `?config=` links as database-connection replacement links. The value is
   a base64-encoded JSON connection, applied before app route guards run.
-- Keep Subfolio frontend-only unless the user explicitly asks for hosted backend
+- Keep Upkeep frontend-only unless the user explicitly asks for hosted backend
   work.
 
 ---
@@ -37,13 +37,13 @@ Source: .ruler\15-linear-workflow.md
 ---
 # Linear Workflow
 
-Linear is the source of truth for Subfolio issues and tasks. Each session should
+Linear is the source of truth for Upkeep issues and tasks. Each session should
 map to a Linear issue whenever possible.
 
 ## Defaults
 
 - Team: DEV
-- Project: subfolio
+- Project: upkeep
 - New work starts by co-planning the scope in chat before creating or updating
   the Linear issue.
 - If the user references a Linear issue, fetch it and work under that issue.
@@ -184,9 +184,9 @@ User input
 ```
 
 - Expense data should flow through provider adapters when a connection exists.
-- Settings currently persist to `localStorage` under `subfolio-settings`.
+- Settings currently persist to `localStorage` under `upkeep-settings`.
 - Database connection state persists to `localStorage` under
-  `subfolio-database-connection`.
+  `upkeep-database-connection`.
 - Any route may include a `config` query parameter. It is a base64-encoded JSON
   database connection, applied before app route guards run, then removed from
   the URL with a replace navigation.
@@ -218,7 +218,7 @@ Public "Open App" calls to action should route to `/app`; the app route guard
 handles database setup by redirecting to `/connect` when needed.
 
 `?config=` links replace the saved database connection on whatever route they
-are opened from. Accepted payloads include native Subfolio connection objects
+are opened from. Accepted payloads include native Upkeep connection objects
 and raw Firebase config objects using either `databaseURL` or Refinimo-style
 `databaseUrl`.
 
@@ -237,7 +237,7 @@ Provider adapters live in `src/services/database/expenseConnections.js`.
 ## Vite Notes
 
 - The app uses Vite defaults unless `vite.config.js` says otherwise.
-- PrimeVue is configured in `src/main.js` with an Aura-derived Subfolio preset.
+- PrimeVue is configured in `src/main.js` with an Aura-derived Upkeep preset.
 - PrimeIcons CSS is imported from `src/main.js`.
 - Tailwind theme tokens and app-level layout helpers live in `src/assets/main.css`.
 
@@ -357,7 +357,7 @@ Rules:
 
 - `Summary` explains the pull request in 1 to 3 sentences.
 - `Task` explains why the work exists and should mention the task id when there is one.
-- PRs for this repository must target the Subfolio repository.
+- PRs for this repository must target the Upkeep repository.
 - Do not open PRs against an upstream repository or unrelated fork target.
 - `Changes` explains what changed in the codebase with clear bullets.
 - `Validation` lists the checks, tests, builds, or manual verification performed.
@@ -379,7 +379,7 @@ Source: .ruler\40-release-and-changelog.md
 ---
 # Release And Changelog Conventions
 
-Subfolio uses a Refinimo-style GitHub release workflow under `.github/` to
+Upkeep uses a Refinimo-style GitHub release workflow under `.github/` to
 publish versioned release notes and keep `CHANGELOG.md` current.
 
 ## Changelog
@@ -404,7 +404,7 @@ publish versioned release notes and keep `CHANGELOG.md` current.
 - Keep PR titles specific enough to make sense outside the code diff.
 - Avoid vague titles such as `update stuff`, `misc fixes`, or only an issue number.
 - Use `.github/PULL_REQUEST_TEMPLATE.md` for the required PR body structure.
-- Target pull requests for this repository to the Subfolio repository.
+- Target pull requests for this repository to the Upkeep repository.
 - Do not open PRs against an upstream repository or unrelated fork target.
 - Put context, testing notes, screenshots, and migration details in the PR body outside the `## Changelog` section.
 - Add a `## Changelog` section to release-included PRs.
@@ -437,7 +437,7 @@ Source: .ruler\50-key-files.md
 | `src/views/CategoriesView.vue` | Category breakdown page |
 | `src/views/RecurrenceOverviewView.vue` | Recurring payment overview page |
 | `src/views/SettingsView.vue` | Local user preference settings and connection detail |
-| `src/assets/main.css` | Tailwind import, Subfolio tokens, and app layout helpers |
+| `src/assets/main.css` | Tailwind import, Upkeep tokens, and app layout helpers |
 | `docs/architecture.md` | Current technical plan and provider notes |
 
 ---
@@ -586,7 +586,7 @@ compatibility: "Requires Linear MCP integration to be connected"
 # Linear Issue Creator
 
 Turns informal feature descriptions, rough notes, or voice-memo-style thoughts into
-clean, developer-friendly Subfolio Linear issues and creates them directly via
+clean, developer-friendly Upkeep Linear issues and creates them directly via
 the Linear MCP.
 
 ---
@@ -596,7 +596,7 @@ the Linear MCP.
 Use these defaults unless the user explicitly says otherwise:
 
 - Team: DEV
-- Project: subfolio
+- Project: upkeep
 
 Before writing anything, confirm only the missing decisions that matter:
 
@@ -660,7 +660,7 @@ Present these as suggestions — let the user confirm or override before creatin
 1. Show the full drafted issue to the user (title + description + priority/label suggestions)
 2. Ask: *"Does this look good, or would you like to adjust anything?"*
 3. Once confirmed, **create the issue using the Linear MCP tool** — do not just return markdown.
-4. Create it under team `DEV` and project `subfolio`.
+4. Create it under team `DEV` and project `upkeep`.
 5. Pass the confirmed priority and labels when creating the issue.
 6. Use the intended workflow status:
    - New scoped work: Planned or Ready to Start, based on user intent.
@@ -689,7 +689,7 @@ Ready for the next issue.
 ## Rules
 
 - Always create the issue via Linear MCP — never only return the markdown
-- Always use DEV/subfolio unless the user explicitly overrides it
+- Always use DEV/upkeep unless the user explicitly overrides it
 - Keep the original intent intact — do not invent unrelated features
 - Acceptance Criteria = observable, testable behavior only (no implementation details)
 - Architecture = technical approach, constraints, scalability notes (not UX)
@@ -709,7 +709,7 @@ Ready for the next issue.
 \```
 # Description
 
-As a Subfolio user, I want to filter recurring expenses by category, so that I
+As a Upkeep user, I want to filter recurring expenses by category, so that I
 can quickly find relevant costs without scanning the full list.
 
 Currently, the list displays all expenses together, making it harder to focus on

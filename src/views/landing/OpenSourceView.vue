@@ -5,10 +5,10 @@ import Message from 'primevue/message'
 import Panel from 'primevue/panel'
 import Tag from 'primevue/tag'
 import PublicSiteShell from '../../components/PublicSiteShell.vue'
-import SubfolioButton from '../../components/SubfolioButton.vue'
+import UpkeepButton from '../../components/UpkeepButton.vue'
 import { useI18n } from '../../composables/useI18n'
 
-const repositoryUrl = 'https://github.com/poziel/subfolio'
+const repositoryUrl = 'https://github.com/poziel/upkeep'
 const architectureUrl = `${repositoryUrl}/blob/main/docs/architecture.md`
 const { t, tm } = useI18n()
 
@@ -35,10 +35,10 @@ const contributionBody = computed(() => tm('pageData.contributionBody'))
       </section>
 
       <section class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        <Card v-for="principle in principles" :key="principle.title" class="subfolio-card">
+        <Card v-for="principle in principles" :key="principle.title" class="upkeep-card">
           <template #content>
             <div class="grid gap-4">
-              <Tag severity="secondary" rounded class="subfolio-card-icon w-fit">
+              <Tag severity="secondary" rounded class="upkeep-card-icon w-fit">
                 <span :class="principle.icon" />
               </Tag>
               <div class="grid gap-2">
@@ -61,7 +61,7 @@ const contributionBody = computed(() => tm('pageData.contributionBody'))
           </template>
           <template #footer>
             <div class="flex flex-col gap-3 sm:flex-row">
-              <SubfolioButton
+              <UpkeepButton
                 as="a"
                 :href="repositoryUrl"
                 target="_blank"
@@ -69,7 +69,7 @@ const contributionBody = computed(() => tm('pageData.contributionBody'))
                 :label="t('pages.openGithub')"
                 icon="pi pi-github"
               />
-              <SubfolioButton
+              <UpkeepButton
                 as="a"
                 :href="architectureUrl"
                 target="_blank"

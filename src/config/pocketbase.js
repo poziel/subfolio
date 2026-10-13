@@ -7,7 +7,7 @@ export const managedPocketBaseConfig = Object.freeze({
   categoryCollection: trimEnv(import.meta.env.VITE_POCKETBASE_CATEGORIES_COLLECTION) || 'categories',
   paymentHistoryCollection: trimEnv(import.meta.env.VITE_POCKETBASE_PAYMENT_HISTORY_COLLECTION) || 'expensePaymentHistory',
   authCollection: trimEnv(import.meta.env.VITE_POCKETBASE_AUTH_COLLECTION) || 'users',
-  authStoreKey: 'subfolio-pocketbase-auth'
+  authStoreKey: 'upkeep-pocketbase-auth'
 })
 
 export const createManagedPocketBaseConnection = () => ({

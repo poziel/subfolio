@@ -3,10 +3,10 @@ import { computed } from 'vue'
 import Card from 'primevue/card'
 import Panel from 'primevue/panel'
 import PublicSiteShell from '../../components/PublicSiteShell.vue'
-import SubfolioButton from '../../components/SubfolioButton.vue'
+import UpkeepButton from '../../components/UpkeepButton.vue'
 import { useI18n } from '../../composables/useI18n'
 
-const repositoryUrl = 'https://github.com/poziel/subfolio'
+const repositoryUrl = 'https://github.com/poziel/upkeep'
 const { t, tm } = useI18n()
 
 const reasons = computed(() => tm('pageData.aboutReasons'))
@@ -51,7 +51,7 @@ const technology = computed(() => tm('pageData.aboutTechnology'))
             </ul>
           </template>
           <template #footer>
-            <SubfolioButton
+            <UpkeepButton
               as="a"
               :href="repositoryUrl"
               target="_blank"
@@ -64,7 +64,7 @@ const technology = computed(() => tm('pageData.aboutTechnology'))
       </section>
 
       <section class="grid gap-5 md:grid-cols-3">
-        <Card v-for="reason in reasons" :key="reason.title" class="subfolio-card">
+        <Card v-for="reason in reasons" :key="reason.title" class="upkeep-card">
           <template #content>
             <div class="grid gap-3">
               <h2 class="text-xl font-semibold text-ink">{{ reason.title }}</h2>
@@ -93,7 +93,7 @@ const technology = computed(() => tm('pageData.aboutTechnology'))
               </p>
             </div>
             <RouterLink v-slot="{ navigate }" to="/app" custom>
-              <SubfolioButton :label="t('common.openApp')" @click="navigate" />
+              <UpkeepButton :label="t('common.openApp')" @click="navigate" />
             </RouterLink>
           </div>
         </template>

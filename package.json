@@ -1,5 +1,5 @@
 {
-  "name": "subfolio",
+  "name": "upkeep",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,11 +15,12 @@
     "check": "vite build",
     "check:pocketbase-migrations": "node scripts/checkPocketBaseMigrations.mjs",
     "lint": "eslint .",
-    "verify": "npm run check:pocketbase-migrations && npm run check && npm run lint",
+    "verify": "npm run test:brand && npm run check:pocketbase-migrations && npm run check && npm run lint",
     "ruler": "ruler apply",
     "ruler:apply": "ruler apply",
     "ruler:revert": "ruler revert",
-    "ruler:revert:dry": "ruler revert --dry-run"
+    "ruler:revert:dry": "ruler revert --dry-run",
+    "test:brand": "node --test tests/brandStorageMigration.test.mjs"
   },
   "dependencies": {
     "@primeuix/themes": "^2.0.3",

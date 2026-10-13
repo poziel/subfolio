@@ -1,15 +1,14 @@
 import fs from 'node:fs/promises'
+import { getPocketBaseRuntimeRoot } from './pocketBaseRuntime.mjs'
 import path from 'node:path'
 import process from 'node:process'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const defaultRuntimeRoot = process.platform === 'win32'
-  ? 'D:\\Dev\\6-miscellaneous\\pocketbase\\subfolio'
-  : path.join(repoRoot, '.pocketbase')
+const defaultRuntimeRoot = getPocketBaseRuntimeRoot(repoRoot)
 
-const runtimeRoot = path.resolve(process.env.SUBFOLIO_POCKETBASE_ROOT || defaultRuntimeRoot)
+const runtimeRoot = path.resolve(process.env.UPKEEP_POCKETBASE_ROOT || defaultRuntimeRoot)
 const paths = {
   data: path.join(runtimeRoot, 'pb_data'),
   hooks: path.join(runtimeRoot, 'pb_hooks'),
@@ -31,7 +30,7 @@ const usage = `Usage:
   npm run db -- update [pocketbase update args]
 
 Environment:
-  SUBFOLIO_POCKETBASE_ROOT=${runtimeRoot}
+  UPKEEP_POCKETBASE_ROOT=${runtimeRoot}
 
 Use --dry-run to print the generated PocketBase command without running it.`
 

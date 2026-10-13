@@ -5,7 +5,7 @@ import Message from 'primevue/message'
 import Panel from 'primevue/panel'
 import Tag from 'primevue/tag'
 import PublicSiteShell from '../../components/PublicSiteShell.vue'
-import SubfolioButton from '../../components/SubfolioButton.vue'
+import UpkeepButton from '../../components/UpkeepButton.vue'
 import { useI18n } from '../../composables/useI18n'
 
 const { t, tm } = useI18n()
@@ -34,10 +34,10 @@ const steps = computed(() => tm('pageData.byodbSteps'))
       </Message>
 
       <section class="grid gap-5 md:grid-cols-2">
-        <Card v-for="provider in providers" :key="provider.title" class="subfolio-card">
+        <Card v-for="provider in providers" :key="provider.title" class="upkeep-card">
           <template #content>
             <div class="grid gap-4">
-              <Tag severity="secondary" rounded class="subfolio-card-icon w-fit">
+              <Tag severity="secondary" rounded class="upkeep-card-icon w-fit">
                 <span :class="provider.icon" />
               </Tag>
               <div class="grid gap-2">
@@ -76,7 +76,7 @@ const steps = computed(() => tm('pageData.byodbSteps'))
         </template>
         <template #footer>
           <RouterLink v-slot="{ navigate }" to="/app" custom>
-            <SubfolioButton :label="t('common.openApp')" @click="navigate" />
+            <UpkeepButton :label="t('common.openApp')" @click="navigate" />
           </RouterLink>
         </template>
       </Card>

@@ -17,8 +17,8 @@ import { buildRecurrenceSummaryParts } from '../data/recurrenceRules'
 import { findKnownServiceById, groupedKnownServices, knownServices, serviceIconOptions } from '../data/serviceCatalog'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
-import SubfolioIconTile from './icons/SubfolioIconTile.vue'
-import SubfolioButton from './SubfolioButton.vue'
+import UpkeepIconTile from './icons/UpkeepIconTile.vue'
+import UpkeepButton from './UpkeepButton.vue'
 
 const {
   showAddModal,
@@ -242,31 +242,31 @@ watch(() => showAddModal.value, (visible) => {
     :closable="false"
     :draggable="false"
     aria-labelledby="expense-modal-title"
-    class="subfolio-expense-dialog w-[min(96vw,46rem)]"
+    class="upkeep-expense-dialog w-[min(96vw,46rem)]"
     @update:visible="handleVisibleChange"
   >
     <template #header>
-      <div class="subfolio-expense-dialog__header">
+      <div class="upkeep-expense-dialog__header">
         <div class="min-w-0">
-          <h2 id="expense-modal-title" class="subfolio-expense-dialog__title">{{ modalTitle }}</h2>
-          <p class="subfolio-expense-dialog__subtitle">{{ modalSubtitle }}</p>
+          <h2 id="expense-modal-title" class="upkeep-expense-dialog__title">{{ modalTitle }}</h2>
+          <p class="upkeep-expense-dialog__subtitle">{{ modalSubtitle }}</p>
         </div>
-        <SubfolioButton
+        <UpkeepButton
           type="button"
           icon="pi pi-times"
           :aria-label="t('expenseForm.cancel')"
           variant="tertiary"
           theme="secondary"
-          class="subfolio-expense-dialog__close"
+          class="upkeep-expense-dialog__close"
           :disabled="saving"
           @click="closeModal"
         />
       </div>
     </template>
 
-    <form id="subfolio-expense-form" class="subfolio-expense-form grid gap-5" @submit.prevent="handleSaveExpense">
+    <form id="upkeep-expense-form" class="upkeep-expense-form grid gap-5" @submit.prevent="handleSaveExpense">
       <div class="grid gap-4 sm:grid-cols-2">
-        <div class="subfolio-field sm:col-span-2">
+        <div class="upkeep-field sm:col-span-2">
           <label for="modal-service-preset">{{ t('expenseForm.preset') }}</label>
           <Select
             v-model="form.presetId"
@@ -279,10 +279,10 @@ watch(() => showAddModal.value, (visible) => {
             filter
             show-clear
             scroll-height="28rem"
-            panel-class="subfolio-preset-panel"
+            panel-class="upkeep-preset-panel"
             :placeholder="t('expenseForm.presetPlaceholder')"
             :disabled="saving"
-            class="subfolio-preset-select w-full"
+            class="upkeep-preset-select w-full"
             data-test-id="recurrence-preset"
             @update:model-value="applypreset"
           >
@@ -292,8 +292,8 @@ watch(() => showAddModal.value, (visible) => {
               </span>
             </template>
             <template #option="{ option }">
-              <span class="subfolio-preset-option">
-                <SubfolioIconTile :icon="option.icon" size="sm" tone="neutral" />
+              <span class="upkeep-preset-option">
+                <UpkeepIconTile :icon="option.icon" size="sm" tone="neutral" />
                 <span class="min-w-0">
                   <span class="block truncate font-semibold">{{ option.label }}</span>
                   <span class="block truncate text-xs muted-copy">{{ option.category }}</span>
@@ -301,8 +301,8 @@ watch(() => showAddModal.value, (visible) => {
               </span>
             </template>
             <template #value="{ value, placeholder }">
-              <span v-if="findKnownServiceById(value)" class="subfolio-preset-value">
-                <SubfolioIconTile :icon="findKnownServiceById(value).icon" size="sm" tone="neutral" />
+              <span v-if="findKnownServiceById(value)" class="upkeep-preset-value">
+                <UpkeepIconTile :icon="findKnownServiceById(value).icon" size="sm" tone="neutral" />
                 <span class="truncate">{{ findKnownServiceById(value).name }}</span>
               </span>
               <span v-else>{{ placeholder }}</span>
@@ -310,13 +310,13 @@ watch(() => showAddModal.value, (visible) => {
           </Select>
         </div>
 
-        <div v-if="selectedPreset" class="subfolio-preset-assist sm:col-span-2">
+        <div v-if="selectedPreset" class="upkeep-preset-assist sm:col-span-2">
           <p>
             {{ t('expenseForm.presetMaintained') }}
             <button
               v-if="!showPreferredNameField"
               type="button"
-              class="subfolio-inline-action"
+              class="upkeep-inline-action"
               :disabled="saving"
               data-test-id="recurrence-preferred-name-reveal"
               @click="revealPreferredName"
@@ -326,9 +326,9 @@ watch(() => showAddModal.value, (visible) => {
           </p>
         </div>
 
-        <div v-if="showPreferredNameField" class="subfolio-field sm:col-span-2">
+        <div v-if="showPreferredNameField" class="upkeep-field sm:col-span-2">
           <label for="modal-preferred-name">{{ t('expenseForm.preferredName') }}</label>
-          <InputGroup class="subfolio-preferred-name-group">
+          <InputGroup class="upkeep-preferred-name-group">
             <InputText
               id="modal-preferred-name"
               v-model="form.name"
@@ -337,13 +337,13 @@ watch(() => showAddModal.value, (visible) => {
               class="w-full"
               data-test-id="recurrence-preferred-name"
             />
-            <InputGroupAddon class="subfolio-preferred-name-addon">
+            <InputGroupAddon class="upkeep-preferred-name-addon">
               <Button
                 type="button"
                 icon="pi pi-times"
                 severity="secondary"
                 variant="text"
-                class="subfolio-preferred-name-remove"
+                class="upkeep-preferred-name-remove"
                 :disabled="saving"
                 :aria-label="t('expenseForm.removePreferredName')"
                 data-test-id="recurrence-preferred-name-remove"
@@ -354,7 +354,7 @@ watch(() => showAddModal.value, (visible) => {
         </div>
 
         <template v-if="!selectedPreset">
-        <div class="subfolio-field sm:col-span-2">
+        <div class="upkeep-field sm:col-span-2">
           <label for="modal-expense-name">{{ t('expenseForm.name') }}</label>
           <InputText
             id="modal-expense-name"
@@ -366,7 +366,7 @@ watch(() => showAddModal.value, (visible) => {
           />
         </div>
 
-        <div class="subfolio-field">
+        <div class="upkeep-field">
           <label for="modal-expense-url">{{ t('expenseForm.serviceUrl') }} <span class="font-normal muted-copy">{{ t('expenseForm.optional') }}</span></label>
           <InputText
             id="modal-expense-url"
@@ -379,7 +379,7 @@ watch(() => showAddModal.value, (visible) => {
           />
         </div>
 
-        <div class="subfolio-field">
+        <div class="upkeep-field">
           <label for="modal-expense-icon">{{ t('expenseForm.icon') }}</label>
           <Select
             v-model="form.icon"
@@ -394,14 +394,14 @@ watch(() => showAddModal.value, (visible) => {
             data-test-id="recurrence-icon"
           >
             <template #value="{ value, placeholder }">
-              <span v-if="value" class="subfolio-icon-select-value">
+              <span v-if="value" class="upkeep-icon-select-value">
                 <span :class="value" aria-hidden="true" />
                 <span>{{ iconOptions.find((item) => item.value === value)?.label || value }}</span>
               </span>
               <span v-else>{{ placeholder }}</span>
             </template>
             <template #option="{ option }">
-              <span class="subfolio-icon-select-value">
+              <span class="upkeep-icon-select-value">
                 <span :class="option.value" aria-hidden="true" />
                 <span>{{ option.label }}</span>
               </span>
@@ -410,7 +410,7 @@ watch(() => showAddModal.value, (visible) => {
         </div>
         </template>
 
-        <div class="subfolio-field sm:col-span-2">
+        <div class="upkeep-field sm:col-span-2">
           <label for="modal-expense-category">{{ t('expenseForm.category') }}</label>
           <AutoComplete
             id="modal-expense-category"
@@ -427,7 +427,7 @@ watch(() => showAddModal.value, (visible) => {
           />
         </div>
 
-        <div class="subfolio-field">
+        <div class="upkeep-field">
           <label for="modal-expense-amount">{{ t('expenseForm.amount') }}</label>
           <InputNumber
             v-model="form.amount"
@@ -443,7 +443,7 @@ watch(() => showAddModal.value, (visible) => {
           />
         </div>
 
-        <div class="subfolio-field">
+        <div class="upkeep-field">
           <label for="modal-expense-currency">{{ t('expenseForm.currency') }}</label>
           <Select
             v-model="form.currency"
@@ -460,9 +460,9 @@ watch(() => showAddModal.value, (visible) => {
         </div>
       </div>
 
-      <div class="subfolio-tax-card">
-        <div class="subfolio-tax-card__summary">
-          <div class="subfolio-tax-card__copy">
+      <div class="upkeep-tax-card">
+        <div class="upkeep-tax-card__summary">
+          <div class="upkeep-tax-card__copy">
             <label for="modal-tax-enabled">{{ t('expenseForm.addTaxes') }}</label>
             <p>{{ t('expenseForm.taxesIncluded') }}</p>
           </div>
@@ -473,7 +473,7 @@ watch(() => showAddModal.value, (visible) => {
             data-test-id="recurrence-tax-enabled"
           />
         </div>
-        <div v-if="addTaxModel && hasMultipleTaxRates" class="subfolio-field subfolio-tax-card__select">
+        <div v-if="addTaxModel && hasMultipleTaxRates" class="upkeep-field upkeep-tax-card__select">
           <label for="modal-tax-rate">{{ t('expenseForm.taxJurisdiction') }}</label>
           <Select
             v-model="taxRateModel"
@@ -488,23 +488,23 @@ watch(() => showAddModal.value, (visible) => {
             data-test-id="recurrence-tax-rate"
           />
         </div>
-        <p v-else-if="addTaxModel && selectedTaxRateOption" class="subfolio-tax-card__selected">
+        <p v-else-if="addTaxModel && selectedTaxRateOption" class="upkeep-tax-card__selected">
           {{ t('expenseForm.taxSelected', { tax: selectedTaxRateOption.label }) }}
         </p>
       </div>
 
-      <section class="subfolio-expense-section" aria-labelledby="modal-payment-schedule-title">
-        <div class="subfolio-expense-section__header">
-          <h3 id="modal-payment-schedule-title" class="subfolio-expense-section__title">
+      <section class="upkeep-expense-section" aria-labelledby="modal-payment-schedule-title">
+        <div class="upkeep-expense-section__header">
+          <h3 id="modal-payment-schedule-title" class="upkeep-expense-section__title">
             {{ t('expenseForm.paymentSchedule') }}
           </h3>
-          <p class="subfolio-recurrence-summary">
+          <p class="upkeep-recurrence-summary">
             <template
               v-for="(part, index) in recurrenceSummaryParts"
               :key="`${index}-${part.text}`"
             >
               <span
-                :class="{ 'subfolio-recurrence-summary__value': part.emphasized }"
+                :class="{ 'upkeep-recurrence-summary__value': part.emphasized }"
               >
                 {{ part.text }}
               </span>
@@ -512,7 +512,7 @@ watch(() => showAddModal.value, (visible) => {
           </p>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
-          <div class="subfolio-field sm:col-span-2">
+          <div class="upkeep-field sm:col-span-2">
             <label for="modal-schedule-type">{{ t('expenseForm.scheduleType') }}</label>
             <SelectButton
               v-model="form.scheduleType"
@@ -522,12 +522,12 @@ watch(() => showAddModal.value, (visible) => {
               option-value="value"
               :allow-empty="false"
               :disabled="saving"
-              class="subfolio-segmented w-full"
+              class="upkeep-segmented w-full"
               data-test-id="recurrence-schedule-type"
             />
           </div>
 
-          <div class="subfolio-field sm:col-span-2">
+          <div class="upkeep-field sm:col-span-2">
             <label for="modal-payment-date">{{ t('expenseForm.paymentDate') }}</label>
             <DatePicker
               v-model="paymentDateModel"
@@ -540,8 +540,8 @@ watch(() => showAddModal.value, (visible) => {
             />
           </div>
 
-          <div v-if="isRecurringSchedule" class="subfolio-repeat-grid sm:col-span-2">
-            <div class="subfolio-field">
+          <div v-if="isRecurringSchedule" class="upkeep-repeat-grid sm:col-span-2">
+            <div class="upkeep-field">
               <label for="modal-repeat-interval">{{ t('expenseForm.repeatEvery') }}</label>
               <InputNumber
                 v-model="form.repeatInterval"
@@ -556,7 +556,7 @@ watch(() => showAddModal.value, (visible) => {
               />
             </div>
 
-            <div class="subfolio-field">
+            <div class="upkeep-field">
               <label for="modal-repeat-unit">{{ t('expenseForm.repeatUnit') }}</label>
               <Select
                 v-model="form.repeatUnit"
@@ -571,7 +571,7 @@ watch(() => showAddModal.value, (visible) => {
             </div>
           </div>
 
-          <div v-if="showRepeatPattern" class="subfolio-field sm:col-span-2">
+          <div v-if="showRepeatPattern" class="upkeep-field sm:col-span-2">
             <label for="modal-repeat-pattern">{{ t('expenseForm.repeatPattern') }}</label>
             <Select
               v-model="form.repeatPattern"
@@ -587,7 +587,7 @@ watch(() => showAddModal.value, (visible) => {
         </div>
       </section>
 
-      <div class="subfolio-field">
+      <div class="upkeep-field">
         <label for="modal-expense-note">{{ t('expenseForm.note') }} <span class="font-normal muted-copy">{{ t('expenseForm.optional') }}</span></label>
         <Textarea
           id="modal-expense-note"
@@ -603,8 +603,8 @@ watch(() => showAddModal.value, (visible) => {
     </form>
 
     <template #footer>
-      <div class="subfolio-expense-dialog__footer">
-        <SubfolioButton
+      <div class="upkeep-expense-dialog__footer">
+        <UpkeepButton
           type="button"
           :label="t('expenseForm.cancel')"
           variant="secondary"
@@ -612,9 +612,9 @@ watch(() => showAddModal.value, (visible) => {
           :disabled="saving"
           @click="closeModal"
         />
-        <SubfolioButton
+        <UpkeepButton
           type="submit"
-          form="subfolio-expense-form"
+          form="upkeep-expense-form"
           :label="buttonLabel"
           icon="pi pi-check"
           :loading="saving"

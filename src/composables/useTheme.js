@@ -1,6 +1,7 @@
+import '../services/brandStorageMigration.js'
 import { computed, ref } from 'vue'
 
-const storageKey = 'subfolio-theme'
+const storageKey = 'upkeep-theme'
 const themeOptions = ['system', 'light', 'dark']
 
 const getBrowserTheme = () => {
@@ -24,7 +25,7 @@ const activeTheme = computed(() =>
 const applyTheme = () => {
   if (typeof document === 'undefined') return
   document.documentElement.dataset.theme = activeTheme.value
-  document.documentElement.classList.toggle('subfolio-dark', activeTheme.value === 'dark')
+  document.documentElement.classList.toggle('upkeep-dark', activeTheme.value === 'dark')
 }
 
 if (typeof window !== 'undefined') {

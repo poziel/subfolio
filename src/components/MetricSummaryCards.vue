@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
-import SubfolioSurfaceCard from './SubfolioSurfaceCard.vue'
-import SubfolioIconTile from './icons/SubfolioIconTile.vue'
+import UpkeepSurfaceCard from './UpkeepSurfaceCard.vue'
+import UpkeepIconTile from './icons/UpkeepIconTile.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 import { useSettings } from '../composables/useSettings'
@@ -126,13 +126,13 @@ const visibleMetrics = computed(() =>
     :class="`metric-summary-grid--count-${visibleMetrics.length}`"
     :aria-label="t('summaryMetrics.ariaLabel')"
   >
-    <SubfolioSurfaceCard v-for="metric in visibleMetrics" :key="metric.label" class="metric-card">
+    <UpkeepSurfaceCard v-for="metric in visibleMetrics" :key="metric.label" class="metric-card">
       <div class="metric-card__top">
         <p class="metric-card__label">{{ metric.label }}</p>
-        <SubfolioIconTile :icon="metric.icon" tone="info" />
+        <UpkeepIconTile :icon="metric.icon" tone="info" />
       </div>
       <p class="metric-value">{{ metric.value }}</p>
       <p class="text-sm muted-copy">{{ metric.detail }}</p>
-    </SubfolioSurfaceCard>
+    </UpkeepSurfaceCard>
   </section>
 </template>

@@ -6,7 +6,7 @@ const releaseVersion = process.env.RELEASE_VERSION
 const previousVersion = process.env.RELEASE_PREVIOUS_VERSION
 const releaseNotesPath = process.env.RELEASE_NOTES_PATH ?? '.release-notes.md'
 const releaseBody = cleanReleaseBody(readFileSync(releaseNotesPath, 'utf8'))
-const repository = process.env.GITHUB_REPOSITORY ?? 'poziel/subfolio'
+const repository = process.env.GITHUB_REPOSITORY ?? 'poziel/upkeep'
 const releaseDate = new Date().toISOString().slice(0, 10)
 
 if (!releaseVersion) {

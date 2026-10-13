@@ -1,6 +1,6 @@
 # Project Overview
 
-Subfolio is a smart, forward-looking finance app. The current product focus is
+Upkeep is a smart, forward-looking finance app. The current product focus is
 tracking subscriptions and recurring expenses, then using that recurring
 schedule to forecast future cash flow and show where money goes over time.
 
@@ -8,7 +8,7 @@ schedule to forecast future cash flow and show where money goes over time.
 
 - Vue 3 with Composition API and `<script setup>`
 - JavaScript application code
-- PrimeVue styled mode with an Aura-derived Subfolio preset
+- PrimeVue styled mode with an Aura-derived Upkeep preset
 - PrimeIcons for UI iconography
 - Tailwind CSS 4 theme tokens in `src/assets/main.css`
 - Vue Router 4 for navigation and route guards
@@ -26,5 +26,5 @@ schedule to forecast future cash flow and show where money goes over time.
 - Treat saved database connection state as the current app entry condition.
 - Treat `?config=` links as database-connection replacement links. The value is
   a base64-encoded JSON connection, applied before app route guards run.
-- Keep Subfolio frontend-only unless the user explicitly asks for hosted backend
+- Keep Upkeep frontend-only unless the user explicitly asks for hosted backend
   work.

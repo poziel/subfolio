@@ -11,9 +11,9 @@ User input
 ```
 
 - Expense data should flow through provider adapters when a connection exists.
-- Settings currently persist to `localStorage` under `subfolio-settings`.
+- Settings currently persist to `localStorage` under `upkeep-settings`.
 - Database connection state persists to `localStorage` under
-  `subfolio-database-connection`.
+  `upkeep-database-connection`.
 - Any route may include a `config` query parameter. It is a base64-encoded JSON
   database connection, applied before app route guards run, then removed from
   the URL with a replace navigation.
@@ -45,7 +45,7 @@ Public "Open App" calls to action should route to `/app`; the app route guard
 handles database setup by redirecting to `/connect` when needed.
 
 `?config=` links replace the saved database connection on whatever route they
-are opened from. Accepted payloads include native Subfolio connection objects
+are opened from. Accepted payloads include native Upkeep connection objects
 and raw Firebase config objects using either `databaseURL` or Refinimo-style
 `databaseUrl`.
 
@@ -64,6 +64,6 @@ Provider adapters live in `src/services/database/expenseConnections.js`.
 ## Vite Notes
 
 - The app uses Vite defaults unless `vite.config.js` says otherwise.
-- PrimeVue is configured in `src/main.js` with an Aura-derived Subfolio preset.
+- PrimeVue is configured in `src/main.js` with an Aura-derived Upkeep preset.
 - PrimeIcons CSS is imported from `src/main.js`.
 - Tailwind theme tokens and app-level layout helpers live in `src/assets/main.css`.

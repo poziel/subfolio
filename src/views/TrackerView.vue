@@ -8,7 +8,7 @@ import AppPage from '../components/AppPage.vue'
 import AppSectionSurface from '../components/AppSectionSurface.vue'
 import ExpenseTable from '../components/ExpenseTable.vue'
 import MetricSummaryCards from '../components/MetricSummaryCards.vue'
-import SubfolioButton from '../components/SubfolioButton.vue'
+import UpkeepButton from '../components/UpkeepButton.vue'
 import { useExpenses } from '../composables/useExpenses'
 import { useI18n } from '../composables/useI18n'
 
@@ -50,7 +50,7 @@ onMounted(fetchExpenses)
           <h1 class="font-serif text-4xl text-ink">{{ t('tracker.title') }}</h1>
           <p class="muted-copy">{{ t('tracker.intro') }}</p>
         </div>
-        <SubfolioButton
+        <UpkeepButton
           type="button"
           :label="t('appNav.addExpense')"
           icon="pi pi-plus"

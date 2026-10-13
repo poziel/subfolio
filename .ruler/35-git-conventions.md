@@ -111,7 +111,7 @@ Rules:
 
 - `Summary` explains the pull request in 1 to 3 sentences.
 - `Task` explains why the work exists and should mention the task id when there is one.
-- PRs for this repository must target the Subfolio repository.
+- PRs for this repository must target the Upkeep repository.
 - Do not open PRs against an upstream repository or unrelated fork target.
 - `Changes` explains what changed in the codebase with clear bullets.
 - `Validation` lists the checks, tests, builds, or manual verification performed.

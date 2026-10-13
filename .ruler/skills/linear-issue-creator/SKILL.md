@@ -15,7 +15,7 @@ compatibility: "Requires Linear MCP integration to be connected"
 # Linear Issue Creator
 
 Turns informal feature descriptions, rough notes, or voice-memo-style thoughts into
-clean, developer-friendly Subfolio Linear issues and creates them directly via
+clean, developer-friendly Upkeep Linear issues and creates them directly via
 the Linear MCP.
 
 ---
@@ -25,7 +25,7 @@ the Linear MCP.
 Use these defaults unless the user explicitly says otherwise:
 
 - Team: DEV
-- Project: subfolio
+- Project: upkeep
 
 Before writing anything, confirm only the missing decisions that matter:
 
@@ -89,7 +89,7 @@ Present these as suggestions — let the user confirm or override before creatin
 1. Show the full drafted issue to the user (title + description + priority/label suggestions)
 2. Ask: *"Does this look good, or would you like to adjust anything?"*
 3. Once confirmed, **create the issue using the Linear MCP tool** — do not just return markdown.
-4. Create it under team `DEV` and project `subfolio`.
+4. Create it under team `DEV` and project `upkeep`.
 5. Pass the confirmed priority and labels when creating the issue.
 6. Use the intended workflow status:
    - New scoped work: Planned or Ready to Start, based on user intent.
@@ -118,7 +118,7 @@ Ready for the next issue.
 ## Rules
 
 - Always create the issue via Linear MCP — never only return the markdown
-- Always use DEV/subfolio unless the user explicitly overrides it
+- Always use DEV/upkeep unless the user explicitly overrides it
 - Keep the original intent intact — do not invent unrelated features
 - Acceptance Criteria = observable, testable behavior only (no implementation details)
 - Architecture = technical approach, constraints, scalability notes (not UX)
@@ -138,7 +138,7 @@ Ready for the next issue.
 \```
 # Description
 
-As a Subfolio user, I want to filter recurring expenses by category, so that I
+As a Upkeep user, I want to filter recurring expenses by category, so that I
 can quickly find relevant costs without scanning the full list.
 
 Currently, the list displays all expenses together, making it harder to focus on

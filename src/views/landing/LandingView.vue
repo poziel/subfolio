@@ -4,8 +4,8 @@ import Card from 'primevue/card'
 import Message from 'primevue/message'
 import Tag from 'primevue/tag'
 import PublicSiteShell from '../../components/PublicSiteShell.vue'
-import SubfolioIconTile from '../../components/icons/SubfolioIconTile.vue'
-import SubfolioButton from '../../components/SubfolioButton.vue'
+import UpkeepIconTile from '../../components/icons/UpkeepIconTile.vue'
+import UpkeepButton from '../../components/UpkeepButton.vue'
 import { useI18n } from '../../composables/useI18n'
 
 const { t, tm } = useI18n()
@@ -84,10 +84,10 @@ const pricingFeatures = computed(() => tm('pageData.pricingFeatures'))
           </p>
           <div class="landing-hero__actions">
             <RouterLink v-slot="{ navigate }" to="/app" custom>
-              <SubfolioButton :label="t('common.openApp')" icon="pi pi-arrow-right" icon-pos="right" @click="navigate" />
+              <UpkeepButton :label="t('common.openApp')" icon="pi pi-arrow-right" icon-pos="right" @click="navigate" />
             </RouterLink>
             <RouterLink v-slot="{ navigate }" to="/features" custom>
-              <SubfolioButton :label="t('landing.exploreFeatures')" variant="secondary" theme="secondary" @click="navigate" />
+              <UpkeepButton :label="t('landing.exploreFeatures')" variant="secondary" theme="secondary" @click="navigate" />
             </RouterLink>
           </div>
           <div class="landing-hero__badges">
@@ -116,7 +116,7 @@ const pricingFeatures = computed(() => tm('pageData.pricingFeatures'))
           <div class="recurrence-preview-list">
             <div v-for="item in forecastItems" :key="item.name" class="recurrence-preview-item">
               <div class="recurrence-preview-item__main">
-                <span class="subfolio-avatar">{{ item.initials }}</span>
+                <span class="upkeep-avatar">{{ item.initials }}</span>
                 <div class="min-w-0">
                   <p class="truncate font-extrabold text-ink">{{ item.name }}</p>
                   <p class="truncate text-sm muted-copy">
@@ -125,7 +125,7 @@ const pricingFeatures = computed(() => tm('pageData.pricingFeatures'))
                 </div>
               </div>
               <div class="grid justify-items-end gap-1">
-                <span class="subfolio-amount">{{ item.amount }}</span>
+                <span class="upkeep-amount">{{ item.amount }}</span>
                 <Tag :value="item.status" :severity="item.severity" rounded />
               </div>
             </div>
@@ -151,7 +151,7 @@ const pricingFeatures = computed(() => tm('pageData.pricingFeatures'))
         <div class="feature-card-grid">
           <Card v-for="item in insightCards" :key="item.titleKey" class="feature-card">
             <template #content>
-              <SubfolioIconTile :icon="item.icon" />
+              <UpkeepIconTile :icon="item.icon" />
               <h3>{{ t(item.titleKey) }}</h3>
               <p class="muted-copy">{{ t(item.detailKey) }}</p>
             </template>
